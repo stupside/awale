@@ -49,7 +49,7 @@ void initGrid(struct Grid *grille);
 void initScore(struct Score *score);
 
 // Retourne 1 si le joueur a des graines, 0 sinon
-int playerHasSeeds(struct Grid *grille, int player);
+int playerHasSeeds(struct Grid *grille, enum PlayerID player);
 
 void deepCopyGrid(struct Grid *grille, struct Grid *grilleCopy);
 
@@ -57,10 +57,10 @@ void deepCopyGrid(struct Grid *grille, struct Grid *grilleCopy);
 void calculeScoreAndUpdateGrid(struct Grid *grille, enum PlayerID player, struct Score *score);
 
 // Sème les graines à partir de la case de départ
-void sowSeeds(struct Grid *grille, int player, int caseDepart);
+void sowSeeds(struct Grid *grille, enum PlayerID player, int caseDepart);
 
 // Vérifie si le coup est valide : la case de départ contient des graines et le coup sème des graines chez l'adversaire si celui-ci n'en a pas
-enum CoupValidity coupIsValid(struct Grid *grille, int caseDepart, int player);
+enum CoupValidity coupIsValid(struct Grid *grille, int caseDepart, enum PlayerID player);
 
 // Demande au joueur de jouer et vérifie si le coup est valide
 enum CoupValidity playCoup(enum PlayerID player, struct Grid *grille, struct Score *score, int caseDepart);

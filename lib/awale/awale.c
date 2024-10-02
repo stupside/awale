@@ -13,7 +13,7 @@ void initGrid(struct Grid *  grille) {
     }
 };
 
-int playerHasSeeds(struct Grid *  grille, int player) {
+int playerHasSeeds(struct Grid *  grille, enum PlayerID player) {
     for (int i = 0; i < GRID_ROWS; i++) {
         if (grille->grid[i][player] > 0) {
             return 1;
@@ -41,7 +41,7 @@ void calculeScoreAndUpdateGrid(struct Grid *  grille, enum PlayerID player, stru
     }
 }
 
-void sowSeeds(struct Grid *  grille, int player, int caseDepart) {
+void sowSeeds(struct Grid *  grille, enum PlayerID player, int caseDepart) {
     // on récupère les graines de la case de départ
     int nbGraines = grille->grid[caseDepart][player];
     // on vide la case de départ
@@ -74,7 +74,7 @@ void sowSeeds(struct Grid *  grille, int player, int caseDepart) {
     }
 }
 
-enum CoupValidity coupIsValid(struct Grid *  grille, int caseDepart, int player) {
+enum CoupValidity coupIsValid(struct Grid *  grille, int caseDepart, enum PlayerID player) {
 
     // On vérifie que la case de départ contient des graines
     int adversaire = player == 0 ? 1 : 0;
