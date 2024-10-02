@@ -32,8 +32,8 @@ void deepCopyGrid(struct Grid *  grille, struct Grid *  grilleCopy) {
     }
 }
 
-void calculeScoreAndUpdateGrid(struct Grid *  grille, int player, struct Score *  score) {
-    int adversaire = player == 0 ? 1 : 0;
+void calculeScoreAndUpdateGrid(struct Grid *  grille, enum PlayerID player, struct Score *  score) {
+    enum PlayerID adversaire = player == PLAYER1 ? PLAYER2 : PLAYER1;
     for (int i = 0; i < GRID_ROWS; i++) {
         int graines = grille->grid[i][adversaire];
         if (graines == 2 || graines == 3) {
@@ -44,14 +44,17 @@ void calculeScoreAndUpdateGrid(struct Grid *  grille, int player, struct Score *
 }
 
 void sowSeeds(struct Grid *  grille, int player, int caseDepart) {
+    // on récupère les graines de la case de départ
     int nbGraines = grille->grid[caseDepart][player];
+    // on vide la case de départ
+    grille->grid[caseDepart][player] = 0;
     int caseInitiale = caseDepart;
     int ligne = player;
     while (nbGraines > 0) {
         if (ligne == 1) {
             caseDepart++;
             if (caseDepart == GRID_ROWS) {
-                caseDepart = 0;
+                caseDepart = 5;
                 ligne = 0;
             }
             // on vérifie si on ne tombe sur la case de départ pour semer une graine
@@ -62,7 +65,7 @@ void sowSeeds(struct Grid *  grille, int player, int caseDepart) {
         } else {
             caseDepart--;
             if (caseDepart == -1) {
-                caseDepart = GRID_ROWS - 1;
+                caseDepart = 0;
                 ligne = 1;
             }
             if (!(caseDepart == caseInitiale && ligne == player)) {
@@ -134,15 +137,26 @@ enum PlayerID switchPlayer(enum PlayerID player) {
     return player == PLAYER1 ? PLAYER2 : PLAYER1;
 }
 
-void displayGrid(struct Grid *  grille) {
+void displayGrid(struct Grid *grille) {
+    printf("\n  Player 0\n");
+    
+    printf("  ");
     for (int i = 0; i < GRID_ROWS; i++) {
-        printf("%d ", grille->grid[i][0]);
+        printf("  [%2d] ", grille->grid[i][0]);
     }
     printf("\n");
+
+    printf("  ");
     for (int i = 0; i < GRID_ROWS; i++) {
-        printf("%d ", grille->grid[i][1]);
+        printf("-------");
     }
     printf("\n");
+
+    printf("  ");
+    for (int i = 0; i < GRID_ROWS; i++) {
+        printf("  [%2d] ", grille->grid[i][1]);
+    }
+    printf("\n  Player 1\n\n");
 }
 
 int test() {
@@ -160,6 +174,26 @@ int test() {
     // Boucle de jeu
     enum PlayerID currentPlayer = PLAYER1;
     while (1) {
+        // On affiche la grille
+        displayGrid(&grid);
+        coupValidity = INVALID;
+
+        // On affiche le joueur qui doit jouer
+        printf("C'est au joueur %d\nScore : %d\n", currentPlayer, score.score[currentPlayer]);
+
+        while (coupValidity != VALID) {
+            // On demande au joueur de jouer
+            coupValidity = playCoup(currentPlayer, &grid, &score);
+
+            // On vérifie si le coup est valide
+            if (coupValidity == INVALID_NO_SEEDS_IN_CASE) {
+                printf("La case de départ ne contient pas de graines\n");
+            }
+            if (coupValidity == INVALID_OPONENT_HAS_NO_SEEDS) {
+                printf("L'adversaire n'a pas de graines le coup doit permettre de lui en donner\n");
+            }
+        }
+
         // on check que le jeu peut être pousuivi
         enum GameStatus gameStatus = checkGameStatus(&grid, &score, currentPlayer);
 
@@ -175,23 +209,6 @@ int test() {
             printf("Le joueur a besoin de graines pour continuer à jouer\n");
             currentPlayer = switchPlayer(currentPlayer);
             continue;
-        }
-
-        // On affiche la grille
-        displayGrid(&grid);
-        coupValidity = INVALID;
-
-        while (coupValidity != VALID) {
-            // On demande au joueur de jouer
-            coupValidity = playCoup(currentPlayer, &grid, &score);
-
-            // On vérifie si le coup est valide
-            if (coupValidity == INVALID_NO_SEEDS_IN_CASE) {
-                printf("La case de départ ne contient pas de graines\n");
-            }
-            if (coupValidity == INVALID_OPONENT_HAS_NO_SEEDS) {
-                printf("L'adversaire n'a pas de graines le coup doit permettre de lui en donner\n");
-            }
         }
 
         // On passe au joueur suivant

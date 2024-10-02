@@ -4,10 +4,10 @@
 #define GRID_ROWS 6
 #define GRID_COLS 2
 #define MAX_SCORE 25
-#include <stdio.h>
 
 // La définition de ce cette version du jeu Awale est basée sur les règles expliquées sur le site suivante:
-// http://archi02.free.fr/_pages/awele.htm
+// http://archi02.free.fr/_pages/awele.html
+// Dans cette version les règles principales sont les suivantes:
 
 struct Grid {
     int grid[6][2];
@@ -53,7 +53,7 @@ int playerHasSeeds(struct Grid *grille, int player);
 void deepCopyGrid(struct Grid *grille, struct Grid *grilleCopy);
 
 // Calcule le score et met à jour la grille selon les règles après le coup d'un joueur
-void calculeScoreAndUpdateGrid(struct Grid *grille, int player, struct Score *score);
+void calculeScoreAndUpdateGrid(struct Grid *grille, enum PlayerID player, struct Score *score);
 
 // Sème les graines à partir de la case de départ
 void sowSeeds(struct Grid *grille, int player, int caseDepart);
