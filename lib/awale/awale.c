@@ -1,7 +1,5 @@
-#include <stdio.h>
 #include "awale.h"
 
-// http://archi02.free.fr/_pages/awele.htm
 void initScore(struct Score *score) {
     score->score[0] = 0;
     score->score[1] = 0;
@@ -98,18 +96,8 @@ enum CoupValidity coupIsValid(struct Grid *  grille, int caseDepart, int player)
 }
 
 
-enum CoupValidity playCoup(enum PlayerID player, struct Grid *  grille, struct Score *  score) {
-    // On demande à l'utilisateur de choisir une case de départ
-    printf("Choisissez une case de départ le nombre doit être compris entre 0 et 5 : ");
-    int caseDepart;
-    while (1) {
-        if (scanf("%d", &caseDepart) == 1 && caseDepart >= 0 && caseDepart <= 5) {
-            break;
-        } else {
-            printf("Entrée invalide. Veuillez choisir un nombre entre 0 et 5 : ");
-            while (getchar() != '\n'); // vide le buffer
-        }
-    }
+enum CoupValidity playCoup(enum PlayerID player, struct Grid *  grille, struct Score *  score, int caseDepart) {
+
     // Une fois que la case de départ est choisie on vérifie si le coup est valide
     enum CoupValidity coupValidity = coupIsValid(grille, caseDepart, player);
     if (coupValidity == VALID) {
@@ -135,84 +123,4 @@ enum GameStatus checkGameStatus(struct Grid *  grille, struct Score *  score, en
 
 enum PlayerID switchPlayer(enum PlayerID player) {
     return player == PLAYER1 ? PLAYER2 : PLAYER1;
-}
-
-void displayGrid(struct Grid *grille) {
-    printf("\n  Player 0\n");
-    
-    printf("  ");
-    for (int i = 0; i < GRID_ROWS; i++) {
-        printf("  [%2d] ", grille->grid[i][0]);
-    }
-    printf("\n");
-
-    printf("  ");
-    for (int i = 0; i < GRID_ROWS; i++) {
-        printf("-------");
-    }
-    printf("\n");
-
-    printf("  ");
-    for (int i = 0; i < GRID_ROWS; i++) {
-        printf("  [%2d] ", grille->grid[i][1]);
-    }
-    printf("\n  Player 1\n\n");
-}
-
-int test() {
-    // Initialisation des variables
-    enum CoupValidity coupValidity;
-
-    // Initialisation de la grille
-    struct Grid grid;
-    initGrid(&grid);
-
-    // Initialisation du score
-    struct Score score;
-    initScore(&score);
-
-    // Boucle de jeu
-    enum PlayerID currentPlayer = PLAYER1;
-    while (1) {
-        // On affiche la grille
-        displayGrid(&grid);
-        coupValidity = INVALID;
-
-        // On affiche le joueur qui doit jouer
-        printf("C'est au joueur %d\nScore : %d\n", currentPlayer, score.score[currentPlayer]);
-
-        while (coupValidity != VALID) {
-            // On demande au joueur de jouer
-            coupValidity = playCoup(currentPlayer, &grid, &score);
-
-            // On vérifie si le coup est valide
-            if (coupValidity == INVALID_NO_SEEDS_IN_CASE) {
-                printf("La case de départ ne contient pas de graines\n");
-            }
-            if (coupValidity == INVALID_OPONENT_HAS_NO_SEEDS) {
-                printf("L'adversaire n'a pas de graines le coup doit permettre de lui en donner\n");
-            }
-        }
-
-        // on check que le jeu peut être pousuivi
-        enum GameStatus gameStatus = checkGameStatus(&grid, &score, currentPlayer);
-
-        if (gameStatus == GAME_OVER_PLAYER1_WINS) {
-            printf("Le joueur 1 a gagné\n");
-            break;
-        }
-        if (gameStatus == GAME_OVER_PLAYER2_WINS) {
-            printf("Le joueur 2 a gagné\n");
-            break;
-        }
-        if (gameStatus == PASS_TURN_NO_SEEDS) {
-            printf("Le joueur a besoin de graines pour continuer à jouer\n");
-            currentPlayer = switchPlayer(currentPlayer);
-            continue;
-        }
-
-        // On passe au joueur suivant
-        currentPlayer = switchPlayer(currentPlayer);
-    }
-    return 0;
 }

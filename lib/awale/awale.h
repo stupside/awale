@@ -24,6 +24,7 @@ enum GameStatus {
     PASS_TURN_NO_SEEDS,
     GAME_OVER_PLAYER1_WINS, // +25 graines
     GAME_OVER_PLAYER2_WINS,
+    GAME_OVER_STALEMATE, // TODO IMPLEMENT
     GAME_NOT_OVER,
 };
 
@@ -62,15 +63,12 @@ void sowSeeds(struct Grid *grille, int player, int caseDepart);
 enum CoupValidity coupIsValid(struct Grid *grille, int caseDepart, int player);
 
 // Demande au joueur de jouer et vérifie si le coup est valide
-enum CoupValidity playCoup(enum PlayerID player, struct Grid *grille, struct Score *score);
+enum CoupValidity playCoup(enum PlayerID player, struct Grid *grille, struct Score *score, int caseDepart);
 
 // Vérifie si le statut du jeu
 enum GameStatus checkGameStatus(struct Grid *grille, struct Score *score, enum PlayerID P);
 
 // Echange le joueur courant avec l'autre joueur
 enum PlayerID switchPlayer(enum PlayerID player);
-
-// Affiche la grille
-void displayGrid(struct Grid *grille);
 
 #endif // AWALE_H

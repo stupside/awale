@@ -15,6 +15,9 @@ client:
 server:
 	$(BAZEL) run //src/server:server -- $(ARGS)
 
+awale:
+	$(BAZEL) run //src/awale:awale -- $(ARGS)
+
 # Nettoyage
 clean:
 	$(BAZEL) clean
