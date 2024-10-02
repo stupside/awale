@@ -2,8 +2,10 @@
 
 #include <arpa/inet.h>
 
+#include "lib/server/server.h"
+#include "lib/socket/cmd.h"
+#include "lib/socket/pool.h"
 #include "lib/socket/socket.h"
-#include "lib/socket/sockets.h"
 
 int init(void) {
 
@@ -12,7 +14,12 @@ int init(void) {
   SOCKADDR_IN sin = {0};
 
   if (sock == INVALID_SOCKET) {
-    perror("socket()");
+    exit(errno);
+  }
+
+  int opt = 1;
+  if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+    close_socket(sock);
     exit(errno);
   }
 
@@ -21,55 +28,50 @@ int init(void) {
   sin.sin_addr.s_addr = htonl(INADDR_ANY);
 
   if (bind(sock, (SOCKADDR *)&sin, sizeof sin) == SOCKET_ERROR) {
-    perror("bind()");
     exit(errno);
   }
 
   if (listen(sock, MAX_CLIENTS) == SOCKET_ERROR) {
-    perror("listen()");
     exit(errno);
   }
 
   return sock;
 }
 
-void app(void) {
+void app(struct Mediator *mediator) {
   SOCKET sock = init();
 
   char buffer[BUF_SIZE];
 
-  int max = sock;
+  int maxfd = sock;
 
   /* an array for all clients */
-  struct SocketClients clients = new_clients();
+  struct Server server = awale_server();
 
   while (1) {
 
-    FD_ZERO(&clients.rdfs);
+    FD_ZERO(&server.pool.rdfs);
 
     /* add STDIN_FILENO */
-    FD_SET(STDIN_FILENO, &clients.rdfs);
+    FD_SET(STDIN_FILENO, &server.pool.rdfs);
 
     /* add the connection socket */
-    FD_SET(sock, &clients.rdfs);
+    FD_SET(sock, &server.pool.rdfs);
 
     /* add socket of each client */
-    for (int i = 0; i < clients.count; i++) {
-      FD_SET(clients.list[i].sock, &clients.rdfs);
+    for (int i = 0; i < server.pool.count; i++) {
+      FD_SET(server.pool.list[i].sock, &server.pool.rdfs);
     }
 
-    if (select(max + 1, &clients.rdfs, NULL, NULL, NULL) == -1) {
-      perror("select()");
+    if (select(maxfd + 1, &server.pool.rdfs, NULL, NULL, NULL) == -1) {
       exit(errno);
     }
 
     /* something from standard input : i.e keyboard */
-    if (FD_ISSET(STDIN_FILENO, &clients.rdfs)) {
-      /* stop process when type on keyboard */
+    if (FD_ISSET(STDIN_FILENO, &server.pool.rdfs)) {
       break;
-    } else if (FD_ISSET(sock, &clients.rdfs)) {
+    } else if (FD_ISSET(sock, &server.pool.rdfs)) {
 
-      /* new client */
       SOCKADDR sock_addr = {0};
 
       unsigned int sock_addr_size = sizeof sock_addr;
@@ -77,49 +79,33 @@ void app(void) {
       int csock = accept(sock, &sock_addr, &sock_addr_size);
 
       if (csock == SOCKET_ERROR) {
-        perror("accept()");
         continue;
       }
 
-      /* after connecting the client sends its name */
       if (read_from_socket(csock, buffer) == -1) {
-        /* disconnected */
         continue;
       }
 
-      /* what is the new maximum fd ? */
-      max = csock > max ? csock : max;
+      maxfd = csock > maxfd ? csock : maxfd;
 
-      FD_SET(csock, &clients.rdfs);
+      FD_SET(csock, &server.pool.rdfs);
 
-      SocketClient client = {csock};
-
-      strncpy(client.name, buffer, BUF_SIZE - 1);
-
-      add_client(&clients, client);
+      add_client(&server.pool, buffer, csock);
 
     } else {
       int i = 0;
 
-      for (i = 0; i < clients.count; i++) {
+      for (i = 0; i < server.pool.count; i++) {
+
+        SOCKET socket = server.pool.list[i].sock;
 
         /* a client is talking */
-        if (FD_ISSET(clients.list[i].sock, &clients.rdfs)) {
+        if (FD_ISSET(socket, &server.pool.rdfs)) {
 
-          SocketClient client = clients.list[i];
-
-          /* client disconnected */
-          if (read_from_socket(clients.list[i].sock, buffer) == 0) {
-
-            remove_client(&clients, clients.count);
-
-            strncpy(buffer, client.name, BUF_SIZE - 1);
-            strncat(buffer, " disconnected !", BUF_SIZE - strlen(buffer) - 1);
-
-            write_to_sockets(clients.list, client, clients.count, buffer, 1);
+          if (read_from_socket(socket, buffer)) {
+            compute_cmd(mediator, buffer);
           } else {
-
-            write_to_sockets(clients.list, client, clients.count, buffer, 0);
+            remove_client(&server.pool, i);
           }
           break;
         }
@@ -127,7 +113,7 @@ void app(void) {
     }
   }
 
-  clear_clients(&clients);
+  clear_clients(&server.pool);
 
   close_socket(sock);
 }

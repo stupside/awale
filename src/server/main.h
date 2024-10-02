@@ -1,14 +1,21 @@
 #include <stdlib.h>
 
-void app(void);
-
 #include "lib/awale/awale.h"
+#include "lib/socket/cmd.h"
+
+#include "mediator.h"
+
+void app(struct Mediator *);
 
 int main(int argc, char **argv) {
 
-  // app();
+  struct Mediator mediator;
 
-  test();
+  init_mediator(&mediator);
+
+  app(&mediator);
+
+  // test();
 
   return EXIT_SUCCESS;
 }

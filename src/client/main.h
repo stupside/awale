@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "lib/socket/cmd.h"
+
+#include "mediator.h"
+
 void app(const char *address, const char *name);
 
 int main(int argc, char **argv) {
@@ -8,6 +12,10 @@ int main(int argc, char **argv) {
     printf("Usage : %s [address] [pseudo]\n", argv[0]);
     return EXIT_FAILURE;
   }
+
+  struct Mediator mediator;
+
+  init_mediator(&mediator);
 
   app(argv[1], argv[2]);
 

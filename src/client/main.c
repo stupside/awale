@@ -2,7 +2,11 @@
 
 #include <netdb.h>
 
+#include "lib/socket/cmd.h"
 #include "lib/socket/socket.h"
+
+#include "lib/socket/cmds/chat.h"
+#include "lib/socket/cmds/user.h"
 
 int init(const char *address) {
 
@@ -13,7 +17,6 @@ int init(const char *address) {
   struct hostent *hostinfo;
 
   if (sock == INVALID_SOCKET) {
-    perror("socket()");
     exit(errno);
   }
 
@@ -29,7 +32,6 @@ int init(const char *address) {
   sin.sin_family = AF_INET;
 
   if (connect(sock, (SOCKADDR *)&sin, sizeof(SOCKADDR)) == SOCKET_ERROR) {
-    perror("connect()");
     exit(errno);
   }
 
@@ -44,8 +46,19 @@ void app(const char *address, const char *name) {
 
   fd_set rdfs;
 
-  /* send our name */
   write_to_socket(sock, name);
+
+  {
+    struct UserLoginReq req;
+
+    strcpy(req.name, name);
+
+    char *cmd = stringify_cmd(CMD_USER_LOGIN, &req, sizeof(req));
+
+    write_to_socket(sock, cmd);
+
+    free(cmd);
+  }
 
   while (1) {
     FD_ZERO(&rdfs);
@@ -57,7 +70,6 @@ void app(const char *address, const char *name) {
     FD_SET(sock, &rdfs);
 
     if (select(sock + 1, &rdfs, NULL, NULL, NULL) == -1) {
-      perror("select()");
       exit(errno);
     }
 
@@ -65,32 +77,36 @@ void app(const char *address, const char *name) {
     if (FD_ISSET(STDIN_FILENO, &rdfs)) {
 
       fgets(buffer, BUF_SIZE - 1, stdin);
+
       {
-        char *p = NULL;
+        struct ChatWriteReq data;
 
-        p = strstr(buffer, "\n");
-        if (p != NULL) {
+        strcpy(data.message, buffer);
 
-          *p = 0;
-        } else {
+        char *cmd = stringify_cmd(CMD_CHAT_WRITE, &data, sizeof(data));
 
-          /* fclean */
-          buffer[BUF_SIZE - 1] = 0;
-        }
+        write_to_socket(sock, cmd);
+
+        free(cmd);
       }
-
-      write_to_socket(sock, buffer);
 
     } else if (FD_ISSET(sock, &rdfs)) {
 
       /* server down */
       if (read_from_socket(sock, buffer) == 0) {
-        printf("Server disconnected !\n");
         break;
       }
 
       puts(buffer);
     }
+  }
+
+  {
+    char *cmd = stringify_cmd(CMD_USER_LOGOUT, NULL, 0);
+
+    write_to_socket(sock, cmd);
+
+    free(cmd);
   }
 
   close_socket(sock);
