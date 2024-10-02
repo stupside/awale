@@ -1,0 +1,23 @@
+# Bazel output directories (bazel-bin, bazel-out, bazel-testlogs, etc.)
+bazel-*
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# Compiled object files and binaries
+*.o
+*.so
+*.exe
+*.out
+
+# NPM or Yarn lockfiles (if using npm/yarn for Bazelisk or other JS dependencies)
+package-lock.json
+yarn.lock
+
+# Backup files (e.g., from editors)
+*~
