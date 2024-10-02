@@ -31,7 +31,7 @@ void deepCopyGrid(struct Grid *  grille, struct Grid *  grilleCopy) {
 }
 
 void calculeScoreAndUpdateGrid(struct Grid *  grille, enum PlayerID player, struct Score *  score) {
-    enum PlayerID adversaire = player == PLAYER1 ? PLAYER2 : PLAYER1;
+    enum PlayerID adversaire = switchPlayer(player);
     for (int i = 0; i < GRID_ROWS; i++) {
         int graines = grille->grid[i][adversaire];
         if (graines == 2 || graines == 3) {
@@ -75,9 +75,8 @@ void sowSeeds(struct Grid *  grille, enum PlayerID player, int caseDepart) {
 }
 
 enum CoupValidity coupIsValid(struct Grid *  grille, int caseDepart, enum PlayerID player) {
-
     // On vérifie que la case de départ contient des graines
-    int adversaire = player == 0 ? 1 : 0;
+    enum PlayerID adversaire = switchPlayer(player);
     if (grille->grid[caseDepart][player] == 0) {
         return INVALID_NO_SEEDS_IN_CASE;
     }
@@ -97,7 +96,6 @@ enum CoupValidity coupIsValid(struct Grid *  grille, int caseDepart, enum Player
 
 
 enum CoupValidity playCoup(enum PlayerID player, struct Grid *  grille, struct Score *  score, int caseDepart) {
-
     // Une fois que la case de départ est choisie on vérifie si le coup est valide
     enum CoupValidity coupValidity = coupIsValid(grille, caseDepart, player);
     if (coupValidity == VALID) {
