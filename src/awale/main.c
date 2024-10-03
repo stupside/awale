@@ -66,7 +66,9 @@ int main() {
                 printf("L'adversaire n'a pas de graines le coup doit permettre de lui en donner\n");
             }
         }
-
+        // On passe au joueur suivant
+        currentPlayer = switchPlayer(currentPlayer);
+        
         // on check que le jeu peut être pousuivi
         enum GameStatus gameStatus = checkGameStatus(&grid, &score, currentPlayer);
 
@@ -83,9 +85,11 @@ int main() {
             currentPlayer = switchPlayer(currentPlayer);
             continue;
         }
-
-        // On passe au joueur suivant
-        currentPlayer = switchPlayer(currentPlayer);
+        if (gameStatus == GAME_OVER_STALEMATE) {
+            enum PlayerID winner = findWinnerIfStale(&score);
+            printf("Plus de mouvements possibles le jeu est fini, le joueur %d a gagné avec un score de %d\n", winner, score.score[winner]);
+            break;
+        }
     }
     return 0;
 }

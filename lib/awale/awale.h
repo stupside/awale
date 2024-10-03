@@ -70,6 +70,12 @@ enum CoupValidity playCoup(enum PlayerID player, struct Grid *grille,
 enum GameStatus checkGameStatus(struct Grid *grille, struct Score *score,
                                 enum PlayerID P);
 
+// Vérifie si les coups sont encore possibles
+int coupsArePossible(struct Grid *grille, enum PlayerID player);
+
+// Trouve le gagant du jeu
+enum PlayerID findWinnerIfStale(struct Score *score);
+
 // Echange le joueur courant avec l'autre joueur
 enum PlayerID switchPlayer(enum PlayerID player);
 

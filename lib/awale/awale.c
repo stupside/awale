@@ -8,7 +8,7 @@ void initScore(struct Score *score) {
 void initGrid(struct Grid *  grille) {
     for (int i = 0; i < GRID_ROWS; i++) {
         for (int j = 0; j < GRID_COLS; j++) {
-            grille->grid[i][j] = 4;
+            grille->grid[i][j] = 0;
         }
     }
 };
@@ -95,6 +95,7 @@ enum CoupValidity coupIsValid(struct Grid *  grille, int caseDepart, enum Player
 }
 
 
+
 enum CoupValidity playCoup(enum PlayerID player, struct Grid *  grille, struct Score *  score, int caseDepart) {
     // Une fois que la case de départ est choisie on vérifie si le coup est valide
     enum CoupValidity coupValidity = coupIsValid(grille, caseDepart, player);
@@ -106,19 +107,51 @@ enum CoupValidity playCoup(enum PlayerID player, struct Grid *  grille, struct S
     return coupValidity;
 }
 
-enum GameStatus checkGameStatus(struct Grid *  grille, struct Score *  score, enum PlayerID P) {
-    if (!playerHasSeeds(grille, P)) {
-        return PASS_TURN_NO_SEEDS;
+// Vérifie si joueur peut semer des graines chez l'adversaire
+int coupsArePossible(struct Grid *  grille, enum PlayerID player) {
+    if (player == PLAYER1) {
+        for (int i = 0; i< GRID_ROWS; i++) {
+            int nbGraines = grille->grid[i][PLAYER2];
+            if (nbGraines >= GRID_ROWS - i) {
+                return 1;
+            }
+        }
+    } else {
+        for (int i = 0; i< GRID_ROWS; i++) {
+            int nbGraines = grille->grid[i][PLAYER1];
+            if (nbGraines >= GRID_ROWS - i + 1) {
+                return 1;
+            }
+        }
     }
+    return 0;
+}
+
+enum GameStatus checkGameStatus(struct Grid *  grille, struct Score *  score, enum PlayerID player) {
+    // cette fonction prend le joueur qui va jouer son coup
     if (score->score[PLAYER1] >= MAX_SCORE) {
         return GAME_OVER_PLAYER1_WINS;
     }
     if (score->score[PLAYER2] >= MAX_SCORE) {
         return GAME_OVER_PLAYER2_WINS;
     }
+    if (!playerHasSeeds(grille, player) && coupsArePossible(grille, switchPlayer(player))) {
+        return PASS_TURN_NO_SEEDS;
+    }
+    if (
+        (!playerHasSeeds(grille, switchPlayer(player)) && !coupsArePossible(grille, player))
+        ||
+        (!playerHasSeeds(grille, player) && !coupsArePossible(grille, switchPlayer(player)))
+        ) {
+        return GAME_OVER_STALEMATE;
+    }
     return GAME_NOT_OVER;
 }
 
 enum PlayerID switchPlayer(enum PlayerID player) {
     return player == PLAYER1 ? PLAYER2 : PLAYER1;
+}
+
+enum PlayerID findWinnerIfStale(struct Score *  score) {
+    return (score->score[PLAYER1] > score->score[PLAYER2]) ? PLAYER1 : PLAYER2;
 }

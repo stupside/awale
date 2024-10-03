@@ -1,5 +1,6 @@
 #pragma once
 
+#include "lib/server/server.h"
 #include "lib/socket/cmd.h"
 
 #include "lib/socket/cmds/chat.h"
@@ -18,6 +19,14 @@ unsigned int on_chat_write(const void *data) {
   const struct ChatWriteReq *cmd = data;
 
   printf("ChatWriteCmd: %s\n", cmd->message);
+
+  struct Server server = awale_server();
+
+  printf("Broadcasting message to %d clients\n", server.pool.count);
+
+  for (int i = 0; i < server.pool.count; i++) {
+    write_to_socket(server.pool.list[i].sock, cmd->message);
+  }
 
   return 0;
 };
