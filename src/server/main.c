@@ -1,6 +1,9 @@
 #include "main.h"
 
 #include <arpa/inet.h>
+#include <errno.h>
+#include <stdio.h>
+#include <unistd.h>
 
 #include "lib/server/server.h"
 #include "lib/socket/cmd.h"
@@ -46,31 +49,31 @@ void app(struct Mediator *mediator) {
   int maxfd = sock;
 
   /* an array for all clients */
-  struct Server server = awale_server();
+  struct Server *server = awale_server();
 
   while (1) {
 
-    FD_ZERO(&server.pool.rdfs);
+    FD_ZERO(&server->pool.rdfs);
 
     /* add STDIN_FILENO */
-    FD_SET(STDIN_FILENO, &server.pool.rdfs);
+    FD_SET(STDIN_FILENO, &server->pool.rdfs);
 
     /* add the connection socket */
-    FD_SET(sock, &server.pool.rdfs);
+    FD_SET(sock, &server->pool.rdfs);
 
     /* add socket of each client */
-    for (int i = 0; i < server.pool.count; i++) {
-      FD_SET(server.pool.list[i].sock, &server.pool.rdfs);
+    for (int i = 0; i < server->pool.count; i++) {
+      FD_SET(server->pool.clients[i].sock, &server->pool.rdfs);
     }
 
-    if (select(maxfd + 1, &server.pool.rdfs, NULL, NULL, NULL) == -1) {
+    if (select(maxfd + 1, &server->pool.rdfs, NULL, NULL, NULL) == -1) {
       exit(errno);
     }
 
     /* something from standard input : i.e keyboard */
-    if (FD_ISSET(STDIN_FILENO, &server.pool.rdfs)) {
+    if (FD_ISSET(STDIN_FILENO, &server->pool.rdfs)) {
       break;
-    } else if (FD_ISSET(sock, &server.pool.rdfs)) {
+    } else if (FD_ISSET(sock, &server->pool.rdfs)) {
 
       SOCKADDR sock_addr = {0};
 
@@ -88,24 +91,31 @@ void app(struct Mediator *mediator) {
 
       maxfd = csock > maxfd ? csock : maxfd;
 
-      FD_SET(csock, &server.pool.rdfs);
+      FD_SET(csock, &server->pool.rdfs);
 
-      add_client(&server.pool, buffer, csock);
+      int ok = add_client(&server->pool, buffer, csock);
+
+      if (!ok) {
+        perror("Failed to add client");
+      }
 
     } else {
       int i = 0;
 
-      for (i = 0; i < server.pool.count; i++) {
+      for (i = 0; i < server->pool.count; i++) {
 
-        SOCKET socket = server.pool.list[i].sock;
+        const struct SocketClient *client = &server->pool.clients[i];
 
         /* a client is talking */
-        if (FD_ISSET(socket, &server.pool.rdfs)) {
+        if (FD_ISSET(client->sock, &server->pool.rdfs)) {
 
-          if (read_from_socket(socket, buffer)) {
-            compute_cmd(mediator, buffer);
+          if (read_from_socket(client->sock, buffer)) {
+
+            if (!compute_cmd(mediator, client->id, buffer)) {
+              perror("Failed to compute command");
+            }
           } else {
-            remove_client(&server.pool, i);
+            remove_client(&server->pool, i);
           }
           break;
         }
@@ -113,7 +123,7 @@ void app(struct Mediator *mediator) {
     }
   }
 
-  clear_clients(&server.pool);
+  clear_clients(&server->pool);
 
   close_socket(sock);
 }

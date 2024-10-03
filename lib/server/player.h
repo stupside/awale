@@ -2,8 +2,8 @@
 
 #include "lib/socket/pool.h"
 
-struct Player {
-  SocketClient *client;
+typedef struct Player {
+  const SocketClient *client;
 } Player;
 
 #pragma endregion

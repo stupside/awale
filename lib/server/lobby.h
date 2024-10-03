@@ -5,9 +5,9 @@
 #define PLAYER_COUNT 2
 
 enum LobbyState {
-  WAITING,
-  PLAYING,
-  FINISHED,
+  LOBBY_STATE_WAITING,
+  LOBBY_STATE_PLAYING,
+  LOBBY_STATE_FINISHED,
 } GameState;
 
 struct Lobby {

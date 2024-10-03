@@ -1,7 +1,6 @@
-#include <stdlib.h>
+#pragma once
 
-#include "lib/awale/awale.h"
-#include "lib/socket/cmd.h"
+#include <stdlib.h>
 
 #include "mediator.h"
 
@@ -19,3 +18,5 @@ int main(int argc, char **argv) {
 
   return EXIT_SUCCESS;
 }
+
+#pragma endregion

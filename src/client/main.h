@@ -1,11 +1,12 @@
+#pragma once
+
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "lib/socket/cmd.h"
-
 #include "mediator.h"
 
-void app(const char *address, const char *name);
+void app(const char *address, const char *name,
+         const struct Mediator *mediator);
 
 int main(int argc, char **argv) {
   if (argc < 2) {
@@ -17,7 +18,11 @@ int main(int argc, char **argv) {
 
   init_mediator(&mediator);
 
-  app(argv[1], argv[2]);
+  // compute_cmd(mediator, const SocketClient *from, const char *cmd)
+
+  app(argv[1], argv[2], &mediator);
 
   return EXIT_SUCCESS;
 }
+
+#pragma endregion
