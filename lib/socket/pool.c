@@ -46,11 +46,11 @@ void remove_client(SocketPool *sockets, int to_remove) {
   sockets->count--;
 }
 
-const SocketClient *find_client(SocketPool *pool, unsigned int id) {
+SocketClient *find_client(SocketPool *pool, unsigned int id) {
 
   for (int i = 0; i < pool->count; i++) {
 
-    const SocketClient *client = &pool->clients[i];
+    SocketClient *client = &pool->clients[i];
 
     if (client->id == id) {
       return client;

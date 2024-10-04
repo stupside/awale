@@ -1,157 +1,194 @@
 #include "awale.h"
 
-void initScore(struct Score *score) {
-    score->score[0] = 0;
-    score->score[1] = 0;
+struct Awale new_awale() { return (struct Awale){.grid = {}, .score = {0}}; }
+
+void reset(struct Awale *awale) {
+
+  awale->score[PLAYER1] = 0;
+  awale->score[PLAYER2] = 0;
+
+  awale->current = PLAYER1;
+
+  for (int i = 0; i < GRID_ROWS; i++) {
+    for (int j = 0; j < GRID_COLS; j++) {
+      awale->grid[i][j] = 4;
+    }
+  }
 }
 
-void initGrid(struct Grid *  grille) {
-    for (int i = 0; i < GRID_ROWS; i++) {
-        for (int j = 0; j < GRID_COLS; j++) {
-            grille->grid[i][j] = 0;
-        }
-    }
-};
+int player_has_seeds(enum PlayerID player,
+                     const int grid[GRID_ROWS][GRID_COLS]) {
 
-int playerHasSeeds(struct Grid *  grille, enum PlayerID player) {
-    for (int i = 0; i < GRID_ROWS; i++) {
-        if (grille->grid[i][player] > 0) {
-            return 1;
-        }
+  for (int i = 0; i < GRID_ROWS; i++) {
+    if (grid[i][player] > 0) {
+      return 1;
     }
-    return 0;
+  }
+
+  return 0;
 }
 
-void deepCopyGrid(struct Grid *  grille, struct Grid *  grilleCopy) {
-    for (int i = 0; i < GRID_ROWS; i++) {
-        for (int j = 0; j < GRID_COLS; j++) {
-            grilleCopy->grid[i][j] = grille->grid[i][j];
-        }
+void copy_grid(const struct Awale *awale, int copy[GRID_ROWS][GRID_COLS]) {
+  for (int i = 0; i < GRID_ROWS; i++) {
+    for (int j = 0; j < GRID_COLS; j++) {
+      copy[i][j] = copy[i][j];
     }
+  }
 }
 
-void calculeScoreAndUpdateGrid(struct Grid *  grille, enum PlayerID player, struct Score *  score) {
-    enum PlayerID adversaire = switchPlayer(player);
-    for (int i = 0; i < GRID_ROWS; i++) {
-        int graines = grille->grid[i][adversaire];
-        if (graines == 2 || graines == 3) {
-            grille->grid[i][adversaire] = 0;
-            score->score[player] = score->score[player] + graines;
-        }
-    }
-}
+void sow_seeds(enum PlayerID player, int grid[GRID_ROWS][GRID_COLS],
+               int target) {
 
-void sowSeeds(struct Grid *  grille, enum PlayerID player, int caseDepart) {
-    // on récupère les graines de la case de départ
-    int nbGraines = grille->grid[caseDepart][player];
-    // on vide la case de départ
-    grille->grid[caseDepart][player] = 0;
-    int caseInitiale = caseDepart;
-    int ligne = player;
-    while (nbGraines > 0) {
-        if (ligne == 1) {
-            caseDepart++;
-            if (caseDepart == GRID_ROWS) {
-                caseDepart = 5;
-                ligne = 0;
-            }
-            // on vérifie si on ne tombe sur la case de départ pour semer une graine
-            if (!(caseDepart == caseInitiale && ligne == player)) {
-                grille->grid[caseDepart][ligne] = grille->grid[caseDepart][ligne] + 1;
-                nbGraines--;
-            }
-        } else {
-            caseDepart--;
-            if (caseDepart == -1) {
-                caseDepart = 0;
-                ligne = 1;
-            }
-            if (!(caseDepart == caseInitiale && ligne == player)) {
-                grille->grid[caseDepart][ligne] = grille->grid[caseDepart][ligne] + 1;
-                nbGraines--;
-            }
-        }
-    }
-}
+  int seeds = grid[target][player];
 
-enum CoupValidity coupIsValid(struct Grid *  grille, int caseDepart, enum PlayerID player) {
-    // On vérifie que la case de départ contient des graines
-    enum PlayerID adversaire = switchPlayer(player);
-    if (grille->grid[caseDepart][player] == 0) {
-        return INVALID_NO_SEEDS_IN_CASE;
-    }
+  grid[target][player] = 0;
 
-    // On vérifie que le coup sème des graines chez l'adversaire si ce dernier n'a pas de graines sinon le coup n'est pas valide
-    struct Grid grilleCopy;
-    deepCopyGrid(grille, &grilleCopy);
-    sowSeeds(&grilleCopy, player, caseDepart);
+  int begin = target;
+  int current = begin;
 
-    if (!playerHasSeeds(grille, adversaire) && !playerHasSeeds(&grilleCopy, adversaire)) {
-        return INVALID_OPONENT_HAS_NO_SEEDS;
-    }
+  int line = player;
 
-    // Sinon le coup est valide
-    return VALID;
-}
+  while (seeds > 0) {
 
+    if (line == 1) {
 
+      current++;
 
-enum CoupValidity playCoup(enum PlayerID player, struct Grid *  grille, struct Score *  score, int caseDepart) {
-    // Une fois que la case de départ est choisie on vérifie si le coup est valide
-    enum CoupValidity coupValidity = coupIsValid(grille, caseDepart, player);
-    if (coupValidity == VALID) {
-        sowSeeds(grille, player, caseDepart);
-        calculeScoreAndUpdateGrid(grille, player, score);
-    }
+      if (current == GRID_ROWS) {
+        line = 0;
+        current = 5;
+      }
 
-    return coupValidity;
-}
+      // on vérifie si on ne tombe sur la case de départ pour semer une graine
+      if (!(current == begin && line == player)) {
 
-// Vérifie si joueur peut semer des graines chez l'adversaire
-int coupsArePossible(struct Grid *  grille, enum PlayerID player) {
-    if (player == PLAYER1) {
-        for (int i = 0; i< GRID_ROWS; i++) {
-            int nbGraines = grille->grid[i][PLAYER2];
-            if (nbGraines >= GRID_ROWS - i) {
-                return 1;
-            }
-        }
+        grid[current][line] = grid[current][line] + 1;
+
+        seeds--;
+      }
     } else {
-        for (int i = 0; i< GRID_ROWS; i++) {
-            int nbGraines = grille->grid[i][PLAYER1];
-            if (nbGraines >= GRID_ROWS - i + 1) {
-                return 1;
-            }
-        }
+
+      current--;
+
+      if (current == -1) {
+        line = 1;
+        current = 0;
+      }
+
+      if (!(current == begin && line == player)) {
+
+        grid[current][line] = grid[current][line] + 1;
+
+        seeds--;
+      }
     }
+  }
+}
+
+enum CoupValidity is_coup_valid(struct Awale *awale, int target) {
+
+  enum PlayerID nex_player = next_player(awale);
+
+  if (awale->grid[target][awale->current] == 0) {
+    return INVALID_NO_SEEDS_IN_CASE;
+  }
+
+  int copy[GRID_ROWS][GRID_COLS];
+
+  copy_grid(awale, copy);
+
+  sow_seeds(awale->current, copy, target);
+
+  const int is_famine = !player_has_seeds(nex_player, awale->grid);
+  const int will_famine = !player_has_seeds(nex_player, copy);
+
+  if (is_famine || will_famine) { // TODO: && instead of ||
+    return INVALID_OPONENT_HAS_NO_SEEDS;
+  }
+
+  return VALID;
+}
+
+enum CoupValidity play(struct Awale *awale, enum PlayerID player, int target) {
+
+  if (awale->current == player) {
+  } else {
     return 0;
+  }
+
+  const enum CoupValidity validity = is_coup_valid(awale, target);
+
+  if (validity == VALID) {
+
+    sow_seeds(player, awale->grid, target);
+
+    const enum PlayerID next = next_player(awale);
+
+    for (int i = 0; i < GRID_ROWS; i++) {
+
+      int graines = awale->grid[i][next];
+
+      if (graines == 2 || graines == 3) {
+
+        awale->grid[i][next] = 0;
+
+        awale->score[player] = awale->score[player] + graines;
+      }
+    }
+
+    awale->current = next;
+  }
+
+  return validity;
 }
 
-enum GameStatus checkGameStatus(struct Grid *  grille, struct Score *  score, enum PlayerID player) {
-    // cette fonction prend le joueur qui va jouer son coup
-    if (score->score[PLAYER1] >= MAX_SCORE) {
-        return GAME_OVER_PLAYER1_WINS;
+int can_play(const struct Awale *awale, enum PlayerID player) {
+
+  for (int i = 0; i < GRID_ROWS; ++i) {
+    int seeds = awale->grid[i][next_player(awale)];
+
+    if (player == PLAYER1) {
+      if (seeds >= GRID_ROWS - i) {
+        return 1;
+      }
+    } else {
+      if (seeds >= GRID_ROWS - i + 1) {
+        return 1;
+      }
     }
-    if (score->score[PLAYER2] >= MAX_SCORE) {
-        return GAME_OVER_PLAYER2_WINS;
-    }
-    if (!playerHasSeeds(grille, player) && coupsArePossible(grille, switchPlayer(player))) {
-        return PASS_TURN_NO_SEEDS;
-    }
-    if (
-        (!playerHasSeeds(grille, switchPlayer(player)) && !coupsArePossible(grille, player))
-        ||
-        (!playerHasSeeds(grille, player) && !coupsArePossible(grille, switchPlayer(player)))
-        ) {
-        return GAME_OVER_STALEMATE;
-    }
-    return GAME_NOT_OVER;
+  }
+
+  return 0;
 }
 
-enum PlayerID switchPlayer(enum PlayerID player) {
-    return player == PLAYER1 ? PLAYER2 : PLAYER1;
+enum GameStatus status(const struct Awale *awale) {
+  if (awale->score[PLAYER1] >= MAX_SCORE) {
+    return GAME_OVER_PLAYER1_WINS;
+  }
+
+  if (awale->score[PLAYER2] >= MAX_SCORE) {
+    return GAME_OVER_PLAYER2_WINS;
+  }
+
+  if (!player_has_seeds(awale->current, awale->grid) &&
+      can_play(awale, next_player(awale))) {
+    return PASS_TURN_NO_SEEDS;
+  }
+
+  if ((!player_has_seeds(next_player(awale), awale->grid) &&
+       !can_play(awale, awale->current)) ||
+      (!player_has_seeds(awale->current, awale->grid) &&
+       !can_play(awale, next_player(awale)))) {
+    return GAME_OVER_STALEMATE;
+  }
+
+  return GAME_NOT_OVER;
 }
 
-enum PlayerID findWinnerIfStale(struct Score *  score) {
-    return (score->score[PLAYER1] > score->score[PLAYER2]) ? PLAYER1 : PLAYER2;
+enum PlayerID next_player(const struct Awale *awale) {
+  return (awale->current + 1) % 2;
+}
+
+enum PlayerID winner(const struct Awale *awale) {
+  return (awale->score[PLAYER1] > awale->score[PLAYER2]) ? PLAYER1 : PLAYER2;
 }

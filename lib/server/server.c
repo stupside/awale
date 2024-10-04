@@ -1,6 +1,13 @@
 #include "server.h"
 
 #include "lib/awale/awale.h"
+#include "lib/socket/pool.h"
+
+#include "lib/socket/cmd.h"
+#include "lib/socket/cmds/challenge.h"
+#include "lib/socket/socket.h"
+
+#include <stdlib.h>
 
 struct Server *awale_server() {
 
@@ -11,21 +18,27 @@ struct Server *awale_server() {
   return &server;
 }
 
-struct Lobby *find_lobby(struct Server *server, const SocketClient *client) {
-  for (int i = 0; i < MAX_LOBBIES; i++) {
-    struct Lobby *game = &server->lobbies[i];
+struct Lobby *find_lobby(struct Server *server,
+                         const struct SocketClient *client) {
 
-    if (game->players[PLAYER1].client == client ||
-        game->players[PLAYER2].client == client) {
-      return game;
+  for (int i = 0; i < MAX_LOBBIES; i++) {
+    struct Lobby *lobby = &server->lobbies[i];
+
+    if (lobby->client[PLAYER1]->id == client->id ||
+        lobby->client[PLAYER2]->id == client->id) {
+
+      if (lobby->state != LOBBY_STATE_FINISHED) {
+        return lobby;
+      }
+
+      return NULL;
     }
   }
 
   return NULL;
 }
 
-int challenge(struct Server *server, const SocketClient *c1,
-              const SocketClient *c2) {
+int challenge(struct Server *server, SocketClient *c1, SocketClient *c2) {
 
   static unsigned int lobbies = 0;
 
@@ -41,12 +54,25 @@ int challenge(struct Server *server, const SocketClient *c1,
 
   server->lobbies[lobbies++] = (struct Lobby){
       .state = LOBBY_STATE_WAITING,
-      .players =
+      .client =
           {
-              [PLAYER1] = {.client = c1},
-              [PLAYER2] = {.client = c2},
+              [PLAYER1] = c1,
+              [PLAYER2] = c2,
           },
   };
+
+  {
+    const struct ChallengeEvent event = {
+        .client_id = c1->id,
+    };
+
+    const char *cmd =
+        inline_cmd(CMD_CHALLENGE, &event, sizeof(struct ChallengeEvent));
+
+    write_to_socket(c2->sock, cmd);
+
+    free(&cmd);
+  }
 
   return 1;
 }
@@ -60,7 +86,7 @@ int handle_challenge(struct Server *server, const SocketClient *client,
     return 0;
   }
 
-  if (lobby->players[PLAYER2].client == client) {
+  if (lobby->client[PLAYER2]->id == client->id) {
     if (accept) {
       lobby->state = LOBBY_STATE_PLAYING;
     } else {

@@ -31,6 +31,6 @@ int add_client(SocketPool *pool, const char *name, SOCKET socket);
 
 void remove_client(SocketPool *sockets, int to_remove);
 
-const SocketClient *find_client(SocketPool *pool, unsigned int id);
+SocketClient *find_client(SocketPool *pool, unsigned int id);
 
 #pragma endregion

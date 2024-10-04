@@ -47,6 +47,7 @@ unsigned int on_user_logout(unsigned int client_id, const void *data) {
 
   {
     const struct UserLogoutEvent event = {.id = sender->id};
+
     char *cmd =
         inline_cmd(CMD_USER_LOGOUT, &event, sizeof(struct UserLogoutEvent));
 
@@ -91,7 +92,7 @@ unsigned int on_chat_write(unsigned int client_id, const void *data) {
 
 unsigned int on_challenge(unsigned int client_id, const void *data) {
 
-  const SocketClient *sender = find_client(&awale_server()->pool, client_id);
+  SocketClient *sender = find_client(&awale_server()->pool, client_id);
 
   if (sender == NULL) {
     return 0;
@@ -105,8 +106,7 @@ unsigned int on_challenge(unsigned int client_id, const void *data) {
 
   const struct ChallengeReq *req = data;
 
-  const SocketClient *client =
-      find_client(&awale_server()->pool, req->client_id);
+  SocketClient *client = find_client(&awale_server()->pool, req->client_id);
 
   int ok = challenge(awale_server(), sender, client);
 
@@ -161,7 +161,7 @@ unsigned int on_challenge_accept(unsigned int client_id, const void *data) {
     char *cmd = inline_cmd(CMD_CHALLENGE_ACCEPT, &event,
                            sizeof(struct ChallengeAcceptEvent));
 
-    write_to_socket(lobby->players[PLAYER1].client->sock, cmd);
+    write_to_socket(lobby->client[PLAYER1]->sock, cmd);
 
     free(cmd);
   }
@@ -197,7 +197,7 @@ unsigned int on_challenge_reject(unsigned int client_id, const void *data) {
     char *cmd = inline_cmd(CMD_CHALLENGE_REJECT, &event,
                            sizeof(struct ChallengeDeclineEvent));
 
-    write_to_socket(lobby->players[PLAYER1].client->sock, cmd);
+    write_to_socket(lobby->client[PLAYER1]->sock, cmd);
 
     free(cmd);
   }
