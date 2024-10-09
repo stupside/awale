@@ -77,7 +77,15 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
     return 0;
   }
 
-  if (lobby->state != LOBBY_STATE_PLAYING) {
+  if (status(&lobby->awale) == GAME_NOT_OVER) {
+    // Game is not over, we can play
+  } else {
+    return 0;
+  }
+
+  if (lobby->state == LOBBY_STATE_RUNNING) {
+    // Game is playing, we can play
+  } else {
     return 0;
   }
 
@@ -114,7 +122,18 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
     write_to_socket(lobby->client[PLAYER1]->sock, cmd);
     write_to_socket(lobby->client[PLAYER2]->sock, cmd);
 
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+
+      const struct SocketClient *observator = lobby->observators[i];
+
+      if (observator) {
+        write_to_socket(lobby->observators[i]->sock, cmd);
+      }
+    }
+
     free(&cmd);
+
+    return 1;
   }
 
   return 0;
@@ -129,7 +148,9 @@ int handle_challenge(struct Server *server, const SocketClient *client,
     return 0;
   }
 
-  if (lobby->state != LOBBY_STATE_WAITING) {
+  if (lobby->state == LOBBY_STATE_WAITING) {
+    // Lobby is waiting for a challenge response
+  } else {
     return 0;
   }
 
