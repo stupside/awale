@@ -16,6 +16,8 @@ struct Server *awale_server();
 
 struct Lobby *find_lobby(struct Server *server, const SocketClient *client);
 
+int awale_play(struct Server *server, const SocketClient *client, int target);
+
 int challenge(struct Server *server, SocketClient *c1, SocketClient *c2);
 
 int handle_challenge(struct Server *server, const SocketClient *client,

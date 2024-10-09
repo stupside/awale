@@ -2,19 +2,14 @@
 
 #include <stdlib.h>
 
+#include "lib/socket/cmd.h"
+#include "lib/socket/cmds/challenge.h"
 #include "lib/socket/socket.h"
 
-struct Lobby *new_lobby(struct SocketClient *p1, struct SocketClient *p2) {
+struct Lobby new_lobby(struct SocketClient *p1, struct SocketClient *p2) {
 
-  struct Lobby *lobby = malloc(sizeof(struct Lobby));
-
-  lobby->client[PLAYER1] = p1;
-  lobby->client[PLAYER2] = p2;
-
-  lobby->awale = new_awale();
-  lobby->state = LOBBY_STATE_WAITING;
-
-  return lobby;
+  return (struct Lobby){
+      .client = {p1, p2}, .awale = new_awale(), .state = LOBBY_STATE_WAITING};
 }
 
 int start_lobby(struct Lobby *lobby) {
@@ -30,27 +25,4 @@ int start_lobby(struct Lobby *lobby) {
   return 1;
 }
 
-int play_lobby(struct Lobby *lobby, const struct SocketClient *client,
-               int target) {
-
-  if (lobby->state == LOBBY_STATE_PLAYING) {
-
-    const enum PlayerID player =
-        lobby->client[PLAYER1]->id == client->id ? PLAYER1 : PLAYER2;
-
-    const enum CoupValidity validity = play(&lobby->awale, player, target);
-
-    if (validity == VALID) {
-
-      if (status(&lobby->awale) != GAME_NOT_OVER) {
-        lobby->state = LOBBY_STATE_FINISHED;
-      }
-
-      return 1;
-    }
-  }
-
-  return 0;
-}
-
-void end_lobby(struct Lobby *lobby) { free(lobby); }
+void end_lobby(struct Lobby *lobby) { lobby->state = LOBBY_STATE_FINISHED; }

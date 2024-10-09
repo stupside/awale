@@ -15,6 +15,7 @@ enum CoupValidity {
   INVALID,
   INVALID_NO_SEEDS_IN_CASE,
   INVALID_OPONENT_HAS_NO_SEEDS,
+  INVALID_NOT_PLAYER_ROUND,
 };
 
 enum GameStatus {

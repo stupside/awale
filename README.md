@@ -1,5 +1,14 @@
 # awale
 
+# Setup
+
+npm i @bazel/bazelisk
+
+make clean
+make build
+make server
+make client
+
 Implanter le jeu d’Awalé : représentation interne, comment jouer un coup, compter les points, sauvegarder une partie, imprimer l’état du plateau etc.
 
 Concevez une application client/serveur. Chaque client s’inscrit avec un pseudo.

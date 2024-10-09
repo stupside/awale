@@ -1,4 +1,5 @@
 #include "lib/awale/awale.h"
+
 #include <stdio.h>
 
 int main() {
@@ -84,10 +85,12 @@ int main() {
       continue;
     }
     if (gameStatus == GAME_OVER_STALEMATE) {
-      enum PlayerID winner = winner(&awale);
+
+      enum PlayerID player = winner(&awale);
+
       printf("Plus de mouvements possibles le jeu est fini, le joueur %d a "
              "gagné avec un score de %d\n",
-             winner, awale.score[winner]);
+             winner, awale.score[player]);
       break;
     }
   }

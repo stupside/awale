@@ -113,7 +113,7 @@ enum CoupValidity play(struct Awale *awale, enum PlayerID player, int target) {
 
   if (awale->current == player) {
   } else {
-    return 0;
+    return INVALID_NOT_PLAYER_ROUND;
   }
 
   const enum CoupValidity validity = is_coup_valid(awale, target);

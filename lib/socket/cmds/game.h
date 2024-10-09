@@ -1,9 +1,14 @@
 #ifndef GAME_H
+#define GAME_H
+
+#include "lib/awale/awale.h"
 
 struct GamePlayReq {
   int input;
 };
-// struct GamePlayRes {};
+struct GamePlayRes {
+  unsigned int ok;
+};
 
 struct GameLeaveReq {};
 // struct GameLeaveRes {};
@@ -11,9 +16,14 @@ struct GameLeaveReq {};
 struct GameListReq {};
 // struct GameListRes {};
 
-struct GameGridReq {};
-struct GameGridRes {
-  int grid[6][2];
+struct GameStateReq {};
+struct GameStateRes {
+  enum GameStatus status;
+  int grid[GRID_ROWS][GRID_COLS];
+};
+struct GameStateEvent {
+  enum GameStatus status;
+  int grid[GRID_ROWS][GRID_COLS];
 };
 
 #endif

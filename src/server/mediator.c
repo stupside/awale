@@ -9,6 +9,7 @@
 
 #include "lib/socket/cmds/challenge.h"
 #include "lib/socket/cmds/chat.h"
+#include "lib/socket/cmds/game.h"
 #include "lib/socket/cmds/user.h"
 
 #include "lib/awale/awale.h"
@@ -99,12 +100,6 @@ unsigned int on_challenge(unsigned int client_id, const void *data) {
     return 0;
   }
 
-  struct Lobby *lobby = find_lobby(awale_server(), sender);
-
-  if (lobby) {
-    return 0;
-  }
-
   const struct ChallengeReq *req = data;
 
   SocketClient *client = find_client(&awale_server()->pool, req->client_id);
@@ -115,93 +110,57 @@ unsigned int on_challenge(unsigned int client_id, const void *data) {
     return 0;
   }
 
-  /**
-   * Sends a challenge request to the other client
-   */
-  {
-    const struct ChallengeEvent event = {.client_id = sender->id};
+  return 1;
+};
 
-    char *cmd =
-        inline_cmd(CMD_CHALLENGE, &event, sizeof(struct ChallengeEvent));
+unsigned int on_challenge_handle(unsigned int client_id, const void *data) {
 
-    write_to_socket(client->sock, cmd);
+  const SocketClient *client = find_client(&awale_server()->pool, client_id);
 
-    free(cmd);
+  if (client == NULL) {
+    return 0;
+  }
+
+  const struct ChallengeHandleReq *req = data;
+
+  int ok = handle_challenge(awale_server(), client, req->accept);
+
+  if (!ok) {
+    return 0;
   }
 
   return 1;
 };
 
-unsigned int on_challenge_accept(unsigned int client_id, const void *data) {
+unsigned int on_game_state(unsigned int client_id, const void *data) {
 
-  const SocketClient *from = find_client(&awale_server()->pool, client_id);
+  const SocketClient *client = find_client(&awale_server()->pool, client_id);
 
-  if (from == NULL) {
+  if (client == NULL) {
     return 0;
   }
 
-  struct Lobby *lobby = find_lobby(awale_server(), from);
+  const struct Lobby *lobby = find_lobby(awale_server(), client);
 
   if (lobby == NULL) {
     return 0;
   }
 
-  if (lobby->state == LOBBY_STATE_PLAYING ||
-      lobby->state == LOBBY_STATE_FINISHED) {
-    return 0;
+  struct GameStateRes res = {
+      .status = status(&lobby->awale),
+  };
+
+  for (int i = 0; i < GRID_ROWS; i++) {
+    for (int j = 0; j < GRID_COLS; j++) {
+      res.grid[i][j] = lobby->awale.grid[i][j];
+    }
   }
 
-  lobby->state = LOBBY_STATE_PLAYING;
+  char *cmd = inline_cmd(CMD_GAME_STATE, &res, sizeof(struct GameStateRes));
 
-  /**
-   * Sends a challenge accept request to the other client
-   */
-  {
-    const struct ChallengeAcceptEvent event;
+  write_to_socket(client->sock, cmd);
 
-    char *cmd = inline_cmd(CMD_CHALLENGE_ACCEPT, &event,
-                           sizeof(struct ChallengeAcceptEvent));
-
-    write_to_socket(lobby->client[PLAYER1]->sock, cmd);
-
-    free(cmd);
-  }
-
-  return 1;
-};
-
-unsigned int on_challenge_reject(unsigned int client_id, const void *data) {
-
-  const SocketClient *from = find_client(&awale_server()->pool, client_id);
-
-  if (from == NULL) {
-    return 0;
-  }
-
-  struct Lobby *lobby = find_lobby(awale_server(), from);
-
-  if (lobby == NULL) {
-    return 0;
-  }
-
-  if (lobby->state == LOBBY_STATE_PLAYING ||
-      lobby->state == LOBBY_STATE_FINISHED) {
-    return 0;
-  }
-
-  /**
-   * Sends a challenge reject request to the other client
-   */
-  {
-    const struct ChallengeDeclineEvent event;
-
-    char *cmd = inline_cmd(CMD_CHALLENGE_REJECT, &event,
-                           sizeof(struct ChallengeDeclineEvent));
-
-    write_to_socket(lobby->client[PLAYER1]->sock, cmd);
-
-    free(cmd);
-  }
+  free(cmd);
 
   return 1;
 };
@@ -213,6 +172,7 @@ void init_mediator(struct Mediator *mediator) {
   register_cmd(mediator, CMD_USER_LOGOUT, &on_user_logout);
 
   register_cmd(mediator, CMD_CHALLENGE, &on_challenge);
-  register_cmd(mediator, CMD_CHALLENGE_ACCEPT, &on_challenge_accept);
-  register_cmd(mediator, CMD_CHALLENGE_REJECT, &on_challenge_reject);
+  register_cmd(mediator, CMD_CHALLENGE_HANDLE, &on_challenge_handle);
+
+  register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
 }
