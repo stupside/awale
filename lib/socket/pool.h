@@ -1,8 +1,6 @@
 #ifndef POOL_H
 #define POOL_H
 
-#include <sys/select.h>
-
 typedef int SOCKET;
 #define MAX_SOCKET_NAME 100
 
@@ -18,11 +16,7 @@ typedef struct SocketClient {
 #define MAX_CLIENTS 100
 
 typedef struct SocketPool {
-
   int count;
-
-  fd_set rdfs;
-
   struct SocketClient clients[MAX_CLIENTS];
 } SocketPool;
 

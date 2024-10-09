@@ -51,29 +51,31 @@ void app(struct Mediator *mediator) {
   /* an array for all clients */
   struct Server *server = awale_server();
 
+  fd_set rdfs;
+
   while (1) {
 
-    FD_ZERO(&server->pool.rdfs);
+    FD_ZERO(&rdfs);
 
     /* add STDIN_FILENO */
-    FD_SET(STDIN_FILENO, &server->pool.rdfs);
+    FD_SET(STDIN_FILENO, &rdfs);
 
     /* add the connection socket */
-    FD_SET(sock, &server->pool.rdfs);
+    FD_SET(sock, &rdfs);
 
     /* add socket of each client */
     for (int i = 0; i < server->pool.count; i++) {
-      FD_SET(server->pool.clients[i].sock, &server->pool.rdfs);
+      FD_SET(server->pool.clients[i].sock, &rdfs);
     }
 
-    if (select(maxfd + 1, &server->pool.rdfs, NULL, NULL, NULL) == -1) {
+    if (select(maxfd + 1, &rdfs, NULL, NULL, NULL) == -1) {
       exit(errno);
     }
 
     /* something from standard input : i.e keyboard */
-    if (FD_ISSET(STDIN_FILENO, &server->pool.rdfs)) {
+    if (FD_ISSET(STDIN_FILENO, &rdfs)) {
       break;
-    } else if (FD_ISSET(sock, &server->pool.rdfs)) {
+    } else if (FD_ISSET(sock, &rdfs)) {
 
       SOCKADDR sock_addr = {0};
 
@@ -91,7 +93,7 @@ void app(struct Mediator *mediator) {
 
       maxfd = csock > maxfd ? csock : maxfd;
 
-      FD_SET(csock, &server->pool.rdfs);
+      FD_SET(csock, &rdfs);
 
       int ok = add_client(&server->pool, buffer, csock);
 
@@ -107,7 +109,7 @@ void app(struct Mediator *mediator) {
         const struct SocketClient *client = &server->pool.clients[i];
 
         /* a client is talking */
-        if (FD_ISSET(client->sock, &server->pool.rdfs)) {
+        if (FD_ISSET(client->sock, &rdfs)) {
 
           if (read_from_socket(client->sock, buffer)) {
 
