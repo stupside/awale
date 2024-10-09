@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOBBY_H
+#define LOBBY_H
 
 #include "lib/awale/awale.h"
 
@@ -27,4 +28,4 @@ int play_lobby(struct Lobby *lobby, const struct SocketClient *client,
 
 void end_lobby(struct Lobby *lobby);
 
-#pragma endregion
+#endif

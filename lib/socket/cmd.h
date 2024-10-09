@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CMD_H
+#define CMD_H
 
 #include "pool.h"
 
@@ -52,4 +53,4 @@ char *inline_cmd(enum CMD cmd, const void *data, unsigned int data_size);
 int compute_cmd(const struct Mediator *dispatcher, unsigned int client_id,
                 const char *cmd);
 
-#pragma endregion
+#endif

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef AWALE_H
+#define AWALE_H
 
 #define GRID_ROWS 6
 #define GRID_COLS 2
@@ -48,4 +49,4 @@ enum GameStatus status(const struct Awale *awale);
 
 enum PlayerID next_player(const struct Awale *awale);
 
-#pragma endregion
+#endif

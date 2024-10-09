@@ -1,4 +1,4 @@
-#pragma once
+#ifndef USER_H
 
 struct UserInfoReq {
   char name[255];
@@ -24,4 +24,4 @@ struct UserLogoutEvent {
   unsigned int id;
 };
 
-#pragma endregion
+#endif

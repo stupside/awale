@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SOCKET_H
+#define SOCKET_H
 
 #include "pool.h"
 
@@ -23,5 +24,4 @@ int write_to_sockets(const SocketPool *pool, const SocketClient *sender,
                      const char *buffer);
 
 int read_from_socket(SOCKET sock, char *buffer);
-
-#pragma endregion
+#endif

@@ -1,4 +1,4 @@
-#pragma once
+#ifndef B_H
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -14,4 +14,4 @@ char *struct_to_byte(const void *struct_ptr, size_t size) {
   return bytes;
 }
 
-#pragma endregion
+#endif

@@ -1,4 +1,4 @@
-#pragma once
+#ifndef GAME_H
 
 struct GamePlayReq {
   int input;
@@ -16,4 +16,4 @@ struct GameGridRes {
   int grid[6][2];
 };
 
-#pragma endregion
+#endif

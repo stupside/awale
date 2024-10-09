@@ -1,4 +1,4 @@
-#pragma once
+#ifndef CHAT_H
 
 struct ChatWriteReq {
   char message[255];
@@ -10,4 +10,4 @@ struct ChatWriteEvent {
                           // the message is not received
 };
 
-#pragma endregion
+#endif

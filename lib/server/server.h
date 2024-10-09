@@ -1,4 +1,4 @@
-#pragma once
+#ifndef AWALE_SERVER_H
 
 #include "lobby.h"
 
@@ -21,4 +21,4 @@ int challenge(struct Server *server, SocketClient *c1, SocketClient *c2);
 int handle_challenge(struct Server *server, const SocketClient *client,
                      int accept);
 
-#pragma endregion
+#endif

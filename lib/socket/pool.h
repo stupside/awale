@@ -1,4 +1,5 @@
-#pragma once
+#ifndef POOL_H
+#define POOL_H
 
 #include <string.h>
 #include <sys/select.h>
@@ -33,4 +34,4 @@ void remove_client(SocketPool *sockets, int to_remove);
 
 SocketClient *find_client(SocketPool *pool, unsigned int id);
 
-#pragma endregion
+#endif

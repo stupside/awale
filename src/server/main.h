@@ -1,5 +1,5 @@
-#pragma once
-
+#ifndef MAIN_H
+#define MAIN_H
 #include <stdlib.h>
 
 #include "mediator.h"
@@ -18,5 +18,4 @@ int main(int argc, char **argv) {
 
   return EXIT_SUCCESS;
 }
-
-#pragma endregion
+#endif
