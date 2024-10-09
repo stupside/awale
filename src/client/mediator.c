@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include "lib/socket/cmds/chat.h"
+#include "lib/socket/cmds/game.h"
 #include "lib/socket/cmds/user.h"
 
 unsigned int on_user_login(unsigned int client_id, const void *data) {
@@ -33,6 +34,22 @@ unsigned int on_chat_write(unsigned int client_id, const void *data) {
   return 1;
 };
 
+unsigned int on_game_state(unsigned int client_id, const void *data) {
+
+  const struct GameStateEvent *event = data;
+
+  printf("Game state: %d\n", event->status);
+
+  for (int i = 0; i < GRID_ROWS; i++) {
+    for (int j = 0; j < GRID_COLS; j++) {
+      printf("[%2d]", event->grid[i][j]);
+    }
+    printf("\n");
+  }
+
+  return 1;
+};
+
 void init_mediator(struct Mediator *mediator) {
 
   register_cmd(mediator, CMD_USER_LOGIN, &on_user_login);
@@ -40,8 +57,5 @@ void init_mediator(struct Mediator *mediator) {
 
   register_cmd(mediator, CMD_CHAT_WRITE, &on_chat_write);
 
-  // register_cmd(mediator, CMD_CHALLENGE, NULL);
-
-  // register_cmd(mediator, CMD_CHALLENGE_ACCEPT, NULL);
-  // register_cmd(mediator, CMD_CHALLENGE_REJECT, NULL);
+  register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
 }

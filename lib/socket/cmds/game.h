@@ -7,7 +7,7 @@ struct GamePlayReq {
   int input;
 };
 struct GamePlayRes {
-  unsigned int ok;
+  enum CoupValidity validity;
 };
 
 struct GameLeaveReq {};

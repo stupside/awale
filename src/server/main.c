@@ -115,7 +115,7 @@ void app(struct Mediator *mediator) {
               perror("Failed to compute command");
             }
           } else {
-            remove_client(&server->pool, i);
+            archive_client(&server->pool, i);
           }
           break;
         }

@@ -57,6 +57,7 @@ int main() {
             ; // vide le buffer
         }
       }
+
       coupValidity = play(&awale, awale.current, caseDepart);
 
       // On vérifie si le coup est valide
@@ -90,7 +91,7 @@ int main() {
 
       printf("Plus de mouvements possibles le jeu est fini, le joueur %d a "
              "gagné avec un score de %d\n",
-             winner, awale.score[player]);
+             player, awale.score[player]);
       break;
     }
   }

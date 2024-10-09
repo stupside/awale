@@ -22,7 +22,8 @@ unsigned int on_user_login(unsigned int client_id, const void *data) {
     char *cmd =
         inline_cmd(CMD_USER_LOGIN, &event, sizeof(struct UserLoginEvent));
 
-    const SocketClient *sender = find_client(&awale_server()->pool, client_id);
+    const SocketClient *sender =
+        find_client_by_id(&awale_server()->pool, client_id);
 
     if (sender == NULL) {
       return 0;
@@ -41,7 +42,8 @@ unsigned int on_user_login(unsigned int client_id, const void *data) {
 
 unsigned int on_user_logout(unsigned int client_id, const void *data) {
 
-  const SocketClient *sender = find_client(&awale_server()->pool, client_id);
+  const SocketClient *sender =
+      find_client_by_id(&awale_server()->pool, client_id);
 
   if (sender == NULL) {
     return 0;
@@ -68,7 +70,8 @@ unsigned int on_chat_write(unsigned int client_id, const void *data) {
 
   const struct ChatWriteReq *req = data;
 
-  const SocketClient *sender = find_client(&awale_server()->pool, client_id);
+  const SocketClient *sender =
+      find_client_by_id(&awale_server()->pool, client_id);
 
   if (sender == NULL) {
     return 0;
@@ -94,7 +97,7 @@ unsigned int on_chat_write(unsigned int client_id, const void *data) {
 
 unsigned int on_challenge(unsigned int client_id, const void *data) {
 
-  SocketClient *sender = find_client(&awale_server()->pool, client_id);
+  SocketClient *sender = find_client_by_id(&awale_server()->pool, client_id);
 
   if (sender == NULL) {
     return 0;
@@ -102,7 +105,8 @@ unsigned int on_challenge(unsigned int client_id, const void *data) {
 
   const struct ChallengeReq *req = data;
 
-  SocketClient *client = find_client(&awale_server()->pool, req->client_id);
+  SocketClient *client =
+      find_client_by_id(&awale_server()->pool, req->client_id);
 
   int ok = challenge(awale_server(), sender, client);
 
@@ -115,7 +119,8 @@ unsigned int on_challenge(unsigned int client_id, const void *data) {
 
 unsigned int on_challenge_handle(unsigned int client_id, const void *data) {
 
-  const SocketClient *client = find_client(&awale_server()->pool, client_id);
+  const SocketClient *client =
+      find_client_by_id(&awale_server()->pool, client_id);
 
   if (client == NULL) {
     return 0;
@@ -134,7 +139,8 @@ unsigned int on_challenge_handle(unsigned int client_id, const void *data) {
 
 unsigned int on_game_state(unsigned int client_id, const void *data) {
 
-  const SocketClient *client = find_client(&awale_server()->pool, client_id);
+  const SocketClient *client =
+      find_client_by_id(&awale_server()->pool, client_id);
 
   if (client == NULL) {
     return 0;

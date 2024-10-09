@@ -87,7 +87,7 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
   const enum CoupValidity validity = play(&lobby->awale, player, target);
 
   struct GamePlayRes res = {
-      .ok = validity == VALID,
+      .validity = validity,
   };
 
   char *cmd = inline_cmd(CMD_GAME_PLAY, &res, sizeof(struct GamePlayRes));
