@@ -1,7 +1,6 @@
 #ifndef POOL_H
 #define POOL_H
 
-#include <string.h>
 #include <sys/select.h>
 
 typedef int SOCKET;
