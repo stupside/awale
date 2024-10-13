@@ -21,3 +21,5 @@ yarn.lock
 
 # Backup files (e.g., from editors)
 *~
+
+.history

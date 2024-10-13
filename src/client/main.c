@@ -110,23 +110,22 @@ void app(const char *address, const char *name, const struct Mediator *mediator,
         buffer[strcspn(buffer, "\n")] = 0;
 
         {
-
           unsigned int res = handle_client_cmd(sock, clientMediator, buffer);
 
           if (!res) {
             printf("This command does not seem to exist\n");
           }
         }
-      } else if (FD_ISSET(sock, &rdfs)) {
-        // Server down
-        if (read_from_socket(sock, buffer) == 0) {
-          printf("Server disconnected.\n");
-          break;
-        }
+      }
+    } else if (FD_ISSET(sock, &rdfs)) {
+      // Server down
+      if (read_from_socket(sock, buffer) == 0) {
+        printf("Server disconnected.\n");
+        break;
+      }
 
-        if (!compute_cmd(mediator, -1, buffer)) {
-          printf("Command not handled\n");
-        }
+      if (!compute_cmd(mediator, -1, buffer)) {
+        printf("Command not handled\n");
       }
     }
   }
