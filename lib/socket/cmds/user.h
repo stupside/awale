@@ -25,4 +25,10 @@ struct UserLogoutEvent {
   unsigned int id;
 };
 
+struct UserObserveReq {
+  unsigned int id;
+};
+
+struct UserListReq {};
+
 #endif

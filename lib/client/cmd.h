@@ -2,7 +2,7 @@
 #define CLIENT_CMD_H
 
 #define MAX_COMMANDS 50
-#define MAX_ARGS 5
+#define MAX_ARGS 10
 
 #include "lib/socket/cmd.h"
 

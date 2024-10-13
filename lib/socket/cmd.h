@@ -16,16 +16,16 @@ enum CMD {
   CMD_USER_ADD_FRIEND = 0x05,
   CMD_USER_REMOVE_FRIEND = 0x06,
 
-  CMD_CHALLENGE = 0x07,
+  CMD_CHALLENGE = 0x07, // commander pour défier un joueur
   CMD_CHALLENGE_HANDLE = 0x08,
 
-  CMD_GAME_PLAY = 0x09,
+  CMD_GAME_PLAY = 0x09, // commande pour jouer un coup
   CMD_GAME_LEAVE = 0x0A,
 
   CMD_GAME_LIST = 0x0B,
   CMD_GAME_STATE = 0x0C,
 
-  // CMD_GAME_OBSERVE = 0x0D,
+  CMD_GAME_OBSERVE = 0x0D,
 
   CMD_CHAT_WRITE = 0x0E,
 };
