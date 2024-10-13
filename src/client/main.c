@@ -129,19 +129,19 @@ void app(const char *address, const char *name, const struct Mediator *mediator,
         }
       }
     }
-
-    // Send logout command when exiting
-    {
-      char *cmd = inline_cmd(CMD_USER_LOGOUT, NULL, 0);
-      if (cmd) {
-        int ok = write_to_socket(sock, cmd);
-        if (!ok) {
-          perror("Failed to write logout command to socket");
-        }
-        free(cmd);
-      }
-    }
-
-    close_socket(sock);
   }
+
+  // Send logout command when exiting
+  {
+    char *cmd = inline_cmd(CMD_USER_LOGOUT, NULL, 0);
+    if (cmd) {
+      int ok = write_to_socket(sock, cmd);
+      if (!ok) {
+        perror("Failed to write logout command to socket");
+      }
+      free(cmd);
+    }
+  }
+
+  close_socket(sock);
 }
