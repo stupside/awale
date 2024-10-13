@@ -17,7 +17,8 @@ typedef struct SocketClient {
 
 typedef struct SocketPool {
   int count;
-  struct SocketClient clients[MAX_CLIENTS];
+
+  struct SocketClient clients[MAX_CLIENTS]; // TODO: make it dynamic
 } SocketPool;
 
 void clear_clients(SocketPool *pool);

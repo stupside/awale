@@ -102,9 +102,9 @@ void app(struct Mediator *mediator) {
       }
 
     } else {
-      for (unsigned int i = 0; i < server->pool.count; i++) {
+      for (unsigned int idx = 0; idx < server->pool.count; idx++) {
 
-        const struct SocketClient *client = &server->pool.clients[i];
+        const struct SocketClient *client = &server->pool.clients[idx];
 
         /* a client is talking */
         if (FD_ISSET(client->socket, &rdfs)) {
@@ -115,7 +115,7 @@ void app(struct Mediator *mediator) {
               perror("Failed to compute command");
             }
           } else {
-            archive_client(&server->pool, i);
+            archive_client(&server->pool, idx);
           }
           break;
         }

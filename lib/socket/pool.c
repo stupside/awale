@@ -57,9 +57,10 @@ unsigned int archive_client(SocketPool *sockets, int client_id) {
     return 0;
   }
 
-  client->online = 0;
-
   close_socket(client->socket);
+
+  client->online = 0;
+  client->socket = 0;
 
   printf("Client with id %d archived\n", client->id);
 
@@ -90,7 +91,7 @@ unsigned int unarchive_client(SocketPool *sockets, SOCKET socket,
 
 SocketClient *find_client_by_id(SocketPool *pool, unsigned int id) {
 
-  for (int i = 0; i < pool->count; i++) {
+  for (unsigned int i = 0; i < pool->count; i++) {
 
     SocketClient *client = &pool->clients[i];
 
