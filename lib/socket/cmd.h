@@ -30,8 +30,8 @@ enum CMD {
   CMD_CHAT_WRITE = 0x0E,
 };
 
-#define CMD_ID_SIZE 2
-#define PAYLOAD_LENGTH_SIZE 2
+#define CMD_ID_SIZE sizeof(char) * 2
+#define PAYLOAD_LENGTH_SIZE sizeof(char) * 6
 
 struct Handler {
   unsigned int (*handle)(unsigned int client_id, const void *data);

@@ -7,8 +7,7 @@ struct ChatWriteReq {
 // struct ChatWriteRes {};
 struct ChatWriteEvent {
   char message[255];
-  unsigned int client_id; // TODO: fix cmd, if client_id is before the message,
-                          // the message is not received
+  unsigned int client_id;
 };
 
 #endif
