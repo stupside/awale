@@ -6,12 +6,13 @@
 #include "lib/socket/cmds/challenge.h"
 #include "lib/socket/socket.h"
 
-struct Lobby new_lobby(struct SocketClient *p1, struct SocketClient *p2) {
+struct Lobby new_lobby(struct SocketClient *challenger,
+                       struct SocketClient *challenged) {
 
   return (struct Lobby){
-      .client = {p1, p2},
-      .awale = new_awale(),
+      .client = {challenger, challenged},
       .state = LOBBY_STATE_WAITING,
+      .awale = new_awale(),
   };
 }
 

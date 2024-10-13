@@ -51,6 +51,8 @@ void app(struct Mediator *mediator) {
   /* an array for all clients */
   struct Server *server = awale_server();
 
+  init_awale_server(server);
+
   fd_set rdfs;
 
   while (1) {

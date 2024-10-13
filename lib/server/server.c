@@ -8,84 +8,122 @@
 #include "lib/socket/cmds/challenge.h"
 #include "lib/socket/cmds/game.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 struct Server *awale_server() {
 
-  static struct Server server = {.pool = (SocketPool){
-                                     .count = 0,
-                                 }};
+  static struct Server server;
 
   return &server;
 }
 
-struct Lobby *find_lobby(struct Server *server,
-                         const struct SocketClient *client) {
+void init_awale_server(struct Server *server) {
 
-  for (int i = 0; i < MAX_LOBBIES; i++) {
+  server->lobbies_c = 0;
+  server->lobbies = malloc(MAX_LOBBIES * sizeof(struct Lobby));
+}
+
+unsigned int is_lobby_player(const struct Lobby *lobby, const SocketClient *p) {
+
+  return lobby->client[PLAYER1]->id == p->id ||
+         lobby->client[PLAYER2]->id == p->id;
+}
+
+struct Lobby *find_waiting_lobby(struct Server *server,
+                                 const SocketClient *challenger,
+                                 const SocketClient *challenged) {
+
+  for (unsigned int i = 0; i < server->lobbies_c; i++) {
+
     struct Lobby *lobby = &server->lobbies[i];
 
-    if (lobby->client[PLAYER1]->id == client->id ||
-        lobby->client[PLAYER2]->id == client->id) {
+    if (!lobby) {
+      continue;
+    }
 
-      if (lobby->state != LOBBY_STATE_FINISHED) {
+    if (lobby->state == LOBBY_STATE_WAITING) {
+
+      if (lobby->client[PLAYER1]->id == challenger->id &&
+          lobby->client[PLAYER2]->id == challenged->id) {
         return lobby;
       }
 
-      return NULL;
+      if (lobby->client[PLAYER1]->id == challenged->id &&
+          lobby->client[PLAYER2]->id == challenger->id) {
+        return lobby;
+      }
     }
   }
 
   return NULL;
 }
 
-int challenge(struct Server *server, SocketClient *p1, SocketClient *p2) {
+struct Lobby *find_running_lobby(struct Server *server,
+                                 const SocketClient *client) {
 
-  static unsigned int lobbies = 0;
+  for (unsigned int i = 0; i < server->lobbies_c; i++) {
 
-  if (lobbies == MAX_LOBBIES) {
+    struct Lobby *lobby = &server->lobbies[i];
+
+    if (!lobby) {
+      continue;
+    }
+
+    if (lobby->state == LOBBY_STATE_RUNNING) {
+
+      if (is_lobby_player(lobby, client)) {
+        return lobby;
+      }
+    }
+  }
+
+  return NULL;
+}
+
+int challenge(struct Server *server, SocketClient *challenger,
+              SocketClient *challenged) {
+
+  if (challenger->id == challenged->id) {
     return 0;
   }
 
-  if (find_lobby(server, p1) == NULL && find_lobby(server, p2) == NULL) {
-    // Both clients are not in a game
-  } else {
+  if (find_running_lobby(server, challenger) ||
+      find_running_lobby(server, challenged)) {
     return 0;
   }
 
-  server->lobbies[lobbies++] = new_lobby(p1, p2);
+  const struct Lobby *waiting_lobby =
+      find_waiting_lobby(server, challenger, challenged);
+
+  if (waiting_lobby) {
+    return 0;
+  }
+
+  if (server->lobbies_c == MAX_LOBBIES) {
+    return 0;
+  }
+
+  server->lobbies[server->lobbies_c++] = new_lobby(challenger, challenged);
 
   const struct ChallengeEvent event = {
-      .client_id = p1->id,
+      .client_id = challenger->id,
   };
 
-  const char *cmd =
-      inline_cmd(CMD_CHALLENGE, &event, sizeof(struct ChallengeEvent));
+  char *cmd = inline_cmd(CMD_CHALLENGE, &event, sizeof(struct ChallengeEvent));
 
-  write_to_socket(p2->socket, cmd);
+  write_to_socket(challenged->socket, cmd);
 
-  free(&cmd);
+  free(cmd);
 
   return 1;
 }
 
 int awale_play(struct Server *server, const SocketClient *client, int target) {
 
-  struct Lobby *lobby = find_lobby(server, client);
+  struct Lobby *lobby = find_running_lobby(server, client);
 
-  if (lobby == NULL) {
-    return 0;
-  }
-
-  if (status(&lobby->awale) == GAME_NOT_OVER) {
-    // Game is not over, we can play
-  } else {
-    return 0;
-  }
-
-  if (lobby->state == LOBBY_STATE_RUNNING) {
-    // Game is playing, we can play
-  } else {
+  if (!lobby) {
     return 0;
   }
 
@@ -102,7 +140,7 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
 
   write_to_socket(client->socket, cmd);
 
-  free(&cmd);
+  free(cmd);
 
   if (validity == VALID) {
 
@@ -131,7 +169,7 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
       }
     }
 
-    free(&cmd);
+    free(cmd);
 
     return 1;
   }
@@ -139,22 +177,16 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
   return 0;
 }
 
-int handle_challenge(struct Server *server, const SocketClient *client,
-                     int accept) {
+int handle_challenge(struct Server *server, const SocketClient *challenger,
+                     const SocketClient *challenged, int accept) {
 
-  struct Lobby *lobby = find_lobby(server, client);
+  struct Lobby *lobby = find_waiting_lobby(server, challenger, challenged);
 
   if (lobby == NULL) {
     return 0;
   }
 
-  if (lobby->state == LOBBY_STATE_WAITING) {
-    // Lobby is waiting for a challenge response
-  } else {
-    return 0;
-  }
-
-  if (lobby->client[PLAYER2]->id == client->id) {
+  if (lobby->client[PLAYER2]->id == challenged->id) {
 
     if (!accept) {
       end_lobby(lobby);
@@ -171,7 +203,7 @@ int handle_challenge(struct Server *server, const SocketClient *client,
 
     write_to_socket(lobby->client[PLAYER1]->socket, cmd);
 
-    free(&cmd);
+    free(cmd);
   }
 
   return 0;

@@ -14,15 +14,19 @@ enum LobbyState {
 };
 
 struct Lobby {
-  enum LobbyState state;
+
+  unsigned int id;
 
   struct Awale awale;
+
+  enum LobbyState state;
 
   struct SocketClient *client[PLAYER_COUNT];
   struct SocketClient *observators[MAX_CLIENTS];
 };
 
-struct Lobby new_lobby(struct SocketClient *p1, struct SocketClient *p2);
+struct Lobby new_lobby(struct SocketClient *challenger,
+                       struct SocketClient *challenged);
 
 int start_lobby(struct Lobby *lobby);
 

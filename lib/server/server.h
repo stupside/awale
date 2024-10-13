@@ -8,20 +8,28 @@
 #define MAX_LOBBIES MAX_CLIENTS / 2
 
 struct Server {
-  struct Lobby lobbies[MAX_LOBBIES];
-
   SocketPool pool;
+
+  struct Lobby *lobbies;
+  unsigned int lobbies_c;
 };
 
 struct Server *awale_server();
 
-struct Lobby *find_lobby(struct Server *server, const SocketClient *client);
+void init_awale_server(struct Server *server);
+
+struct Lobby *find_running_lobby(struct Server *server,
+                                 const SocketClient *client);
+
+struct Lobby *find_waiting_lobby(struct Server *server,
+                                 const SocketClient *challenger,
+                                 const SocketClient *challenged);
 
 int awale_play(struct Server *server, const SocketClient *client, int target);
 
 int challenge(struct Server *server, SocketClient *c1, SocketClient *c2);
 
-int handle_challenge(struct Server *server, const SocketClient *client,
-                     int accept);
+int handle_challenge(struct Server *server, const SocketClient *challenger,
+                     const SocketClient *challenged, int accept);
 
 #endif

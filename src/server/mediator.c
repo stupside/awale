@@ -73,7 +73,7 @@ unsigned int on_chat_write(unsigned int client_id, const void *data) {
   const SocketClient *sender =
       find_client_by_id(&awale_server()->pool, client_id);
 
-  if (sender == NULL) {
+  if (!sender) {
     return 0;
   }
 
@@ -84,9 +84,6 @@ unsigned int on_chat_write(unsigned int client_id, const void *data) {
     char *cmd =
         inline_cmd(CMD_CHAT_WRITE, &event, sizeof(struct ChatWriteEvent));
 
-    /**
-     * Broadcasts the message to all clients
-     */
     write_to_sockets(&awale_server()->pool, sender, cmd);
 
     free(cmd);
@@ -99,7 +96,7 @@ unsigned int on_challenge(unsigned int client_id, const void *data) {
 
   SocketClient *sender = find_client_by_id(&awale_server()->pool, client_id);
 
-  if (sender == NULL) {
+  if (!sender) {
     return 0;
   }
 
@@ -108,27 +105,33 @@ unsigned int on_challenge(unsigned int client_id, const void *data) {
   SocketClient *client =
       find_client_by_id(&awale_server()->pool, req->client_id);
 
-  int ok = challenge(awale_server(), sender, client);
-
-  if (!ok) {
+  if (!client) {
     return 0;
   }
 
-  return 1;
+  return challenge(awale_server(), sender, client);
 };
 
 unsigned int on_challenge_handle(unsigned int client_id, const void *data) {
 
-  const SocketClient *client =
-      find_client_by_id(&awale_server()->pool, client_id);
+  const struct ChallengeHandleReq *req = data;
 
-  if (client == NULL) {
+  const SocketClient *challenger =
+      find_client_by_id(&awale_server()->pool, req->client_id);
+
+  if (!challenger) {
     return 0;
   }
 
-  const struct ChallengeHandleReq *req = data;
+  const SocketClient *challenged =
+      find_client_by_id(&awale_server()->pool, client_id);
 
-  int ok = handle_challenge(awale_server(), client, req->accept);
+  if (!challenged) {
+    return 0;
+  }
+
+  int ok =
+      handle_challenge(awale_server(), challenger, challenged, req->accept);
 
   if (!ok) {
     return 0;
@@ -146,7 +149,7 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
     return 0;
   }
 
-  const struct Lobby *lobby = find_lobby(awale_server(), client);
+  const struct Lobby *lobby = find_running_lobby(awale_server(), client);
 
   if (lobby == NULL) {
     return 0;

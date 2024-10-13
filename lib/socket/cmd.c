@@ -22,45 +22,58 @@ int compute_cmd(const struct Mediator *dispatcher, unsigned int client_id,
   memcpy(cmd_id_hex, cmd, CMD_ID_SIZE);
   cmd_id_hex[CMD_ID_SIZE] = '\0';
 
+  // Convert command ID from hexadecimal string to enum
+  const enum CMD cmd_id = strtol(cmd_id_hex, NULL, 16);
+
   // Extract payload length from the received command
   char payload_len_hex[PAYLOAD_LENGTH_SIZE + 1];
   memcpy(payload_len_hex, cmd + CMD_ID_SIZE, PAYLOAD_LENGTH_SIZE);
   payload_len_hex[PAYLOAD_LENGTH_SIZE] = '\0';
 
-  // Convert payload length from hexadecimal string to long
   const long payload_len = strtol(payload_len_hex, NULL, 16);
 
   // Allocate memory for the payload
-  void *payload = malloc(payload_len);
+  unsigned char *payload = malloc(payload_len);
   if (payload == NULL) {
+    perror("Failed to allocate memory for payload");
     return 0; // Allocation failed
   }
 
   // Copy the hexadecimal data into the payload
-  for (long i = 0; i < payload_len; ++i) {
+  for (unsigned long i = 0; i < payload_len; ++i) {
+
     // Convert each pair of hex characters into a byte
     char hex_byte[3] = {cmd[CMD_ID_SIZE + PAYLOAD_LENGTH_SIZE + 2 * i],
                         cmd[CMD_ID_SIZE + PAYLOAD_LENGTH_SIZE + 2 * i + 1],
                         '\0'};
-    ((unsigned char *)payload)[i] = (unsigned char)strtol(hex_byte, NULL, 16);
+
+    payload[i] = (unsigned char)strtol(hex_byte, NULL, 16);
   }
 
-  // Convert command ID from hexadecimal string to enum
-  const enum CMD id = strtol(cmd_id_hex, NULL, 16);
-
   // Ensure the handler exists
-  const struct Handler *handler = &dispatcher->handlers[id];
-  if (handler->handle == NULL) {
+  const struct Handler *handler = &dispatcher->handlers[cmd_id];
+
+  if (!handler) {
+
     free(payload); // Free allocated memory in case of error
+
+    perror("No handler for command");
     return 0;
   }
 
-  // Call the handler with the payload data
-  int res = handler->handle(client_id, payload);
+  if (handler->handle) {
+    // Call the handler with the payload data
+    int res = handler->handle(client_id, payload);
+
+    free(payload); // Free the memory after use
+
+    return res;
+  }
 
   free(payload); // Free the memory after use
 
-  return res;
+  perror("No handler function");
+  return 0;
 }
 
 char *inline_cmd(enum CMD cmd, const void *data, unsigned int data_size) {
@@ -97,8 +110,6 @@ char *inline_cmd(enum CMD cmd, const void *data, unsigned int data_size) {
 
   // Ensure the buffer is null-terminated (for safety)
   buffer[cmd_len] = '\0';
-
-  printf("Command: %s\n", buffer);
 
   return buffer; // Return the allocated buffer
 }

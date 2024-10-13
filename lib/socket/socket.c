@@ -8,7 +8,6 @@
 void close_socket(SOCKET sock) { close(sock); }
 
 int write_to_socket(SOCKET sock, const char *buffer) {
-
   return send(sock, buffer, strlen(buffer), 0) > 0;
 }
 
@@ -19,11 +18,17 @@ int write_to_sockets(const SocketPool *pool, const SocketClient *sender,
 
   for (int i = 0; i < pool->count; i++) {
 
-    if (sender->id == pool->clients[i].id) {
+    const SocketClient *client = &pool->clients[i];
+
+    if (!client) {
       continue;
     }
 
-    if (write_to_socket(pool->clients[i].socket, buffer)) {
+    if (client->id == sender->id) {
+      continue;
+    }
+
+    if (write_to_socket(client->socket, buffer)) {
       ++ok;
     }
   }
