@@ -65,7 +65,7 @@ void app(struct Mediator *mediator) {
 
     /* add socket of each client */
     for (int i = 0; i < server->pool.count; i++) {
-      FD_SET(server->pool.clients[i].sock, &rdfs);
+      FD_SET(server->pool.clients[i].socket, &rdfs);
     }
 
     if (select(maxfd + 1, &rdfs, NULL, NULL, NULL) == -1) {
@@ -102,16 +102,14 @@ void app(struct Mediator *mediator) {
       }
 
     } else {
-      int i = 0;
-
-      for (i = 0; i < server->pool.count; i++) {
+      for (unsigned int i = 0; i < server->pool.count; i++) {
 
         const struct SocketClient *client = &server->pool.clients[i];
 
         /* a client is talking */
-        if (FD_ISSET(client->sock, &rdfs)) {
+        if (FD_ISSET(client->socket, &rdfs)) {
 
-          if (read_from_socket(client->sock, buffer)) {
+          if (read_from_socket(client->socket, buffer)) {
 
             if (!compute_cmd(mediator, client->id, buffer)) {
               perror("Failed to compute command");

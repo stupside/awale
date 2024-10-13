@@ -9,8 +9,11 @@ build:
 	$(BAZEL) build //src/client:client //src/server:server $(ARGS)
 
 # Exécution
-client:
-	$(BAZEL) run //src/client:client -- 127.0.0.1 insa $(ARGS)
+client1:
+	$(BAZEL) run //src/client:client -- 127.0.0.1 client1 $(ARGS)
+
+client2:
+	$(BAZEL) run //src/client:client -- 127.0.0.1 client2 $(ARGS)
 
 server:
 	$(BAZEL) run //src/server:server -- $(ARGS)

@@ -11,7 +11,7 @@ void clear_clients(SocketPool *pool) {
 
     const SocketClient *client = &pool->clients[i];
 
-    close_socket(client->sock);
+    close_socket(client->socket);
   }
 }
 
@@ -23,27 +23,20 @@ int add_client(SocketPool *pool, const char *name, SOCKET socket) {
     return 0;
   }
 
-  SocketClient *existing = find_client_by_name(pool, name);
+  unsigned int unarchived = unarchive_client(pool, socket, name);
 
-  if (existing) {
-
-    if (existing->online) {
-      printf("Client %d already connected\n", existing->id);
-      return 0;
-    }
-
-    printf("Client %d reconnected\n", existing->id);
-
-    existing->online = 1;
-    existing->sock = socket;
-
+  if (unarchived) {
+    printf("Client %s unarchived\n", name);
   } else {
-    printf("Client %d added\n", pool->clients[pool->count].id);
 
     pool->clients[pool->count] =
-        (SocketClient){.id = id++, .sock = socket, .online = 1};
+        (SocketClient){.id = id++, .socket = socket, .online = 1};
 
-    strncpy(pool->clients[pool->count].name, name, strlen(name));
+    struct SocketClient *client = &pool->clients[pool->count];
+
+    strncpy(client->name, name, strlen(name));
+
+    printf("Client %s added with id %d\n", client->name, client->id);
 
     pool->count++;
   }
@@ -51,23 +44,48 @@ int add_client(SocketPool *pool, const char *name, SOCKET socket) {
   return 1;
 }
 
-void archive_client(SocketPool *sockets, int client_id) {
+unsigned int archive_client(SocketPool *sockets, int client_id) {
 
   SocketClient *client = &sockets->clients[client_id];
 
   if (!client) {
-    return;
+    return 0;
   }
 
   if (!client->online) {
-    return;
+    perror("Client already offline");
+    return 0;
   }
 
   client->online = 0;
 
-  close_socket(client->sock);
+  close_socket(client->socket);
 
-  printf("Client %d archived\n", client->id);
+  printf("Client with id %d archived\n", client->id);
+
+  return 1;
+}
+
+unsigned int unarchive_client(SocketPool *sockets, SOCKET socket,
+                              const char *name) {
+
+  SocketClient *client = find_client_by_name(sockets, name);
+
+  if (!client) {
+    return 0;
+  }
+
+  if (client->online) {
+    perror("Client already online");
+    return 0;
+  }
+
+  client->online = 1;
+  client->socket = socket;
+
+  printf("Client with id %d unarchived\n", client->id);
+
+  return 1;
 }
 
 SocketClient *find_client_by_id(SocketPool *pool, unsigned int id) {

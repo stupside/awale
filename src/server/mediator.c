@@ -164,7 +164,7 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
 
   char *cmd = inline_cmd(CMD_GAME_STATE, &res, sizeof(struct GameStateRes));
 
-  write_to_socket(client->sock, cmd);
+  write_to_socket(client->socket, cmd);
 
   free(cmd);
 

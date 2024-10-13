@@ -6,7 +6,7 @@ typedef int SOCKET;
 
 typedef struct SocketClient {
   int online;
-  SOCKET sock;
+  SOCKET socket;
 
   unsigned int id;
   char name[MAX_SOCKET_NAME];
@@ -24,7 +24,9 @@ void clear_clients(SocketPool *pool);
 
 int add_client(SocketPool *pool, const char *name, SOCKET socket);
 
-void archive_client(SocketPool *sockets, int to_remove);
+unsigned int archive_client(SocketPool *sockets, int client_id);
+unsigned int unarchive_client(SocketPool *sockets, SOCKET socket,
+                              const char *name);
 
 SocketClient *find_client_by_id(SocketPool *pool, unsigned int id);
 SocketClient *find_client_by_name(SocketPool *pool, const char *name);

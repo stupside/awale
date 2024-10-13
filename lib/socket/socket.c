@@ -23,7 +23,7 @@ int write_to_sockets(const SocketPool *pool, const SocketClient *sender,
       continue;
     }
 
-    if (write_to_socket(pool->clients[i].sock, buffer)) {
+    if (write_to_socket(pool->clients[i].socket, buffer)) {
       ++ok;
     }
   }

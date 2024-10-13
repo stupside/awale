@@ -6,7 +6,7 @@
 #include <sys/socket.h>
 
 // Function to initialize a new Mediator
-struct Mediator new_mediator() { return (struct Mediator){.handlers = {{0}}}; }
+struct Mediator new_mediator() { return (struct Mediator){.handlers = {0}}; }
 
 // Function to register a command with a callback
 void register_cmd(struct Mediator *mediator, enum CMD cmd,
