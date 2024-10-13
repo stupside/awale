@@ -1,4 +1,5 @@
 #ifndef AWALE_SERVER_H
+#define AWALE_SERVER_H
 
 #include "lobby.h"
 

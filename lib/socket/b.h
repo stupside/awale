@@ -1,4 +1,5 @@
 #ifndef B_H
+#define B_H
 
 #include <stddef.h>
 #include <stdlib.h>

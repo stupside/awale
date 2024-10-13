@@ -1,4 +1,5 @@
 #ifndef CHAT_H
+#define CHAT_H
 
 struct ChatWriteReq {
   char message[255];

@@ -1,4 +1,5 @@
 #ifndef USER_H
+#define USER_H
 
 struct UserInfoReq {
   char name[255];
