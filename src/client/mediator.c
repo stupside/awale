@@ -67,10 +67,20 @@ void init_mediator(struct Mediator *mediator) {
 
 unsigned int input_formatter_chat(SOCKET sock, char *argv[],
                                   unsigned int argslen) {
-
   struct ChatWriteReq req;
+  char formatted_message[255];
 
-  strcpy(req.message, argv[1]);
+  formatted_message[0] = '\0';
+
+  for (unsigned int i = 1; i < argslen; i++) {
+    strcat(formatted_message, argv[i]);
+    if (i < argslen - 1) {
+      strcat(formatted_message, " ");
+    }
+  }
+
+  strncpy(req.message, formatted_message, sizeof(req.message) - 1);
+  req.message[sizeof(req.message) - 1] = '\0';
 
   char *cmd = inline_cmd(CMD_CHAT_WRITE, &req, sizeof(struct ChatWriteReq));
 
