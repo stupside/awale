@@ -6,8 +6,8 @@
 
 #include "mediator.h"
 
-void app(const char *address, const char *name,
-         const struct Mediator *mediator);
+void app(const char *address, const char *name, const struct Mediator *mediator,
+         const struct ClientMediator *clientMediator);
 
 int main(int argc, char **argv) {
   if (argc < 2) {
@@ -19,9 +19,12 @@ int main(int argc, char **argv) {
 
   init_mediator(&mediator);
 
+  struct ClientMediator clientMediator;
+  init_client_mediator(&clientMediator);
+
   // compute_cmd(mediator, const SocketClient *from, const char *cmd)
 
-  app(argv[1], argv[2], &mediator);
+  app(argv[1], argv[2], &mediator, &clientMediator);
 
   return EXIT_SUCCESS;
 }

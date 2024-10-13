@@ -1,6 +1,5 @@
 #include "main.h"
 
-#include <errno.h>
 #include <netdb.h>
 #include <signal.h>
 #include <string.h>
@@ -8,7 +7,6 @@
 #include <unistd.h>
 
 #include "lib/socket/cmd.h"
-#include "lib/socket/cmds/chat.h"
 #include "lib/socket/cmds/user.h"
 #include "lib/socket/socket.h"
 
@@ -58,8 +56,8 @@ int init(const char *address) {
 }
 
 // Main application function
-void app(const char *address, const char *name,
-         const struct Mediator *mediator) {
+void app(const char *address, const char *name, const struct Mediator *mediator,
+         const struct ClientMediator *clientMediator) {
   sock = init(address);
   char buffer[BUF_SIZE];
   fd_set rdfs;
@@ -112,44 +110,38 @@ void app(const char *address, const char *name,
         buffer[strcspn(buffer, "\n")] = 0;
 
         {
-          struct ChatWriteReq data;
-          strcpy(data.message, buffer);
 
-          char *cmd =
-              inline_cmd(CMD_CHAT_WRITE, &data, sizeof(struct ChatWriteReq));
+          unsigned int res = handle_client_cmd(sock, clientMediator, buffer);
 
-          if (cmd) {
-            write_to_socket(sock, cmd);
-            free(cmd);
-          } else {
-            perror("Failed to create command for chat write");
+          if (!res) {
+            printf("This command does not seem to exist\n");
           }
         }
-      }
-    } else if (FD_ISSET(sock, &rdfs)) {
-      // Server down
-      if (read_from_socket(sock, buffer) == 0) {
-        printf("Server disconnected.\n");
-        break;
-      }
+      } else if (FD_ISSET(sock, &rdfs)) {
+        // Server down
+        if (read_from_socket(sock, buffer) == 0) {
+          printf("Server disconnected.\n");
+          break;
+        }
 
-      if (!compute_cmd(mediator, -1, buffer)) {
-        printf("Command not handled\n");
+        if (!compute_cmd(mediator, -1, buffer)) {
+          printf("Command not handled\n");
+        }
       }
     }
-  }
 
-  // Send logout command when exiting
-  {
-    char *cmd = inline_cmd(CMD_USER_LOGOUT, NULL, 0);
-    if (cmd) {
-      int ok = write_to_socket(sock, cmd);
-      if (!ok) {
-        perror("Failed to write logout command to socket");
+    // Send logout command when exiting
+    {
+      char *cmd = inline_cmd(CMD_USER_LOGOUT, NULL, 0);
+      if (cmd) {
+        int ok = write_to_socket(sock, cmd);
+        if (!ok) {
+          perror("Failed to write logout command to socket");
+        }
+        free(cmd);
       }
-      free(cmd);
     }
-  }
 
-  close_socket(sock);
+    close_socket(sock);
+  }
 }

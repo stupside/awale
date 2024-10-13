@@ -1,18 +1,18 @@
 #include "cmd.h"
 
-#include "b.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 
 // Function to initialize a new Mediator
-struct Mediator new_mediator() { return (struct Mediator){.handlers = {0}}; }
+struct Mediator new_mediator() { return (struct Mediator){.handlers = {{0}}}; }
 
 // Function to register a command with a callback
 void register_cmd(struct Mediator *mediator, enum CMD cmd,
                   unsigned int (*callback)(unsigned int client_id,
                                            const void *data)) {
+
   mediator->handlers[cmd] = (struct Handler){.handle = callback};
 }
 

@@ -6,5 +6,6 @@ cc_binary(
     deps = [
         "//lib/awale:awale_lib",
         "//lib/socket:socket_lib",
+        "//lib/client:client_lib",
     ],
 )
