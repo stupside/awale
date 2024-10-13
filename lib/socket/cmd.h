@@ -28,6 +28,8 @@ enum CMD {
   CMD_GAME_OBSERVE = 0x0D,
 
   CMD_CHAT_WRITE = 0x0E,
+
+  CMD_ERROR = 0xFF,
 };
 
 #define CMD_ID_SIZE sizeof(char) * 2

@@ -10,6 +10,7 @@ struct ChallengeEvent {
 };
 
 struct ChallengeHandleReq {
+  unsigned int client_id;
   int accept;
 };
 // struct ChallengeHandleRes {};

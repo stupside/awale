@@ -7,6 +7,7 @@
 
 #include "lib/socket/cmds/challenge.h"
 #include "lib/socket/cmds/chat.h"
+#include "lib/socket/cmds/error.h"
 #include "lib/socket/cmds/game.h"
 #include "lib/socket/cmds/user.h"
 #include "lib/socket/socket.h"
@@ -54,16 +55,60 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
   return 1;
 };
 
-void init_mediator(struct Mediator *mediator) {
+unsigned int on_challenge(unsigned int client_id, const void *data) {
 
-  register_cmd(mediator, CMD_USER_LOGIN, &on_user_login);
-  register_cmd(mediator, CMD_USER_LOGOUT, &on_user_logout);
+  const struct ChallengeEvent *event = data;
 
-  register_cmd(mediator, CMD_CHAT_WRITE, &on_chat_write);
+  printf("You have been challenged by %d, tap /handle %d 1 in order to accept "
+         "or /handle %d 0 in order to decline request /\n",
+         event->client_id, event->client_id, event->client_id);
 
-  register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
-}
+  return 1;
+};
 
+unsigned int on_handle_challenge(unsigned int client_id, const void *data) {
+
+  const struct ChallengeHandleEvent *event = data;
+
+  if (event->accept) {
+    printf("Your challenge request has been accepted, tap /grid in order to "
+           "load the game\n");
+  } else {
+    printf("Your challenge request has been declined, try challenging other "
+           "users !\n");
+  }
+
+  return 1;
+};
+
+unsigned int on_user_list(unsigned int client_id, const void *data) {
+
+  const struct UserListRes *res = data;
+
+  printf("Online users: %d\n", res->count);
+
+  for (int i = 0; i < res->count; i++) {
+    printf("User %s\n", res->users[i].name);
+  }
+
+  return 1;
+};
+
+unsigned int on_game_leave(unsigned int client_id, const void *data) {
+
+  printf("The openent have left the game ! You can no longer play\n");
+
+  return 1;
+};
+
+unsigned int on_error(unsigned int client_id, const void *data) {
+
+  const struct ErrorEvent *event = data;
+
+  printf("Error: %s\n", event->message);
+
+  return 1;
+};
 //__________________________________________________________________________________________________________________
 
 unsigned int input_formatter_chat(SOCKET sock, char *argv[],
@@ -126,7 +171,8 @@ unsigned int input_formatter_handle(SOCKET sock, char *argv[],
                                     unsigned int argslen) {
   struct ChallengeHandleReq req;
 
-  req.accept = atoi(argv[1]); // soit 1 soit 0
+  req.client_id = atoi(argv[1]);
+  req.accept = atoi(argv[2]);
 
   char *cmd =
       inline_cmd(CMD_CHALLENGE_HANDLE, &req, sizeof(struct ChallengeHandleReq));
@@ -138,9 +184,27 @@ unsigned int input_formatter_handle(SOCKET sock, char *argv[],
   return 1;
 }
 
+unsigned int input_formatter_grid(SOCKET sock, char *argv[],
+                                  unsigned int argslen) {
+  struct GameStateReq req;
+
+  char *cmd = inline_cmd(CMD_GAME_STATE, &req, sizeof(struct GameStateReq));
+
+  write_to_socket(sock, cmd);
+
+  free(cmd);
+
+  return 1;
+}
+
 unsigned int input_formatter_users(SOCKET sock, char *argv[],
                                    unsigned int argslen) {
   struct UserListReq req;
+
+  req.page_number =
+      argslen > 1
+          ? atoi(argv[1])
+          : 0; // par défaut page 0 // TODO: check whether the input is a number
 
   char *cmd = inline_cmd(CMD_USER_LIST_ALL, &req, sizeof(struct UserListReq));
 
@@ -190,9 +254,35 @@ void init_client_mediator(struct ClientMediator *mediator) {
 
   register_client_cmd(mediator, "/handle", &input_formatter_handle);
 
+  register_client_cmd(mediator, "/grid", &input_formatter_grid);
+
   register_client_cmd(mediator, "/users", &input_formatter_users);
 
   register_client_cmd(mediator, "/observe", &input_formatter_observe);
 
   register_client_cmd(mediator, "/leave", &input_formatter_leave);
+}
+
+void init_mediator(struct Mediator *mediator) {
+  // voir ces fonctions de manière inversée
+  register_cmd(mediator, CMD_USER_LOGIN, &on_user_login);
+
+  register_cmd(mediator, CMD_USER_LOGOUT, &on_user_logout);
+
+  register_cmd(mediator, CMD_CHAT_WRITE, &on_chat_write);
+
+  register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
+
+  register_cmd(mediator, CMD_CHALLENGE, &on_challenge);
+
+  register_cmd(mediator, CMD_CHALLENGE_HANDLE, &on_handle_challenge);
+
+  register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list);
+
+  // pareil qu'avec le game state
+  register_cmd(mediator, CMD_GAME_OBSERVE, &on_game_state);
+
+  register_cmd(mediator, CMD_GAME_LEAVE, &on_game_leave);
+
+  register_cmd(mediator, CMD_ERROR, &on_error);
 }
