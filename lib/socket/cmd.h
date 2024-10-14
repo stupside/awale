@@ -27,6 +27,8 @@ enum CMD {
 
   CMD_CHAT_WRITE = 0x0E,
 
+  CMD_GAME_STATE_EVENT = 0x0F,
+
   CMD_ERROR = 0xFF,
 };
 

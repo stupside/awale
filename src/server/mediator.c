@@ -245,11 +245,32 @@ unsigned int on_game_play(unsigned int client_id, const void *data) {
     return 0;
   }
 
-  int ok = play(&lobby->awale, client_id, req->input);
+  enum CoupValidity ok = play(&lobby->awale, client_id, req->input);
 
-  if (!ok) {
+  const struct GamePlayRes event = {.validity = ok};
+
+  send_cmd_to(client->socket, CMD_GAME_PLAY, &event,
+              sizeof(struct GamePlayRes));
+
+  if (ok != VALID) {
     return 0;
   }
+
+  struct GameStateEvent res = {
+      .status = status(&lobby->awale),
+  };
+
+  for (int i = 0; i < GRID_ROWS; i++) {
+    for (int j = 0; j < GRID_COLS; j++) {
+      res.grid[i][j] = lobby->awale.grid[i][j];
+    }
+  }
+
+  send_cmd_to(lobby->client[PLAYER2]->socket, CMD_GAME_STATE_EVENT, &res,
+              sizeof(struct GameStateEvent));
+
+  send_cmd_to(lobby->client[PLAYER1]->socket, CMD_GAME_STATE_EVENT, &res,
+              sizeof(struct GameStateEvent));
 
   return 1;
 };
