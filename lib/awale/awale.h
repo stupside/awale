@@ -46,8 +46,8 @@ void reset(struct Awale *awale);
 
 enum CoupValidity play(struct Awale *awale, enum PlayerID player, int target);
 
-enum PlayerID winner(const struct Awale *awale);
 enum GameStatus status(const struct Awale *awale);
+int winner(const struct Awale *awale, enum PlayerID *player);
 
 enum PlayerID next_player(const struct Awale *awale);
 

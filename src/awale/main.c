@@ -39,8 +39,12 @@ int main() {
     coupValidity = INVALID;
 
     // On affiche le joueur qui doit jouer
-    printf("C'est au joueur %d\nScore : %d\n", awale.current,
-           awale.score[awale.current]);
+    printf("C'est au joueur %d\n", awale.current);
+
+    // Affichage des scores actuels
+    printf("Scores actuels:\n");
+    printf("Joueur 0: %d\n", awale.score[0]);
+    printf("Joueur 1: %d\n", awale.score[1]);
 
     while (coupValidity != VALID) {
       // On demande à l'utilisateur de choisir une case de départ
@@ -87,11 +91,18 @@ int main() {
     }
     if (gameStatus == GAME_OVER_STALEMATE) {
 
-      enum PlayerID player = winner(&awale);
+      enum PlayerID player;
 
-      printf("Plus de mouvements possibles le jeu est fini, le joueur %d a "
-             "gagné avec un score de %d\n",
-             player, awale.score[player]);
+      int win = winner(&awale, &player);
+
+      if (win == 0) {
+        printf("lus de mouvements possibles le jeu est fini, match nul\n");
+      } else {
+        printf("Plus de mouvements possibles le jeu est fini, le joueur %d a "
+               "gagné avec un score de %d\n",
+               player, awale.score[player]);
+      }
+
       break;
     }
   }

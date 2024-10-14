@@ -133,8 +133,9 @@ void sow_seeds_update_grid_score(enum PlayerID player, struct Awale *awale,
         if (line == adversaire && (awale->grid[current][line] == 2 ||
                                    awale->grid[current][line] == 3)) {
           // on met à jour le score
-          awale->score[player] =
-              awale->score[player] + awale->grid[current][line];
+          awale->score[player] = awale->score[player] +
+                                 awale->grid[current][line] +
+                                 1; // ne pas oubleir la graine qu'on a semé
           awale->grid[current][line] = 0; // on capture les graines
         }
       }
@@ -157,7 +158,7 @@ void sow_seeds_update_grid_score(enum PlayerID player, struct Awale *awale,
                                    awale->grid[current][line] == 3)) {
           // on met à jour le score
           awale->score[player] =
-              awale->score[player] + awale->grid[current][line];
+              awale->score[player] + awale->grid[current][line] + 1;
           awale->grid[current][line] = 0; // on capture les graines
         }
       }
@@ -228,6 +229,7 @@ int can_play(const struct Awale *awale, enum PlayerID player) {
 }
 
 enum GameStatus status(const struct Awale *awale) {
+
   if (awale->score[PLAYER1] >= MAX_SCORE) {
     return GAME_OVER_PLAYER1_WINS;
   }
@@ -255,6 +257,13 @@ enum PlayerID next_player(const struct Awale *awale) {
   return (awale->current + 1) % 2;
 }
 
-enum PlayerID winner(const struct Awale *awale) {
-  return (awale->score[PLAYER1] > awale->score[PLAYER2]) ? PLAYER1 : PLAYER2;
+int winner(const struct Awale *awale, enum PlayerID *player) {
+
+  if (awale->score[PLAYER1] == awale->score[PLAYER2]) {
+    return 0;
+  }
+
+  *player = (awale->score[PLAYER1] > awale->score[PLAYER2]) ? PLAYER1 : PLAYER2;
+
+  return 1;
 }
