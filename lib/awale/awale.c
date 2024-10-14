@@ -11,9 +11,14 @@ void reset(struct Awale *awale) {
 
   for (int i = 0; i < GRID_ROWS; i++) {
     for (int j = 0; j < GRID_COLS; j++) {
-      awale->grid[i][j] = 4;
+      awale->grid[i][j] = 0;
     }
   }
+
+  awale->grid[1][0] = 1;
+  awale->grid[2][0] = 1;
+  awale->grid[1][1] = 1;
+  awale->grid[2][1] = 1;
 }
 
 int player_has_seeds(enum PlayerID player,
@@ -85,6 +90,74 @@ void sow_seeds(enum PlayerID player, int grid[GRID_ROWS][GRID_COLS],
   }
 }
 
+void sow_seeds_update_grid_score(enum PlayerID player, struct Awale *awale,
+                                 int target) {
+
+  int seeds = awale->grid[target][player];
+
+  enum PlayerID adversaire = next_player(awale);
+
+  awale->grid[target][player] = 0;
+
+  int begin = target;
+  int current = begin;
+
+  int line = player;
+
+  while (seeds > 0) {
+
+    if (line == 1) {
+
+      current++;
+
+      if (current == GRID_ROWS) {
+        line = 0;
+        current = 5;
+      }
+
+      // on vérifie si on ne tombe sur la case de départ pour semer une graine
+      if (!(current == begin && line == player)) {
+
+        awale->grid[current][line] = awale->grid[current][line] + 1;
+
+        seeds--;
+
+        // Si on est chez l'adversaire et qu'on a semé 2 ou 3 graines on les
+        if (line == adversaire && (awale->grid[current][line] == 2 ||
+                                   awale->grid[current][line] == 3)) {
+          // on met à jour le score
+          awale->score[player] =
+              awale->score[player] + awale->grid[current][line];
+          awale->grid[current][line] = 0; // on capture les graines
+        }
+      }
+    } else {
+
+      current--;
+
+      if (current == -1) {
+        line = 1;
+        current = 0;
+      }
+
+      if (!(current == begin && line == player)) {
+
+        awale->grid[current][line] = awale->grid[current][line] + 1;
+
+        seeds--;
+
+        if (line == adversaire && (awale->grid[current][line] == 2 ||
+                                   awale->grid[current][line] == 3)) {
+          // on met à jour le score
+          awale->score[player] =
+              awale->score[player] + awale->grid[current][line];
+          awale->grid[current][line] = 0; // on capture les graines
+        }
+      }
+    }
+  }
+}
+
 enum CoupValidity is_coup_valid(struct Awale *awale, int target) {
 
   enum PlayerID nex_player = next_player(awale);
@@ -120,23 +193,9 @@ enum CoupValidity play(struct Awale *awale, enum PlayerID player, int target) {
 
   if (validity == VALID) {
 
-    sow_seeds(player, awale->grid, target);
+    sow_seeds_update_grid_score(player, awale, target);
 
-    const enum PlayerID next = next_player(awale);
-
-    for (int i = 0; i < GRID_ROWS; i++) {
-
-      int graines = awale->grid[i][next];
-
-      if (graines == 2 || graines == 3) {
-
-        awale->grid[i][next] = 0;
-
-        awale->score[player] = awale->score[player] + graines;
-      }
-    }
-
-    awale->current = next;
+    awale->current = next_player(awale);
   }
 
   return validity;
