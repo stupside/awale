@@ -171,6 +171,10 @@ enum CoupValidity is_coup_valid(struct Awale *awale, int target) {
 
   enum PlayerID nex_player = next_player(awale);
 
+  if (target < 0 || target >= GRID_ROWS) {
+    return INVALID_TARGET_OUT_OF_BOUNDS;
+  }
+
   if (awale->grid[target][awale->current] == 0) {
     return INVALID_NO_SEEDS_IN_CASE;
   }
