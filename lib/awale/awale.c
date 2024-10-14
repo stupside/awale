@@ -133,9 +133,10 @@ void sow_seeds_update_grid_score(enum PlayerID player, struct Awale *awale,
         if (line == adversaire && (awale->grid[current][line] == 2 ||
                                    awale->grid[current][line] == 3)) {
           // on met à jour le score
-          awale->score[player] = awale->score[player] +
-                                 awale->grid[current][line] +
-                                 1; // ne pas oubleir la graine qu'on a semé
+          awale->score[player] =
+              awale->score[player] +
+              awale->grid[current]
+                         [line]; // ne pas oubleir la graine qu'on a semé
           awale->grid[current][line] = 0; // on capture les graines
         }
       }
@@ -158,7 +159,7 @@ void sow_seeds_update_grid_score(enum PlayerID player, struct Awale *awale,
                                    awale->grid[current][line] == 3)) {
           // on met à jour le score
           awale->score[player] =
-              awale->score[player] + awale->grid[current][line] + 1;
+              awale->score[player] + awale->grid[current][line];
           awale->grid[current][line] = 0; // on capture les graines
         }
       }
@@ -180,10 +181,9 @@ enum CoupValidity is_coup_valid(struct Awale *awale, int target) {
 
   sow_seeds(awale->current, copy, target);
 
-  const int is_famine = !player_has_seeds(nex_player, awale->grid);
-  const int will_famine = !player_has_seeds(nex_player, copy);
+  const int famine = !player_has_seeds(nex_player, copy);
 
-  if (is_famine || will_famine) { // TODO: && instead of ||
+  if (famine) {
     return INVALID_OPONENT_HAS_NO_SEEDS;
   }
 
@@ -212,14 +212,14 @@ enum CoupValidity play(struct Awale *awale, enum PlayerID player, int target) {
 int can_play(const struct Awale *awale, enum PlayerID player) {
 
   for (int i = 0; i < GRID_ROWS; ++i) {
-    int seeds = awale->grid[i][next_player(awale)];
+    int seeds = awale->grid[i][player];
 
     if (player == PLAYER1) {
-      if (seeds >= GRID_ROWS - i) {
+      if (seeds >= i + 1) {
         return 1;
       }
     } else {
-      if (seeds >= GRID_ROWS - i + 1) {
+      if (seeds >= i - 1) {
         return 1;
       }
     }
@@ -243,10 +243,8 @@ enum GameStatus status(const struct Awale *awale) {
     return PASS_TURN_NO_SEEDS;
   }
 
-  if ((!player_has_seeds(next_player(awale), awale->grid) &&
-       !can_play(awale, awale->current)) ||
-      (!player_has_seeds(awale->current, awale->grid) &&
-       !can_play(awale, next_player(awale)))) {
+  if (!player_has_seeds(next_player(awale), awale->grid) &&
+      !can_play(awale, awale->current)) {
     return GAME_OVER_STALEMATE;
   }
 

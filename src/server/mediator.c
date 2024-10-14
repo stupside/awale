@@ -228,6 +228,32 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
   return 1;
 };
 
+unsigned int on_game_play(unsigned int client_id, const void *data) {
+
+  const SocketClient *client =
+      find_client_by_id(&awale_server()->pool, client_id);
+
+  if (client == NULL) {
+    return 0;
+  }
+
+  const struct GamePlayReq *req = data;
+
+  struct Lobby *lobby = find_running_lobby(awale_server(), client);
+
+  if (lobby == NULL) {
+    return 0;
+  }
+
+  int ok = play(&lobby->awale, client_id, req->input);
+
+  if (!ok) {
+    return 0;
+  }
+
+  return 1;
+};
+
 void init_mediator(struct Mediator *mediator) {
   register_cmd(mediator, CMD_CHAT_WRITE, &on_chat_write);
 
@@ -238,4 +264,5 @@ void init_mediator(struct Mediator *mediator) {
   register_cmd(mediator, CMD_CHALLENGE_HANDLE, &on_challenge_handle);
 
   register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
+  register_cmd(mediator, CMD_GAME_PLAY, &on_game_play);
 }
