@@ -1,6 +1,7 @@
 #ifndef SOCKET_H
 #define SOCKET_H
 
+#include "cmd.h"
 #include "pool.h"
 
 #define PORT 1977
@@ -18,10 +19,11 @@ typedef struct sockaddr_in SOCKADDR_IN;
 
 void close_socket(SOCKET sock);
 
-int write_to_socket(SOCKET sock, const char *buffer);
+int send_cmd_to(SOCKET sock, enum CMD cmd_id, const void *data,
+                unsigned int data_size);
 
-int write_to_sockets(const SocketPool *pool, const SocketClient *sender,
-                     const char *buffer);
+int send_cmd_to_all(const SocketPool *pool, const SocketClient *sender,
+                    enum CMD cmd_id, const void *data, unsigned int data_size);
 
 int read_from_socket(SOCKET sock, char *buffer);
 #endif

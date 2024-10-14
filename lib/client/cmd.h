@@ -1,10 +1,11 @@
 #ifndef CLIENT_CMD_H
 #define CLIENT_CMD_H
 
-#define MAX_COMMANDS 50
 #define MAX_ARGS 10
+#define MAX_COMMANDS 50
 
 #include "lib/socket/cmd.h"
+#include "lib/socket/socket.h"
 
 enum CLIENT_CMD {
   CLIENT_CMD_CHAT_WRITE,

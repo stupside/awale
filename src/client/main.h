@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
   struct ClientMediator clientMediator;
   init_client_mediator(&clientMediator);
 
-  // compute_cmd(mediator, const SocketClient *from, const char *cmd)
+  // handle_cmd(mediator, const SocketClient *from, const char *cmd)
 
   app(argv[1], argv[2], argv[3], &mediator, &clientMediator);
 

@@ -3,20 +3,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h>
 
-// Function to initialize a new Mediator
 struct Mediator new_mediator() { return (struct Mediator){.handlers = {0}}; }
 
-// Function to register a command with a callback
 void register_cmd(struct Mediator *mediator, enum CMD cmd,
                   unsigned int (*callback)(unsigned int client_id,
                                            const void *data)) {
   mediator->handlers[cmd] = (struct Handler){.handle = callback};
 }
 
-int compute_cmd(const struct Mediator *dispatcher, unsigned int client_id,
-                const char *cmd, enum CMD *cmd_id) {
+int handle_cmd(const struct Mediator *dispatcher, unsigned int client_id,
+               const char *cmd, enum CMD *cmd_id) {
   // Extract command ID from the received command
   char cmd_id_hex[CMD_ID_SIZE + 1];
   memcpy(cmd_id_hex, cmd, CMD_ID_SIZE);

@@ -14,16 +14,14 @@ SOCKET sock;
 
 // Signal handler for SIGINT
 void handle_sigint(int sig) {
-  char *cmd = inline_cmd(CMD_USER_LOGOUT, NULL, 0);
-  if (cmd) {
-    int ok = write_to_socket(sock, cmd);
-    if (!ok) {
-      perror("Failed to write to socket");
-    }
-    free(cmd);
+  int ok = send_cmd_to(sock, CMD_USER_LOGOUT, NULL, 0);
+
+  if (!ok) {
+    perror("Failed to write to socket");
   }
 
   close_socket(sock);
+
   exit(0);
 }
 
@@ -71,11 +69,7 @@ void app(const char *address, const char *name, const char *password,
     strncpy(req.name, name, sizeof(req.name));
     strncpy(req.password, password, sizeof(req.password));
 
-    char *cmd = inline_cmd(CMD_USER_LOGIN, &req, sizeof(struct UserLoginReq));
-
-    write_to_socket(sock, cmd);
-
-    free(cmd);
+    send_cmd_to(sock, CMD_USER_LOGIN, &req, sizeof(struct UserLoginReq));
   }
 
   while (1) {
@@ -117,7 +111,7 @@ void app(const char *address, const char *name, const char *password,
 
       enum CMD cmd_id;
 
-      if (compute_cmd(mediator, -1, buffer, &cmd_id)) {
+      if (handle_cmd(mediator, -1, buffer, &cmd_id)) {
         printf("Command %02X handled\n", cmd_id);
       } else {
         perror("Command %02X not handled");
@@ -127,13 +121,10 @@ void app(const char *address, const char *name, const char *password,
 
   // Send logout command when exiting
   {
-    char *cmd = inline_cmd(CMD_USER_LOGOUT, NULL, 0);
-    if (cmd) {
-      int ok = write_to_socket(sock, cmd);
-      if (!ok) {
-        perror("Failed to write logout command to socket");
-      }
-      free(cmd);
+    const int ok = send_cmd_to(sock, CMD_USER_LOGOUT, NULL, 0);
+
+    if (!ok) {
+      perror("Failed to write logout command to socket");
     }
   }
 

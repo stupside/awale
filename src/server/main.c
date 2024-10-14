@@ -95,7 +95,7 @@ void app(struct Mediator *mediator) {
 
       enum CMD cmd_id;
 
-      if (compute_cmd(mediator, csock, buffer, &cmd_id)) {
+      if (handle_cmd(mediator, csock, buffer, &cmd_id)) {
         FD_SET(csock, &rdfs);
         maxfd = csock > maxfd ? csock : maxfd;
       } else {
@@ -113,7 +113,7 @@ void app(struct Mediator *mediator) {
           if (read_from_socket(client->socket, buffer)) {
 
             enum CMD cmd_id;
-            if (compute_cmd(mediator, client->id, buffer, &cmd_id)) {
+            if (handle_cmd(mediator, client->id, buffer, &cmd_id)) {
               printf("Command computed %02X from client %d\n", cmd_id,
                      client->id);
             } else {

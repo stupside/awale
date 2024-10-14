@@ -128,11 +128,7 @@ unsigned int input_formatter_chat(SOCKET sock, char *argv[],
   strncpy(req.message, formatted_message, sizeof(req.message) - 1);
   req.message[sizeof(req.message) - 1] = '\0';
 
-  char *cmd = inline_cmd(CMD_CHAT_WRITE, &req, sizeof(struct ChatWriteReq));
-
-  write_to_socket(sock, cmd);
-
-  free(cmd);
+  send_cmd_to(sock, CMD_CHAT_WRITE, &req, sizeof(struct ChatWriteReq));
 
   return 1;
 }
@@ -140,14 +136,9 @@ unsigned int input_formatter_chat(SOCKET sock, char *argv[],
 unsigned int input_formatter_play(SOCKET sock, char *argv[],
                                   unsigned int argslen) {
   struct GamePlayReq req;
-
   req.input = atoi(argv[1]);
 
-  char *cmd = inline_cmd(CMD_GAME_PLAY, &req, sizeof(struct GamePlayReq));
-
-  write_to_socket(sock, cmd);
-
-  free(cmd);
+  send_cmd_to(sock, CMD_GAME_PLAY, &req, sizeof(struct GamePlayReq));
 
   return 1;
 }
@@ -155,14 +146,9 @@ unsigned int input_formatter_play(SOCKET sock, char *argv[],
 unsigned int input_formatter_challenge(SOCKET sock, char *argv[],
                                        unsigned int argslen) {
   struct ChallengeReq req;
-
   req.client_id = atoi(argv[1]);
 
-  char *cmd = inline_cmd(CMD_CHALLENGE, &req, sizeof(struct ChallengeReq));
-
-  write_to_socket(sock, cmd);
-
-  free(cmd);
+  send_cmd_to(sock, CMD_CHALLENGE, &req, sizeof(struct ChallengeReq));
 
   return 1;
 }
@@ -170,16 +156,11 @@ unsigned int input_formatter_challenge(SOCKET sock, char *argv[],
 unsigned int input_formatter_handle(SOCKET sock, char *argv[],
                                     unsigned int argslen) {
   struct ChallengeHandleReq req;
-
-  req.client_id = atoi(argv[1]);
   req.accept = atoi(argv[2]);
+  req.client_id = atoi(argv[1]);
 
-  char *cmd =
-      inline_cmd(CMD_CHALLENGE_HANDLE, &req, sizeof(struct ChallengeHandleReq));
-
-  write_to_socket(sock, cmd);
-
-  free(cmd);
+  send_cmd_to(sock, CMD_CHALLENGE_HANDLE, &req,
+              sizeof(struct ChallengeHandleReq));
 
   return 1;
 }
@@ -188,11 +169,7 @@ unsigned int input_formatter_grid(SOCKET sock, char *argv[],
                                   unsigned int argslen) {
   struct GameStateReq req;
 
-  char *cmd = inline_cmd(CMD_GAME_STATE, &req, sizeof(struct GameStateReq));
-
-  write_to_socket(sock, cmd);
-
-  free(cmd);
+  send_cmd_to(sock, CMD_GAME_STATE, &req, sizeof(struct GameStateReq));
 
   return 1;
 }
@@ -206,11 +183,7 @@ unsigned int input_formatter_users(SOCKET sock, char *argv[],
           ? atoi(argv[1])
           : 0; // par défaut page 0 // TODO: check whether the input is a number
 
-  char *cmd = inline_cmd(CMD_USER_LIST_ALL, &req, sizeof(struct UserListReq));
-
-  write_to_socket(sock, cmd);
-
-  free(cmd);
+  send_cmd_to(sock, CMD_USER_LIST_ALL, &req, sizeof(struct UserListReq));
 
   return 1;
 }
@@ -218,14 +191,9 @@ unsigned int input_formatter_users(SOCKET sock, char *argv[],
 unsigned int input_formatter_observe(SOCKET sock, char *argv[],
                                      unsigned int argslen) {
   struct UserObserveReq req;
-
   req.id = atoi(argv[1]);
 
-  char *cmd = inline_cmd(CMD_GAME_OBSERVE, &req, sizeof(struct UserObserveReq));
-
-  write_to_socket(sock, cmd);
-
-  free(cmd);
+  send_cmd_to(sock, CMD_GAME_OBSERVE, &req, sizeof(struct UserObserveReq));
 
   return 1;
 }
@@ -235,11 +203,7 @@ unsigned int input_formatter_leave(SOCKET sock, char *argv[],
 
   struct GameLeaveReq req;
 
-  char *cmd = inline_cmd(CMD_GAME_LEAVE, &req, sizeof(struct GameLeaveReq));
-
-  write_to_socket(sock, cmd);
-
-  free(cmd);
+  send_cmd_to(sock, CMD_GAME_LEAVE, &req, sizeof(struct GameLeaveReq));
 
   return 1;
 }
@@ -264,7 +228,6 @@ void init_client_mediator(struct ClientMediator *mediator) {
 }
 
 void init_mediator(struct Mediator *mediator) {
-  // voir ces fonctions de manière inversée
   register_cmd(mediator, CMD_USER_LOGIN, &on_user_login);
 
   register_cmd(mediator, CMD_USER_LOGOUT, &on_user_logout);
@@ -279,7 +242,6 @@ void init_mediator(struct Mediator *mediator) {
 
   register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list);
 
-  // pareil qu'avec le game state
   register_cmd(mediator, CMD_GAME_OBSERVE, &on_game_state);
 
   register_cmd(mediator, CMD_GAME_LEAVE, &on_game_leave);

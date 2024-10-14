@@ -110,11 +110,8 @@ int challenge(struct Server *server, SocketClient *challenger,
       .client_id = challenger->id,
   };
 
-  char *cmd = inline_cmd(CMD_CHALLENGE, &event, sizeof(struct ChallengeEvent));
-
-  write_to_socket(challenged->socket, cmd);
-
-  free(cmd);
+  send_cmd_to(challenged->socket, CMD_CHALLENGE, &event,
+              sizeof(struct ChallengeEvent));
 
   return 1;
 }
@@ -136,11 +133,7 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
       .validity = validity,
   };
 
-  char *cmd = inline_cmd(CMD_GAME_PLAY, &res, sizeof(struct GamePlayRes));
-
-  write_to_socket(client->socket, cmd);
-
-  free(cmd);
+  send_cmd_to(client->socket, CMD_GAME_PLAY, &res, sizeof(struct GamePlayRes));
 
   if (validity == VALID) {
 
@@ -154,22 +147,21 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
       }
     }
 
-    char *cmd =
-        inline_cmd(CMD_GAME_STATE, &event, sizeof(struct GameStateEvent));
+    send_cmd_to(lobby->client[PLAYER1]->socket, CMD_GAME_STATE, &event,
+                sizeof(struct GameStateEvent));
 
-    write_to_socket(lobby->client[PLAYER1]->socket, cmd);
-    write_to_socket(lobby->client[PLAYER2]->socket, cmd);
+    send_cmd_to(lobby->client[PLAYER2]->socket, CMD_GAME_STATE, &event,
+                sizeof(struct GameStateEvent));
 
     for (int i = 0; i < MAX_CLIENTS; i++) {
 
       const struct SocketClient *observator = lobby->observators[i];
 
       if (observator) {
-        write_to_socket(lobby->observators[i]->socket, cmd);
+        send_cmd_to(observator->socket, CMD_GAME_STATE, &event,
+                    sizeof(struct GameStateEvent));
       }
     }
-
-    free(cmd);
 
     return 1;
   }
@@ -198,12 +190,8 @@ int handle_challenge(struct Server *server, const SocketClient *challenger,
         .accept = accept,
     };
 
-    char *cmd = inline_cmd(CMD_CHALLENGE_HANDLE, &event,
-                           sizeof(struct ChallengeHandleEvent));
-
-    write_to_socket(lobby->client[PLAYER1]->socket, cmd);
-
-    free(cmd);
+    send_cmd_to(lobby->client[PLAYER1]->socket, CMD_CHALLENGE_HANDLE, &event,
+                sizeof(struct ChallengeHandleEvent));
   }
 
   return 0;
