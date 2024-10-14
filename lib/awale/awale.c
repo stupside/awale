@@ -11,14 +11,9 @@ void reset(struct Awale *awale) {
 
   for (int i = 0; i < GRID_ROWS; i++) {
     for (int j = 0; j < GRID_COLS; j++) {
-      awale->grid[i][j] = 0;
+      awale->grid[i][j] = 4;
     }
   }
-
-  awale->grid[1][0] = 1;
-  awale->grid[2][0] = 1;
-  awale->grid[1][1] = 1;
-  awale->grid[2][1] = 1;
 }
 
 int player_has_seeds(enum PlayerID player,
@@ -36,7 +31,7 @@ int player_has_seeds(enum PlayerID player,
 void copy_grid(const struct Awale *awale, int copy[GRID_ROWS][GRID_COLS]) {
   for (int i = 0; i < GRID_ROWS; i++) {
     for (int j = 0; j < GRID_COLS; j++) {
-      copy[i][j] = copy[i][j];
+      copy[i][j] = awale->grid[i][j];
     }
   }
 }
@@ -45,6 +40,8 @@ void sow_seeds(enum PlayerID player, int grid[GRID_ROWS][GRID_COLS],
                int target) {
 
   int seeds = grid[target][player];
+
+  enum PlayerID adversaire = (player + 1) % 2;
 
   grid[target][player] = 0;
 
@@ -70,6 +67,11 @@ void sow_seeds(enum PlayerID player, int grid[GRID_ROWS][GRID_COLS],
         grid[current][line] = grid[current][line] + 1;
 
         seeds--;
+
+        if (line == adversaire &&
+            (grid[current][line] == 2 || grid[current][line] == 3)) {
+          grid[current][line] = 0; // on capture les graines
+        }
       }
     } else {
 
@@ -85,6 +87,11 @@ void sow_seeds(enum PlayerID player, int grid[GRID_ROWS][GRID_COLS],
         grid[current][line] = grid[current][line] + 1;
 
         seeds--;
+
+        if (line == adversaire &&
+            (grid[current][line] == 2 || grid[current][line] == 3)) {
+          grid[current][line] = 0; // on capture les graines
+        }
       }
     }
   }
