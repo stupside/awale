@@ -14,8 +14,6 @@
 #include "lib/socket/cmds/game.h"
 #include "lib/socket/cmds/user.h"
 
-#include "lib/awale/awale.h"
-
 unsigned int on_user_login(unsigned int socket, const void *data) {
 
   struct Server *server = awale_server();
@@ -100,7 +98,7 @@ unsigned int on_user_logout(unsigned int client_id, const void *data) {
   }
 
   {
-    const struct UserLogoutEvent event = {.id = client->id};
+    const struct UserLogoutEvent event = {.client_id = client->id};
 
     char *cmd =
         inline_cmd(CMD_USER_LOGOUT, &event, sizeof(struct UserLogoutEvent));
@@ -275,6 +273,46 @@ unsigned int on_game_play(unsigned int client_id, const void *data) {
   return 1;
 };
 
+unsigned int on_user_list_all(unsigned int client_id, const void *data) {
+
+  const struct UserListReq *req = data;
+
+  struct UserListRes res;
+
+  const unsigned int min = req->page * PAGE_MAX_CLIENTS;
+  const unsigned int max =
+      (min + PAGE_MAX_CLIENTS) % awale_server()->pool.count;
+
+  for (unsigned int i = min; i < max; i++) {
+
+    const SocketClient *client = &awale_server()->pool.clients[i];
+
+    if (client->id == client_id) {
+      continue;
+    }
+
+    if (client->online) {
+
+      struct UserRes user = {
+          .client_id = client->id,
+          .description = {0},
+      };
+
+      strncpy(user.name, client->name, USER_NAME_LEN);
+
+      res.users[res.count++] = user;
+    }
+  }
+
+  const SocketClient *client =
+      find_client_by_id(&awale_server()->pool, client_id);
+
+  send_cmd_to(client->socket, CMD_USER_LIST_ALL, &res,
+              sizeof(struct UserListRes));
+
+  return 1;
+};
+
 void init_mediator(struct Mediator *mediator) {
   register_cmd(mediator, CMD_CHAT_WRITE, &on_chat_write);
 
@@ -284,6 +322,8 @@ void init_mediator(struct Mediator *mediator) {
   register_cmd(mediator, CMD_CHALLENGE, &on_challenge);
   register_cmd(mediator, CMD_CHALLENGE_HANDLE, &on_challenge_handle);
 
-  register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
   register_cmd(mediator, CMD_GAME_PLAY, &on_game_play);
+  register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
+
+  register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list_all);
 }

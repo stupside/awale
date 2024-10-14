@@ -1,17 +1,19 @@
 #ifndef CHALLENGE_H
 #define CHALLENGE_H
 
+#include "lib/valuable/type.h"
+
 struct ChallengeReq {
-  unsigned int client_id;
+  ClientId client_id;
 };
 // struct ChallengeRes {};
 struct ChallengeEvent {
-  unsigned int client_id;
+  ClientId client_id;
 };
 
 struct ChallengeHandleReq {
   unsigned int accept;
-  unsigned int client_id;
+  ClientId client_id;
 };
 // struct ChallengeHandleRes {};
 struct ChallengeHandleEvent {

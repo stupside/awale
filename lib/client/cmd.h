@@ -1,16 +1,9 @@
 #ifndef CLIENT_CMD_H
 #define CLIENT_CMD_H
 
-#define MAX_ARGS 10
-#define MAX_COMMANDS 50
+#define MAX_CLIENT_COMMANDS 50
 
-#include "lib/socket/cmd.h"
 #include "lib/socket/socket.h"
-
-enum CLIENT_CMD {
-  CLIENT_CMD_CHAT_WRITE,
-  // CLIENT_CMD_PLAY_MOVE
-};
 
 struct ClientHandler {
   char prefix[15];
@@ -18,7 +11,8 @@ struct ClientHandler {
 };
 
 struct ClientMediator {
-  struct ClientHandler handlers[MAX_COMMANDS];
+  unsigned int handler_c;
+  struct ClientHandler handlers[MAX_CLIENT_COMMANDS];
 };
 
 unsigned int register_client_cmd(

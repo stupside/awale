@@ -16,7 +16,7 @@ void clear_clients(SocketPool *pool) {
 }
 
 int add_client(SocketPool *pool, const char *name, const char *password,
-               SOCKET socket, unsigned int *client_id) {
+               SOCKET socket, ClientId *client_id) {
 
   if (pool->count == MAX_CLIENTS) {
     perror("Max clients reached");
@@ -44,7 +44,7 @@ int add_client(SocketPool *pool, const char *name, const char *password,
   return 1;
 }
 
-int archive_client(SocketPool *sockets, unsigned int client_id) {
+int archive_client(SocketPool *sockets, ClientId client_id) {
 
   SocketClient *client = &sockets->clients[client_id];
 
@@ -68,12 +68,11 @@ int archive_client(SocketPool *sockets, unsigned int client_id) {
 }
 
 int unarchive_client(SocketPool *sockets, SOCKET socket, const char *name,
-                     unsigned int *client_id) {
+                     ClientId *client_id) {
 
   SocketClient *client = find_client_by_name(sockets, name);
 
   if (!client) {
-    perror("Client not found");
     return 0;
   }
 
@@ -92,7 +91,7 @@ int unarchive_client(SocketPool *sockets, SOCKET socket, const char *name,
   return 1;
 }
 
-SocketClient *find_client_by_id(SocketPool *pool, unsigned int id) {
+SocketClient *find_client_by_id(SocketPool *pool, ClientId client_id) {
 
   for (unsigned int i = 0; i < pool->count; i++) {
 
@@ -102,12 +101,10 @@ SocketClient *find_client_by_id(SocketPool *pool, unsigned int id) {
       continue;
     }
 
-    if (client->id == id) {
+    if (client->id == client_id) {
       return client;
     }
   }
-
-  perror("Client not found");
 
   return NULL;
 }
@@ -122,8 +119,6 @@ SocketClient *find_client_by_name(SocketPool *pool, const char *name) {
       return client;
     }
   }
-
-  perror("Client not found");
 
   return NULL;
 }

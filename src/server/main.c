@@ -6,8 +6,7 @@
 #include <unistd.h>
 
 #include "lib/server/server.h"
-#include "lib/socket/cmd.h"
-#include "lib/socket/pool.h"
+
 #include "lib/socket/socket.h"
 
 int init(void) {
@@ -93,9 +92,7 @@ void app(struct Mediator *mediator) {
         continue;
       }
 
-      enum CMD cmd_id;
-
-      if (handle_cmd(mediator, csock, buffer, &cmd_id)) {
+      if (handle_cmd(mediator, csock, buffer)) {
         FD_SET(csock, &rdfs);
         maxfd = csock > maxfd ? csock : maxfd;
       } else {
@@ -112,10 +109,8 @@ void app(struct Mediator *mediator) {
 
           if (read_from_socket(client->socket, buffer)) {
 
-            enum CMD cmd_id;
-            if (handle_cmd(mediator, client->id, buffer, &cmd_id)) {
-              printf("Command computed %02X from client %d\n", cmd_id,
-                     client->id);
+            if (handle_cmd(mediator, client->id, buffer)) {
+              // Command handled
             } else {
               perror("Failed to compute command");
             }

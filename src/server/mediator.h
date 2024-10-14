@@ -1,7 +1,7 @@
 #ifndef MEDIATOR_H
 #define MEDIATOR_H
 
-#include "lib/socket/cmd.h"
+#include "lib/cmds/mediator.h"
 
 void init_mediator(struct Mediator *mediator);
 

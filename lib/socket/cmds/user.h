@@ -1,50 +1,53 @@
 #ifndef USER_H
 #define USER_H
 
-#define PAGE_MAX_CLIENTS 10
+#include "lib/valuable/limit.h"
+#include "lib/valuable/type.h"
+
+#define PAGE_MAX_CLIENTS 5
 
 struct UserInfoReq {
-  char name[255];
+  char name[USER_NAME_LEN];
 };
 struct UserInfoRes {
-  char description[255];
+  char description[USER_DESC_LEN];
 };
 
 struct UserLoginReq {
-  char name[255];
-  char password[255];
-  char description[255];
+  char name[USER_NAME_LEN];
+  char password[USER_PASSWORD_LEN];
+  char description[USER_DESC_LEN];
 };
 struct UserLoginRes {
-  unsigned int id;
+  ClientId client_id;
 };
 struct UserLoginEvent {
-  unsigned int id;
+  ClientId id;
 };
 
 struct UserLogoutReq {};
 // struct UserLogoutRes {};
 struct UserLogoutEvent {
-  unsigned int id;
+  ClientId client_id;
 };
 
 struct UserObserveReq {
-  unsigned int id;
+  ClientId client_id;
 };
 
 struct UserListReq {
-  unsigned int page_number;
+  unsigned int page;
 };
 
 struct UserRes {
-  unsigned int id;
+  ClientId client_id;
 
-  char name[255];
-  char description[255];
+  char name[USER_NAME_LEN];
+  char description[USER_DESC_LEN];
 };
 
 struct UserListRes {
-  unsigned int count; // <= PAGE_MAX_CLIENTS
+  unsigned int count;
   struct UserRes users[PAGE_MAX_CLIENTS];
 };
 

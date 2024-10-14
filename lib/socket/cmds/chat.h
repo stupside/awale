@@ -1,13 +1,17 @@
 #ifndef CHAT_H
 #define CHAT_H
 
+#include "lib/valuable/limit.h"
+#include "lib/valuable/type.h"
+
 struct ChatWriteReq {
-  char message[255];
+  char message[CHAT_MSG_LEN];
 };
+
 // struct ChatWriteRes {};
 struct ChatWriteEvent {
-  char message[255];
-  unsigned int client_id;
+  ClientId client_id;
+  char message[CHAT_MSG_LEN];
 };
 
 #endif

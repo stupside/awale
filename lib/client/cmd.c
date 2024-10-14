@@ -2,19 +2,19 @@
 
 #include <string.h>
 
+#define MAX_ARGS 10
+
 unsigned int register_client_cmd(
     struct ClientMediator *mediator, char prefix[15],
     unsigned int (*callback)(SOCKET sock, char *argv[], unsigned int argslen)) {
 
-  // Def of the handler
   struct ClientHandler handler;
+
   strcpy(handler.prefix, prefix);
 
   handler.handle = callback;
 
-  static unsigned int cmd = 0;
-
-  mediator->handlers[cmd++] = handler;
+  mediator->handlers[mediator->handler_c++] = handler;
 
   return 1;
 }
@@ -40,7 +40,7 @@ unsigned int handle_client_cmd(SOCKET sock,
 
   const unsigned argslen = get_arguments(input, args);
 
-  for (int i = 0; i < MAX_COMMANDS; i++) {
+  for (int i = 0; i < mediator->handler_c; i++) {
     const struct ClientHandler *handler = &mediator->handlers[i];
 
     if (handler) {

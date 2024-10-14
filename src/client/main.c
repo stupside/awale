@@ -8,6 +8,7 @@
 
 #include "lib/socket/cmd.h"
 #include "lib/socket/cmds/user.h"
+
 #include "lib/socket/socket.h"
 
 SOCKET sock;
@@ -109,10 +110,8 @@ void app(const char *address, const char *name, const char *password,
         break;
       }
 
-      enum CMD cmd_id;
-
-      if (handle_cmd(mediator, -1, buffer, &cmd_id)) {
-        printf("Command %02X handled\n", cmd_id);
+      if (handle_cmd(mediator, -1, buffer)) {
+        // Command handled
       } else {
         perror("Command %02X not handled");
       }

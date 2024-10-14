@@ -1,12 +1,11 @@
 # lib/awale/BUILD
 
 cc_library(
-    name = "socket_lib",
+    name = "cmds_lib",
     srcs = glob(["**/*.c"]),
     hdrs = glob(["**/*.h"]),
     visibility = ["//visibility:public"],
     deps = [
-        "//lib/cmds:cmds_lib",
         "//lib/valuable:valuable_lib",
     ],
 )

@@ -1,6 +1,5 @@
 #include "mediator.h"
 
-#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,7 +9,6 @@
 #include "lib/socket/cmds/error.h"
 #include "lib/socket/cmds/game.h"
 #include "lib/socket/cmds/user.h"
-#include "lib/socket/socket.h"
 
 unsigned int on_user_login(unsigned int client_id, const void *data) {
 
@@ -25,7 +23,7 @@ unsigned int on_user_logout(unsigned int client_id, const void *data) {
 
   const struct UserLogoutEvent *event = data;
 
-  printf("User %d logged out\n", event->id);
+  printf("User %d logged out\n", event->client_id);
 
   return 1;
 };
@@ -116,8 +114,8 @@ unsigned int on_user_list(unsigned int client_id, const void *data) {
 
   printf("Online users: %d\n", res->count);
 
-  for (int i = 0; i < res->count; i++) {
-    printf("User %s\n", res->users[i].name);
+  for (unsigned int i = 0; i < res->count; i++) {
+    printf("User %d: %s\n", res->users[i].client_id, res->users[i].name);
   }
 
   return 1;
@@ -221,12 +219,9 @@ unsigned int input_formatter_grid(SOCKET sock, char *argv[],
 
 unsigned int input_formatter_users(SOCKET sock, char *argv[],
                                    unsigned int argslen) {
-  struct UserListReq req;
-
-  req.page_number =
-      argslen > 1
-          ? atoi(argv[1])
-          : 0; // par défaut page 0 // TODO: check whether the input is a number
+  struct UserListReq req = {
+      .page = argslen > 1 ? atoi(argv[1]) : 0,
+  };
 
   send_cmd_to(sock, CMD_USER_LIST_ALL, &req, sizeof(struct UserListReq));
 
@@ -235,8 +230,9 @@ unsigned int input_formatter_users(SOCKET sock, char *argv[],
 
 unsigned int input_formatter_observe(SOCKET sock, char *argv[],
                                      unsigned int argslen) {
-  struct UserObserveReq req;
-  req.id = atoi(argv[1]);
+  struct UserObserveReq req = {
+      .client_id = atoi(argv[1]),
+  };
 
   send_cmd_to(sock, CMD_GAME_OBSERVE, &req, sizeof(struct UserObserveReq));
 

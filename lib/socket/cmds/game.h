@@ -4,7 +4,7 @@
 #include "lib/awale/awale.h"
 
 struct GamePlayReq {
-  int input;
+  unsigned int input;
 };
 struct GamePlayRes {
   enum CoupValidity validity;

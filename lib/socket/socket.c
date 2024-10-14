@@ -1,5 +1,7 @@
 #include "socket.h"
 
+#include "lib/cmds/cmd.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,6 +53,7 @@ int read_from_socket(SOCKET sock, char *buffer) {
 
 int send_cmd_to(SOCKET sock, enum CMD cmd_id, const void *data,
                 unsigned int data_size) {
+
   char *cmd = inline_cmd(cmd_id, data, data_size);
 
   int ok = write_to_socket(sock, cmd);

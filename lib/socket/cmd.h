@@ -1,8 +1,6 @@
 #ifndef CMD_H
 #define CMD_H
 
-#define MAX_COMMANDS 50
-
 enum CMD {
   CMD_USER_INFO = 0x00,
   CMD_USER_LOGIN = 0x01,
@@ -31,27 +29,5 @@ enum CMD {
 
   CMD_ERROR = 0xFF,
 };
-
-#define CMD_ID_SIZE sizeof(char) * 2
-#define PAYLOAD_LENGTH_SIZE sizeof(char) * 6
-
-struct Handler {
-  unsigned int (*handle)(unsigned int client_id, const void *data);
-};
-
-struct Mediator {
-  struct Handler handlers[MAX_COMMANDS];
-};
-
-struct Mediator new_mediator();
-
-void register_cmd(struct Mediator *mediator, enum CMD cmd,
-                  unsigned int (*callback)(unsigned int client_id,
-                                           const void *data));
-
-char *inline_cmd(enum CMD cmd, const void *data, unsigned int data_size);
-
-int handle_cmd(const struct Mediator *dispatcher, unsigned int client_id,
-               const char *cmd, enum CMD *cmd_id);
 
 #endif
