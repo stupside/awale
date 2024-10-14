@@ -1,21 +1,25 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <stdlib.h>
+#include "handlers/challenge.h"
+#include "handlers/chat.h"
+#include "handlers/game.h"
+#include "handlers/user.h"
 
-#include "mediator.h"
+#include "lib/cmds/mediator.h"
 
-void app(struct Mediator *);
+void app(struct ServerMediator *);
 
 int main(int argc, char **argv) {
 
-  struct Mediator mediator;
+  struct ServerMediator mediator;
 
-  init_mediator(&mediator);
+  add_user_cmds(&mediator);
+  add_chat_cmds(&mediator);
+  add_game_cmds(&mediator);
+  add_challenge_cmds(&mediator);
 
   app(&mediator);
-
-  // test();
 
   return EXIT_SUCCESS;
 }

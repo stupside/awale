@@ -40,14 +40,13 @@ int init(void) {
   return sock;
 }
 
-void app(struct Mediator *mediator) {
+void app(struct ServerMediator *mediator) {
   SOCKET sock = init();
 
   char buffer[BUF_SIZE];
 
   int maxfd = sock;
 
-  /* an array for all clients */
   struct Server *server = awale_server();
 
   init_awale_server(server);

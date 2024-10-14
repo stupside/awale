@@ -4,10 +4,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "lib/cmds/mediator.h"
 #include "mediator.h"
 
+#include "handlers/challenge.h"
+#include "handlers/chat.h"
+#include "handlers/error.h"
+#include "handlers/game.h"
+#include "handlers/user.h"
+
 void app(const char *address, const char *name, const char *password,
-         const struct Mediator *mediator,
+         const struct ServerMediator *mediator,
          const struct ClientMediator *clientMediator);
 
 int main(int argc, char **argv) {
@@ -16,9 +23,13 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  struct Mediator mediator;
+  struct ServerMediator mediator;
 
-  init_mediator(&mediator);
+  add_user_cmds(&mediator);
+  add_chat_cmds(&mediator);
+  add_challenge_cmds(&mediator);
+  add_game_cmds(&mediator);
+  add_error_handlers(&mediator);
 
   struct ClientMediator clientMediator;
   init_client_mediator(&clientMediator);

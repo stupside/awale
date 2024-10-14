@@ -2,7 +2,7 @@
 
 cc_binary(
     name = "client",
-    srcs = glob(["*.c", "*.h"]),
+    srcs = glob(["**/*.c", "**/*.h"]),
     deps = [
         "//lib/cmds:cmds_lib",
         "//lib/awale:awale_lib",

@@ -56,7 +56,7 @@ int init(const char *address) {
 
 // Main application function
 void app(const char *address, const char *name, const char *password,
-         const struct Mediator *mediator,
+         const struct ServerMediator *mediator,
          const struct ClientMediator *clientMediator) {
   sock = init(address);
   char buffer[BUF_SIZE];

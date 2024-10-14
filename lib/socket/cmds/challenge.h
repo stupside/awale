@@ -6,7 +6,6 @@
 struct ChallengeReq {
   ClientId client_id;
 };
-// struct ChallengeRes {};
 struct ChallengeEvent {
   ClientId client_id;
 };
@@ -15,7 +14,6 @@ struct ChallengeHandleReq {
   unsigned int accept;
   ClientId client_id;
 };
-// struct ChallengeHandleRes {};
 struct ChallengeHandleEvent {
   unsigned int accept;
 };

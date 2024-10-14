@@ -11,17 +11,17 @@ struct Handler {
   unsigned int (*handle)(unsigned int client_id, const void *data);
 };
 
-struct Mediator {
+struct ServerMediator {
   struct Handler handlers[MAX_COMMANDS];
 };
 
-struct Mediator new_mediator();
+struct ServerMediator new_mediator();
 
-void register_cmd(struct Mediator *mediator, CommandId cmd_id,
+void register_cmd(struct ServerMediator *mediator, CommandId cmd_id,
                   unsigned int (*callback)(ClientId client_id,
                                            const void *data));
 
-int handle_cmd(const struct Mediator *dispatcher, unsigned int client_id,
+int handle_cmd(const struct ServerMediator *dispatcher, unsigned int client_id,
                const char *cmd);
 
 #endif

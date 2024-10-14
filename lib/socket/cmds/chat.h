@@ -8,7 +8,6 @@ struct ChatWriteReq {
   char message[CHAT_MSG_LEN];
 };
 
-// struct ChatWriteRes {};
 struct ChatWriteEvent {
   ClientId client_id;
   char message[CHAT_MSG_LEN];

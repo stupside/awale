@@ -11,10 +11,8 @@ struct GamePlayRes {
 };
 
 struct GameLeaveReq {};
-// struct GameLeaveRes {};
 
 struct GameListReq {};
-// struct GameListRes {};
 
 struct GameStateReq {};
 struct GameStateRes {

@@ -4,8 +4,6 @@
 #include "lib/valuable/limit.h"
 #include "lib/valuable/type.h"
 
-#define PAGE_MAX_CLIENTS 5
-
 struct UserInfoReq {
   char name[USER_NAME_LEN];
 };
@@ -26,7 +24,6 @@ struct UserLoginEvent {
 };
 
 struct UserLogoutReq {};
-// struct UserLogoutRes {};
 struct UserLogoutEvent {
   ClientId client_id;
 };
@@ -45,6 +42,8 @@ struct UserRes {
   char name[USER_NAME_LEN];
   char description[USER_DESC_LEN];
 };
+
+#define PAGE_MAX_CLIENTS 5
 
 struct UserListRes {
   unsigned int count;
