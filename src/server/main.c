@@ -93,14 +93,13 @@ void app(struct Mediator *mediator) {
         continue;
       }
 
-      maxfd = csock > maxfd ? csock : maxfd;
+      enum CMD cmd_id;
 
-      FD_SET(csock, &rdfs);
-
-      int ok = add_client(&server->pool, buffer, csock);
-
-      if (!ok) {
-        perror("Failed to add client");
+      if (compute_cmd(mediator, csock, buffer, &cmd_id)) {
+        FD_SET(csock, &rdfs);
+        maxfd = csock > maxfd ? csock : maxfd;
+      } else {
+        close_socket(csock);
       }
 
     } else {
@@ -113,11 +112,21 @@ void app(struct Mediator *mediator) {
 
           if (read_from_socket(client->socket, buffer)) {
 
-            if (!compute_cmd(mediator, client->id, buffer)) {
+            enum CMD cmd_id;
+            if (compute_cmd(mediator, client->id, buffer, &cmd_id)) {
+              printf("Command computed %02X from client %d\n", cmd_id,
+                     client->id);
+            } else {
               perror("Failed to compute command");
             }
           } else {
-            archive_client(&server->pool, idx);
+            const int ok = archive_client(&server->pool, idx);
+
+            if (ok) {
+              printf("Client archived\n");
+            } else {
+              perror("Failed to archive client");
+            }
           }
           break;
         }

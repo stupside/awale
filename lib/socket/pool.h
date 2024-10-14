@@ -1,8 +1,11 @@
 #ifndef POOL_H
 #define POOL_H
 
-typedef int SOCKET;
 #define MAX_SOCKET_NAME 100
+
+typedef int SOCKET;
+
+#define MAX_PASSWORD_SIZE 50
 
 typedef struct SocketClient {
   int online;
@@ -10,6 +13,7 @@ typedef struct SocketClient {
 
   unsigned int id;
   char name[MAX_SOCKET_NAME];
+  char password[MAX_PASSWORD_SIZE];
 
 } SocketClient;
 
@@ -23,11 +27,12 @@ typedef struct SocketPool {
 
 void clear_clients(SocketPool *pool);
 
-int add_client(SocketPool *pool, const char *name, SOCKET socket);
+int add_client(SocketPool *pool, const char *name, const char *password,
+               SOCKET socket, unsigned int *client_id);
 
-unsigned int archive_client(SocketPool *sockets, int client_id);
-unsigned int unarchive_client(SocketPool *sockets, SOCKET socket,
-                              const char *name);
+int archive_client(SocketPool *sockets, unsigned int client_id);
+int unarchive_client(SocketPool *sockets, SOCKET socket, const char *name,
+                     unsigned int *client_id);
 
 SocketClient *find_client_by_id(SocketPool *pool, unsigned int id);
 SocketClient *find_client_by_name(SocketPool *pool, const char *name);

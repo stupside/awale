@@ -38,7 +38,7 @@ int init(const char *address) {
   SOCKADDR_IN sin = {0};
   struct hostent *hostinfo = gethostbyname(address);
   if (hostinfo == NULL) {
-    fprintf(stderr, "Unknown host %s.\n", address);
+    perror("Host not found");
     exit(EXIT_FAILURE);
   }
 
@@ -56,7 +56,8 @@ int init(const char *address) {
 }
 
 // Main application function
-void app(const char *address, const char *name, const struct Mediator *mediator,
+void app(const char *address, const char *name, const char *password,
+         const struct Mediator *mediator,
          const struct ClientMediator *clientMediator) {
   sock = init(address);
   char buffer[BUF_SIZE];
@@ -65,25 +66,16 @@ void app(const char *address, const char *name, const struct Mediator *mediator,
   // Setup the signal handler for SIGINT
   signal(SIGINT, handle_sigint);
 
-  // Send the username to the server
-  if (write_to_socket(sock, name) < 0) {
-    perror("Failed to send name to server");
-    close_socket(sock);
-    exit(EXIT_FAILURE);
-  }
-
   {
     struct UserLoginReq req;
-    strncpy(req.name, name, sizeof(req.name) - 1);
-    req.name[sizeof(req.name) - 1] = '\0'; // Ensure null-termination
+    strncpy(req.name, name, sizeof(req.name));
+    strncpy(req.password, password, sizeof(req.password));
 
     char *cmd = inline_cmd(CMD_USER_LOGIN, &req, sizeof(struct UserLoginReq));
-    if (cmd) {
-      write_to_socket(sock, cmd);
-      free(cmd);
-    } else {
-      perror("Failed to create command for user login");
-    }
+
+    write_to_socket(sock, cmd);
+
+    free(cmd);
   }
 
   while (1) {
@@ -92,7 +84,6 @@ void app(const char *address, const char *name, const struct Mediator *mediator,
     FD_SET(sock, &rdfs);         // Add the socket
 
     if (select(sock + 1, &rdfs, NULL, NULL, NULL) == -1) {
-      perror("Select failed");
       close_socket(sock);
       exit(EXIT_FAILURE);
     }
@@ -113,19 +104,23 @@ void app(const char *address, const char *name, const struct Mediator *mediator,
           unsigned int res = handle_client_cmd(sock, clientMediator, buffer);
 
           if (!res) {
-            printf("This command does not seem to exist\n");
+            perror("Command not handled");
           }
         }
       }
     } else if (FD_ISSET(sock, &rdfs)) {
       // Server down
       if (read_from_socket(sock, buffer) == 0) {
-        printf("Server disconnected.\n");
+        perror("Server down");
         break;
       }
 
-      if (!compute_cmd(mediator, -1, buffer)) {
-        printf("Command not handled\n");
+      enum CMD cmd_id;
+
+      if (compute_cmd(mediator, -1, buffer, &cmd_id)) {
+        printf("Command %02X handled\n", cmd_id);
+      } else {
+        perror("Command %02X not handled");
       }
     }
   }

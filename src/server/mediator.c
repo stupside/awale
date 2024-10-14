@@ -14,28 +14,59 @@
 
 #include "lib/awale/awale.h"
 
-unsigned int on_user_login(unsigned int client_id, const void *data) {
+unsigned int on_user_login(unsigned int socket, const void *data) {
 
-  {
-    const struct UserLoginEvent event = {.id = client_id};
+  struct Server *server = awale_server();
 
-    char *cmd =
-        inline_cmd(CMD_USER_LOGIN, &event, sizeof(struct UserLoginEvent));
+  const struct UserLoginReq *req = data;
 
-    const SocketClient *sender =
-        find_client_by_id(&awale_server()->pool, client_id);
+  const SocketClient *existing = find_client_by_name(&server->pool, req->name);
 
-    if (sender == NULL) {
+  unsigned int client_id = 0;
+
+  if (existing) {
+
+    if (existing->online) {
+      perror("Client already online");
       return 0;
     }
 
-    /**
-     * Tells all clients that a new user has logged in
-     */
-    write_to_sockets(&awale_server()->pool, sender, cmd);
+    if (strcmp(existing->password, req->password) != 0) {
+      perror("Invalid password");
+      return 0;
+    }
 
-    free(cmd);
+    const int ok =
+        unarchive_client(&server->pool, socket, req->name, &client_id);
+
+    if (!ok) {
+      perror("Failed to unarchive client");
+      return 0;
+    }
+  } else {
+    const int ok =
+        add_client(&server->pool, req->name, req->password, socket, &client_id);
+
+    if (!ok) {
+      perror("Failed to add client");
+      return 0;
+    }
   }
+
+  const struct UserLoginEvent event = {.id = client_id};
+
+  char *cmd = inline_cmd(CMD_USER_LOGIN, &event, sizeof(struct UserLoginEvent));
+
+  const SocketClient *sender =
+      find_client_by_id(&awale_server()->pool, client_id);
+
+  if (!sender) {
+    return 0;
+  }
+
+  write_to_sockets(&awale_server()->pool, sender, cmd);
+
+  free(cmd);
 
   return 1;
 };
@@ -45,7 +76,7 @@ unsigned int on_user_logout(unsigned int client_id, const void *data) {
   const SocketClient *sender =
       find_client_by_id(&awale_server()->pool, client_id);
 
-  if (sender == NULL) {
+  if (!sender) {
     return 0;
   }
 
@@ -151,7 +182,7 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
 
   const struct Lobby *lobby = find_running_lobby(awale_server(), client);
 
-  if (lobby == NULL) {
+  if (!lobby) {
     return 0;
   }
 

@@ -12,6 +12,7 @@ struct UserInfoRes {
 
 struct UserLoginReq {
   char name[255];
+  char password[255];
   char description[255];
 };
 struct UserLoginRes {

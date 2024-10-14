@@ -45,8 +45,8 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
 
   printf("Game state: %d\n", event->status);
 
-  for (int i = 0; i < GRID_COLS; i++) {
-    for (int j = 0; j < GRID_ROWS; j++) {
+  for (int i = 0; i < GRID_ROWS; i++) {
+    for (int j = 0; j < GRID_COLS; j++) {
       printf("[%2d]", event->grid[i][j]);
     }
     printf("\n");

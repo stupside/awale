@@ -6,12 +6,13 @@
 
 #include "mediator.h"
 
-void app(const char *address, const char *name, const struct Mediator *mediator,
+void app(const char *address, const char *name, const char *password,
+         const struct Mediator *mediator,
          const struct ClientMediator *clientMediator);
 
 int main(int argc, char **argv) {
   if (argc < 2) {
-    printf("Usage : %s [address] [pseudo]\n", argv[0]);
+    printf("Usage : %s [address] [pseudo] [password]\n", argv[0]);
     return EXIT_FAILURE;
   }
 
@@ -24,7 +25,7 @@ int main(int argc, char **argv) {
 
   // compute_cmd(mediator, const SocketClient *from, const char *cmd)
 
-  app(argv[1], argv[2], &mediator, &clientMediator);
+  app(argv[1], argv[2], argv[3], &mediator, &clientMediator);
 
   return EXIT_SUCCESS;
 }

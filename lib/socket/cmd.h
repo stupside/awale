@@ -52,6 +52,6 @@ void register_cmd(struct Mediator *mediator, enum CMD cmd,
 char *inline_cmd(enum CMD cmd, const void *data, unsigned int data_size);
 
 int compute_cmd(const struct Mediator *dispatcher, unsigned int client_id,
-                const char *cmd);
+                const char *cmd, enum CMD *cmd_id);
 
 #endif

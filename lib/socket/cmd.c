@@ -16,14 +16,14 @@ void register_cmd(struct Mediator *mediator, enum CMD cmd,
 }
 
 int compute_cmd(const struct Mediator *dispatcher, unsigned int client_id,
-                const char *cmd) {
+                const char *cmd, enum CMD *cmd_id) {
   // Extract command ID from the received command
   char cmd_id_hex[CMD_ID_SIZE + 1];
   memcpy(cmd_id_hex, cmd, CMD_ID_SIZE);
   cmd_id_hex[CMD_ID_SIZE] = '\0';
 
   // Convert command ID from hexadecimal string to enum
-  const enum CMD cmd_id = strtol(cmd_id_hex, NULL, 16);
+  *cmd_id = strtol(cmd_id_hex, NULL, 16);
 
   // Extract payload length from the received command
   char payload_len_hex[PAYLOAD_LENGTH_SIZE + 1];
@@ -51,7 +51,7 @@ int compute_cmd(const struct Mediator *dispatcher, unsigned int client_id,
   }
 
   // Ensure the handler exists
-  const struct Handler *handler = &dispatcher->handlers[cmd_id];
+  const struct Handler *handler = &dispatcher->handlers[*cmd_id];
 
   if (!handler) {
 
@@ -72,7 +72,8 @@ int compute_cmd(const struct Mediator *dispatcher, unsigned int client_id,
 
   free(payload); // Free the memory after use
 
-  perror("No handler function");
+  printf("No handler function for command %02X\n", *cmd_id);
+
   return 0;
 }
 

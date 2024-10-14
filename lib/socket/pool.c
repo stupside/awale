@@ -15,36 +15,36 @@ void clear_clients(SocketPool *pool) {
   }
 }
 
-int add_client(SocketPool *pool, const char *name, SOCKET socket) {
-
-  static unsigned int id = 0;
+int add_client(SocketPool *pool, const char *name, const char *password,
+               SOCKET socket, unsigned int *client_id) {
 
   if (pool->count == MAX_CLIENTS) {
+    perror("Max clients reached");
     return 0;
   }
 
-  unsigned int unarchived = unarchive_client(pool, socket, name);
-
-  if (unarchived) {
-    printf("Client %s unarchived\n", name);
-  } else {
-
-    pool->clients[pool->count] =
-        (SocketClient){.id = id++, .socket = socket, .online = 1};
-
-    struct SocketClient *client = &pool->clients[pool->count];
-
-    strncpy(client->name, name, strlen(name));
-
-    printf("Client %s added with id %d\n", client->name, client->id);
-
-    pool->count++;
+  if (find_client_by_name(pool, name)) {
+    perror("Client already exists");
+    return 0;
   }
+
+  const unsigned int id = pool->count++;
+
+  pool->clients[id] = (SocketClient){.id = id, .socket = socket, .online = 1};
+
+  struct SocketClient *client = &pool->clients[id];
+
+  strncpy(client->name, name, strlen(name));
+  strncpy(client->password, password, strlen(password));
+
+  printf("Client %s added with id %d\n", client->name, client->id);
+
+  *client_id = client->id;
 
   return 1;
 }
 
-unsigned int archive_client(SocketPool *sockets, int client_id) {
+int archive_client(SocketPool *sockets, unsigned int client_id) {
 
   SocketClient *client = &sockets->clients[client_id];
 
@@ -67,12 +67,13 @@ unsigned int archive_client(SocketPool *sockets, int client_id) {
   return 1;
 }
 
-unsigned int unarchive_client(SocketPool *sockets, SOCKET socket,
-                              const char *name) {
+int unarchive_client(SocketPool *sockets, SOCKET socket, const char *name,
+                     unsigned int *client_id) {
 
   SocketClient *client = find_client_by_name(sockets, name);
 
   if (!client) {
+    perror("Client not found");
     return 0;
   }
 
@@ -85,6 +86,8 @@ unsigned int unarchive_client(SocketPool *sockets, SOCKET socket,
   client->socket = socket;
 
   printf("Client with id %d unarchived\n", client->id);
+
+  *client_id = client->id;
 
   return 1;
 }
@@ -104,6 +107,8 @@ SocketClient *find_client_by_id(SocketPool *pool, unsigned int id) {
     }
   }
 
+  perror("Client not found");
+
   return NULL;
 }
 
@@ -117,6 +122,8 @@ SocketClient *find_client_by_name(SocketPool *pool, const char *name) {
       return client;
     }
   }
+
+  perror("Client not found");
 
   return NULL;
 }
