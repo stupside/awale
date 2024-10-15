@@ -8,7 +8,7 @@
 
 #include "lib/socket/cmds/challenge.h"
 
-unsigned int on_challenge_event(unsigned int client_id, const void *data) {
+unsigned int on_challenge(unsigned int client_id, const void *data) {
 
   const struct ChallengeEvent *event = data;
 
@@ -36,7 +36,7 @@ unsigned int on_handle_challenge_event(unsigned int client_id,
 };
 
 void add_challenge_cmds(struct ServerMediator *mediator) {
-  register_cmd(mediator, CMD_CHALLENGE_EVENT, &on_challenge_event);
+  register_cmd(mediator, CMD_CHALLENGE_EVENT, &on_challenge);
   register_cmd(mediator, CMD_CHALLENGE_HANDLE_EVENT,
                &on_handle_challenge_event);
 }

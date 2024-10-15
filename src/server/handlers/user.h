@@ -13,7 +13,7 @@
 
 #include "lib/socket/cmds/user.h"
 
-unsigned int on_user_login_event(unsigned int socket, const void *data) {
+unsigned int on_user_login(unsigned int socket, const void *data) {
 
   struct Server *server = awale_server();
 
@@ -87,7 +87,7 @@ unsigned int on_user_login_event(unsigned int socket, const void *data) {
   return 1;
 };
 
-unsigned int on_user_logout_event(unsigned int client_id, const void *data) {
+unsigned int on_user_logout(unsigned int client_id, const void *data) {
 
   const SocketClient *client =
       find_client_by_id(&awale_server()->pool, client_id);
@@ -110,9 +110,12 @@ unsigned int on_user_list_all(unsigned int client_id, const void *data) {
 
   const struct UserListReq *req = data;
 
-  struct UserListRes res;
+  struct UserListRes res = {
+      .count = 0,
+  };
 
   const unsigned int min = req->page * PAGE_MAX_CLIENTS;
+
   const unsigned int max =
       (min + PAGE_MAX_CLIENTS) % awale_server()->pool.count;
 
@@ -148,8 +151,8 @@ unsigned int on_user_list_all(unsigned int client_id, const void *data) {
 
 void add_user_cmds(struct ServerMediator *mediator) {
 
-  register_cmd(mediator, CMD_USER_LOGIN, &on_user_login_event);
-  register_cmd(mediator, CMD_USER_LOGOUT, &on_user_logout_event);
+  register_cmd(mediator, CMD_USER_LOGIN, &on_user_login);
+  register_cmd(mediator, CMD_USER_LOGOUT, &on_user_logout);
   register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list_all);
 }
 

@@ -8,7 +8,7 @@
 
 #include "lib/socket/cmds/user.h"
 
-unsigned int on_user_login_event(unsigned int client_id, const void *data) {
+unsigned int on_user_login(unsigned int client_id, const void *data) {
 
   const struct UserLoginEvent *event = data;
 
@@ -17,7 +17,7 @@ unsigned int on_user_login_event(unsigned int client_id, const void *data) {
   return 1;
 };
 
-unsigned int on_user_logout_event(unsigned int client_id, const void *data) {
+unsigned int on_user_logout(unsigned int client_id, const void *data) {
 
   const struct UserLogoutEvent *event = data;
 
@@ -42,8 +42,8 @@ unsigned int on_user_list(unsigned int client_id, const void *data) {
 void add_user_cmds(struct ServerMediator *mediator) {
   register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list);
 
-  register_cmd(mediator, CMD_USER_LOGIN_EVENT, &on_user_login_event);
-  register_cmd(mediator, CMD_USER_LOGOUT_EVENT, &on_user_logout_event);
+  register_cmd(mediator, CMD_USER_LOGIN_EVENT, &on_user_login);
+  register_cmd(mediator, CMD_USER_LOGOUT_EVENT, &on_user_logout);
 }
 
 #endif

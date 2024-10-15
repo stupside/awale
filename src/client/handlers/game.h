@@ -60,8 +60,25 @@ unsigned int on_game_state_event(unsigned int client_id, const void *data) {
   return 1;
 };
 
+unsigned int on_game_state(unsigned int client_id, const void *data) {
+
+  const struct GameStateRes *res = data;
+
+  printf("Game state: %d\n", res->status);
+
+  for (int i = 0; i < GRID_ROWS; i++) {
+    for (int j = 0; j < GRID_COLS; j++) {
+      printf("[%2d]", res->grid[i][j]);
+    }
+    printf("\n");
+  }
+
+  return 1;
+};
+
 void add_game_cmds(struct ServerMediator *mediator) {
   register_cmd(mediator, CMD_GAME_PLAY, &on_game_play);
+  register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
 
   register_cmd(mediator, CMD_GAME_LEAVE_EVENT, &on_game_leave_event);
   register_cmd(mediator, CMD_GAME_STATE_EVENT, &on_game_state_event);

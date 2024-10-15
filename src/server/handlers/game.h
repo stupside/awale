@@ -69,7 +69,7 @@ unsigned int on_game_play(unsigned int client_id, const void *data) {
     }
   }
 
-  send_cmd_to(lobby->client[PLAYER2]->socket, CMD_GAME_STATE_EVENT, &res,
+  send_cmd_to(lobby->client[PLAYER1]->socket, CMD_GAME_STATE_EVENT, &res,
               sizeof(struct GameStateEvent));
 
   send_cmd_to(lobby->client[PLAYER1]->socket, CMD_GAME_STATE_EVENT, &res,
