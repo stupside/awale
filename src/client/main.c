@@ -83,7 +83,7 @@ void *read_handler(void *mediator) {
       break;
     }
 
-    if (handle_cmd((struct Mediator *)mediator, -1, buffer)) {
+    if (handle_cmd(mediator, -1, buffer)) {
       continue;
     } else {
       perror("Command %02X not handled");
@@ -105,6 +105,7 @@ void app(const char *address, const char *name, const char *password,
   struct UserLoginReq req;
   strncpy(req.name, name, sizeof(req.name));
   strncpy(req.password, password, sizeof(req.password));
+
   send_cmd_to(sock, CMD_USER_LOGIN, &req, sizeof(struct UserLoginReq));
 
   // Create threads for reading and writing

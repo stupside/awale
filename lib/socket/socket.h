@@ -20,8 +20,12 @@ void close_socket(SOCKET sock);
 int send_cmd_to(SOCKET sock, enum CMD cmd_id, const void *data,
                 unsigned int data_size);
 
-int send_cmd_to_all(const SocketPool *pool, const SocketClient *sender,
-                    enum CMD cmd_id, const void *data, unsigned int data_size);
+int send_cmd_to_pool(const SocketPool *pool, const SocketClient *sender,
+                     enum CMD cmd_id, const void *data, unsigned int data_size);
+
+int send_cmd_to_client(const struct SocketClient *client, enum CMD cmd_id,
+                       const void *data, unsigned int data_size);
 
 int read_from_socket(SOCKET sock, char *buffer);
+
 #endif

@@ -25,8 +25,8 @@ unsigned int on_chat_write(unsigned int client_id, const void *data) {
     struct ChatWriteEvent event = {.client_id = client->id};
     strcpy(event.message, req->message);
 
-    send_cmd_to_all(&awale_server()->pool, client, CMD_CHAT_WRITE_EVENT, &event,
-                    sizeof(struct ChatWriteEvent));
+    send_cmd_to_pool(&awale_server()->pool, client, CMD_CHAT_WRITE_EVENT,
+                     &event, sizeof(struct ChatWriteEvent));
   }
 
   return 1;

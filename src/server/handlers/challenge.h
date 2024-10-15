@@ -24,8 +24,8 @@ unsigned int on_challenge(unsigned int client_id, const void *data) {
 
     const struct ErrorEvent event = {.message = "Client not found"};
 
-    send_cmd_to(challenger->socket, CMD_ERROR_EVENT, &event,
-                sizeof(struct ErrorEvent));
+    send_cmd_to_client(challenger, CMD_ERROR_EVENT, &event,
+                       sizeof(struct ErrorEvent));
 
     return 0;
   }
@@ -44,8 +44,8 @@ unsigned int on_challenge_handle(unsigned int client_id, const void *data) {
 
     const struct ErrorEvent event = {.message = "Challenger not found"};
 
-    send_cmd_to(challenger->socket, CMD_ERROR_EVENT, &event,
-                sizeof(struct ErrorEvent));
+    send_cmd_to_client(challenger, CMD_ERROR_EVENT, &event,
+                       sizeof(struct ErrorEvent));
 
     return 0;
   }

@@ -30,8 +30,7 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
     }
   }
 
-  send_cmd_to(client->socket, CMD_GAME_STATE, &res,
-              sizeof(struct GameStateRes));
+  send_cmd_to_client(client, CMD_GAME_STATE, &res, sizeof(struct GameStateRes));
 
   return 1;
 };
@@ -69,8 +68,8 @@ unsigned int on_game_observe(unsigned int client_id, const void *data) {
         .message = "An error occured while trying to observe the game",
     };
 
-    send_cmd_to(observer->socket, CMD_ERROR_EVENT, &event,
-                sizeof(struct ErrorEvent));
+    send_cmd_to_client(observer, CMD_ERROR_EVENT, &event,
+                       sizeof(struct ErrorEvent));
 
     return 0;
   }
@@ -80,19 +79,19 @@ unsigned int on_game_observe(unsigned int client_id, const void *data) {
       .client_id = req->client_id,
   };
 
-  send_cmd_to(observer->socket, CMD_GAME_OBSERVE, &res,
-              sizeof(struct GameObserveRes));
+  send_cmd_to_client(observer, CMD_GAME_OBSERVE, &res,
+                     sizeof(struct GameObserveRes));
 
   const struct GameObserveEvent event = {
       .client_id = client_id,
       .observe = req->observe,
   };
 
-  send_cmd_to(lobby->client[PLAYER1]->socket, CMD_GAME_OBSERVE_EVENT, &event,
-              sizeof(struct GameObserveEvent));
+  send_cmd_to_client(lobby->client[PLAYER1], CMD_GAME_OBSERVE_EVENT, &event,
+                     sizeof(struct GameObserveEvent));
 
-  send_cmd_to(lobby->client[PLAYER2]->socket, CMD_GAME_OBSERVE_EVENT, &event,
-              sizeof(struct GameObserveEvent));
+  send_cmd_to_client(lobby->client[PLAYER2], CMD_GAME_OBSERVE_EVENT, &event,
+                     sizeof(struct GameObserveEvent));
 
   return 1;
 };

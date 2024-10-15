@@ -20,7 +20,6 @@ struct Server *awale_server() {
 }
 
 void init_awale_server(struct Server *server) {
-
   server->lobbies_c = 0;
   server->lobbies = malloc(MAX_LOBBIES * sizeof(struct Lobby));
 }
@@ -111,8 +110,8 @@ int challenge(struct Server *server, SocketClient *challenger,
       .client_id = challenger->id,
   };
 
-  send_cmd_to(challenged->socket, CMD_CHALLENGE_EVENT, &event,
-              sizeof(struct ChallengeEvent));
+  send_cmd_to_client(challenged, CMD_CHALLENGE_EVENT, &event,
+                     sizeof(struct ChallengeEvent));
 
   return 1;
 }
@@ -155,21 +154,23 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
       }
     }
 
-    send_cmd_to(lobby->client[PLAYER1]->socket, CMD_GAME_STATE_EVENT, &event,
-                sizeof(struct GameStateEvent));
+    send_cmd_to_client(lobby->client[PLAYER1], CMD_GAME_STATE_EVENT, &event,
+                       sizeof(struct GameStateEvent));
 
-    send_cmd_to(lobby->client[PLAYER2]->socket, CMD_GAME_STATE_EVENT, &event,
-                sizeof(struct GameStateEvent));
+    send_cmd_to_client(lobby->client[PLAYER2], CMD_GAME_STATE_EVENT, &event,
+                       sizeof(struct GameStateEvent));
 
     event.observed = 1;
 
-    for (unsigned int i = 0; i < lobby->observators_c; i++) {
+    for (unsigned int i = 0; i < MAX_LOBBIES; i++) {
 
       const struct SocketClient *observator = lobby->observators[i];
 
       if (observator) {
-        send_cmd_to(observator->socket, CMD_GAME_STATE_EVENT, &event,
-                    sizeof(struct GameStateEvent));
+        if (observator->online) {
+          send_cmd_to_client(observator, CMD_GAME_STATE_EVENT, &event,
+                             sizeof(struct GameStateEvent));
+        }
       }
     }
 
@@ -180,8 +181,7 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
         .validity = validity,
     };
 
-    send_cmd_to(client->socket, CMD_GAME_PLAY, &res,
-                sizeof(struct GamePlayRes));
+    send_cmd_to_client(client, CMD_GAME_PLAY, &res, sizeof(struct GamePlayRes));
   }
 
   return 0;
@@ -208,8 +208,8 @@ int handle_challenge(struct Server *server, const SocketClient *challenger,
         .accept = accept,
     };
 
-    send_cmd_to(lobby->client[PLAYER1]->socket, CMD_CHALLENGE_HANDLE_EVENT,
-                &event, sizeof(struct ChallengeHandleEvent));
+    send_cmd_to_client(lobby->client[PLAYER1], CMD_CHALLENGE_HANDLE_EVENT,
+                       &event, sizeof(struct ChallengeHandleEvent));
   }
 
   return 0;

@@ -81,8 +81,8 @@ unsigned int on_user_login(unsigned int socket, const void *data) {
 
   const struct UserLoginEvent event = {.id = client_id};
 
-  send_cmd_to_all(&awale_server()->pool, client, CMD_USER_LOGIN_EVENT, &event,
-                  sizeof(struct UserLoginEvent));
+  send_cmd_to_pool(&awale_server()->pool, client, CMD_USER_LOGIN_EVENT, &event,
+                   sizeof(struct UserLoginEvent));
 
   return 1;
 };
@@ -99,8 +99,8 @@ unsigned int on_user_logout(unsigned int client_id, const void *data) {
   {
     const struct UserLogoutEvent event = {.client_id = client->id};
 
-    send_cmd_to_all(&awale_server()->pool, client, CMD_USER_LOGOUT_EVENT,
-                    &event, sizeof(struct UserLogoutEvent));
+    send_cmd_to_pool(&awale_server()->pool, client, CMD_USER_LOGOUT_EVENT,
+                     &event, sizeof(struct UserLogoutEvent));
   }
 
   return 1;
