@@ -18,7 +18,7 @@ unsigned int client_chat(SOCKET sock, char *argv[], unsigned int argslen) {
 
   message[0] = '\0';
 
-  for (unsigned int i = 1; i < argslen; i++) {
+  for (unsigned int i = 2; i < argslen; i++) {
 
     strcat(message, argv[i]);
 
@@ -28,6 +28,8 @@ unsigned int client_chat(SOCKET sock, char *argv[], unsigned int argslen) {
   }
 
   strncpy(req.message, message, sizeof(req.message) - 1);
+
+  req.client_id = atoi(argv[1]);
 
   send_cmd_to(sock, CMD_CHAT_WRITE, &req, sizeof(struct ChatWriteReq));
 

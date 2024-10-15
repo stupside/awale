@@ -5,6 +5,7 @@
 #include "lib/valuable/type.h"
 
 struct ChatWriteReq {
+  int client_id;
   char message[CHAT_MSG_LEN];
 };
 
