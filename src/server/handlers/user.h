@@ -119,7 +119,7 @@ unsigned int on_user_list_all(unsigned int client_id, const void *data) {
   const unsigned int max =
       (min + PAGE_MAX_CLIENTS) % awale_server()->pool.count;
 
-  for (unsigned int i = min; i < max; i++) {
+  for (unsigned int i = min; i <= max; i++) {
 
     const SocketClient *client = &awale_server()->pool.clients[i];
 
