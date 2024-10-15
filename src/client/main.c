@@ -2,12 +2,9 @@
 
 #include <netdb.h>
 #include <pthread.h>
-#include <signal.h>
 #include <string.h>
 
-#include "lib/socket/cmd.h"
 #include "lib/socket/cmds/user.h"
-#include "lib/socket/socket.h"
 
 SOCKET sock;
 pthread_t read_thread, write_thread;

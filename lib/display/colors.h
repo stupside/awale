@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #define SET_COLOR(code) printf("\033[%sm", code)
 #define RESET_COLOR() printf("\033[0m")
 #define COLOR_BLUE "1;34"   // Bold Blue

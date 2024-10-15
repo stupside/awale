@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "lib/cmds/mediator.h"
 #include "mediator.h"
 
 #include "handlers/challenge.h"
