@@ -47,6 +47,7 @@ unsigned int on_user_get_info(unsigned int client_id, const void *data) {
   printf("Id: %d\n", res->user.client_id);
   printf("Name: %s\n", res->user.name);
   printf("Description: %s\n", res->user.description);
+
   return 1;
 };
 

@@ -160,11 +160,11 @@ unsigned int client_set_password(SOCKET sock, char *argv[],
     return 0;
   }
 
-  struct UserInfoSetReq req = {0};
+  struct UserSetInfoReq req = {0};
 
   strncpy(req.password, argv[1], sizeof(req.password) - 1);
 
-  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(struct UserInfoSetReq));
+  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(struct UserSetInfoReq));
 
   return 1;
 }
@@ -176,11 +176,11 @@ unsigned int client_set_username(SOCKET sock, char *argv[],
     return 0;
   }
 
-  struct UserInfoSetReq req = {0};
+  struct UserSetInfoReq req = {0};
 
   strncpy(req.name, argv[1], sizeof(req.name) - 1);
 
-  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(struct UserInfoSetReq));
+  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(struct UserSetInfoReq));
 
   return 1;
 }
@@ -192,7 +192,7 @@ unsigned int client_set_description(SOCKET sock, char *argv[],
     return 0;
   }
 
-  struct UserInfoSetReq req = {0};
+  struct UserSetInfoReq req = {0};
 
   unsigned int curs = 1;
   while (curs < argslen) {
@@ -205,7 +205,7 @@ unsigned int client_set_description(SOCKET sock, char *argv[],
     curs++;
   }
 
-  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(struct UserInfoSetReq));
+  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(struct UserSetInfoReq));
 
   return 1;
 }

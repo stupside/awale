@@ -4,13 +4,6 @@
 #include "lib/valuable/limit.h"
 #include "lib/valuable/type.h"
 
-struct UserInfoReq {
-  char name[USER_NAME_LEN];
-};
-struct UserInfoRes {
-  char description[USER_DESC_LEN];
-};
-
 struct UserLoginReq {
   char name[USER_NAME_LEN];
   char password[USER_PASSWORD_LEN];
@@ -49,14 +42,13 @@ struct UserListRes {
   struct UserRes users[PAGE_MAX_CLIENTS];
 };
 
-struct UserInfoSetReq {
+struct UserSetInfoReq {
   char name[USER_NAME_LEN];
   char password[USER_PASSWORD_LEN];
   char description[USER_DESC_LEN];
 };
 
 struct UserGetInfoReq {};
-
 struct UserGetInfoRes {
   struct UserRes user;
 };

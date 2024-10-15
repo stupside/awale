@@ -145,7 +145,7 @@ unsigned int on_user_list_all(unsigned int client_id, const void *data) {
 
 unsigned int on_user_set_info(unsigned int client_id, const void *data) {
 
-  const struct UserInfoSetReq *req = data;
+  const struct UserSetInfoReq *req = data;
 
   SocketClient *client = find_client_by_id(&awale_server()->pool, client_id);
 
@@ -182,7 +182,7 @@ unsigned int on_user_get_info(unsigned int client_id, const void *data) {
   strncpy(res.user.description, client->description, USER_DESC_LEN);
 
   send_cmd_to(client->socket, CMD_USER_GET_INFO, &res,
-              sizeof(struct UserInfoRes));
+              sizeof(struct UserGetInfoRes));
 
   return 1;
 };
