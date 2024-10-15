@@ -13,7 +13,7 @@ struct UserLoginRes {
   ClientId client_id;
 };
 struct UserLoginEvent {
-  ClientId id;
+  ClientId client_id;
 };
 
 struct UserLogoutReq {};
@@ -49,7 +49,9 @@ struct UserSetInfoReq {
 };
 struct UserSetInfoRes {};
 
-struct UserGetInfoReq {};
+struct UserGetInfoReq {
+  ClientId client_id;
+};
 struct UserGetInfoRes {
   struct UserRes user;
 };

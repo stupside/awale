@@ -11,15 +11,6 @@
 
 static ClientId CLIENT_ID;
 
-unsigned int on_user_login_event(unsigned int client_id, const void *data) {
-
-  const struct UserLoginEvent *event = data;
-
-  PRINT_COLOR(COLOR_BLUE, "\n\n User %d logged in \n\n", event->id);
-
-  return 1;
-};
-
 unsigned int on_user_login(unsigned int client_id, const void *data) {
 
   const struct UserLoginRes *event = data;
@@ -27,6 +18,15 @@ unsigned int on_user_login(unsigned int client_id, const void *data) {
   CLIENT_ID = event->client_id;
 
   PRINT_COLOR(COLOR_GREEN, "\n\n Your user ID is %d \n\n", CLIENT_ID);
+
+  return 1;
+};
+
+unsigned int on_user_login_event(unsigned int client_id, const void *data) {
+
+  const struct UserLoginEvent *event = data;
+
+  PRINT_COLOR(COLOR_BLUE, "\n\n User %d logged in \n\n", event->client_id);
 
   return 1;
 };
@@ -67,7 +67,6 @@ unsigned int on_user_get_info(unsigned int client_id, const void *data) {
 
 void add_user_cmds(struct ServerMediator *mediator) {
   register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list);
-  register_cmd(mediator, CMD_USER_LOGIN_EVENT, &on_user_login_event);
   register_cmd(mediator, CMD_USER_LOGOUT_EVENT, &on_user_logout);
   register_cmd(mediator, CMD_USER_GET_INFO, &on_user_get_info);
   register_cmd(mediator, CMD_USER_LOGIN, &on_user_login);

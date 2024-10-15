@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "handlers/user.h"
+
 #include "lib/socket/cmds/challenge.h"
 #include "lib/socket/cmds/chat.h"
 #include "lib/socket/cmds/game.h"
@@ -214,6 +216,12 @@ unsigned int client_set_description(SOCKET sock, char *argv[],
 
 unsigned int client_user(SOCKET sock, char *argv[], unsigned int argslen) {
   struct UserGetInfoReq req;
+
+  if (argslen < 2) {
+    req.client_id = CLIENT_ID;
+  } else {
+    req.client_id = atoi(argv[1]);
+  }
 
   send_cmd_to(sock, CMD_USER_GET_INFO, &req, sizeof(struct UserGetInfoReq));
 

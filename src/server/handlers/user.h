@@ -13,7 +13,7 @@
 
 #include "lib/socket/cmds/user.h"
 
-unsigned int on_user_login_event(unsigned int socket, const void *data) {
+unsigned int on_user_login(unsigned int socket, const void *data) {
 
   struct Server *server = awale_server();
 
@@ -59,7 +59,7 @@ unsigned int on_user_login_event(unsigned int socket, const void *data) {
 
   send_cmd_to(socket, CMD_USER_LOGIN, &res, sizeof(struct UserLoginRes));
 
-  const struct UserLoginEvent event = {.id = client_id};
+  const struct UserLoginEvent event = {.client_id = client_id};
 
   const SocketClient *client =
       find_client_by_id(&awale_server()->pool, client_id);
@@ -176,8 +176,18 @@ unsigned int on_user_set_info(unsigned int client_id, const void *data) {
 
 unsigned int on_user_get_info(unsigned int client_id, const void *data) {
 
+  const struct UserGetInfoReq *req = data;
+
   const SocketClient *client =
-      find_client_by_id(&awale_server()->pool, client_id);
+      find_client_by_id(&awale_server()->pool, req->client_id);
+
+  if (!client) {
+    const struct ErrorEvent event = {.message = "Client not found"};
+
+    send_cmd_to(client->socket, CMD_ERROR_EVENT, &event,
+                sizeof(struct ErrorEvent));
+    return 0;
+  }
 
   struct UserGetInfoRes res = {
       .user.client_id = client->id,
@@ -194,7 +204,7 @@ unsigned int on_user_get_info(unsigned int client_id, const void *data) {
 
 void add_user_cmds(struct ServerMediator *mediator) {
 
-  register_cmd(mediator, CMD_USER_LOGIN, &on_user_login_event);
+  register_cmd(mediator, CMD_USER_LOGIN, &on_user_login);
   register_cmd(mediator, CMD_USER_LOGOUT, &on_user_logout);
   register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list_all);
   register_cmd(mediator, CMD_USER_SET_INFO, &on_user_set_info);
