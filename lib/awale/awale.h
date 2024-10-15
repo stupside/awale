@@ -1,6 +1,8 @@
 #ifndef AWALE_H
 #define AWALE_H
 
+#define PLAYER_COUNT 2
+
 #define GRID_ROWS 6
 #define GRID_COLS 2
 
@@ -36,7 +38,7 @@ struct Awale {
 
   enum PlayerID current;
 
-  int score[2];
+  int score[PLAYER_COUNT];
 
   int grid[GRID_ROWS][GRID_COLS];
 };

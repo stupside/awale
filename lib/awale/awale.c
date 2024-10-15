@@ -1,4 +1,6 @@
 #include "awale.h"
+#include <stdlib.h>
+#include <time.h>
 
 struct Awale new_awale() { return (struct Awale){.grid = {}, .score = {0}}; }
 
@@ -7,7 +9,11 @@ void reset(struct Awale *awale) {
   awale->score[PLAYER1] = 0;
   awale->score[PLAYER2] = 0;
 
-  awale->current = PLAYER1;
+  unsigned int seed = time(NULL);
+
+  srand(seed);
+
+  awale->current = rand() % PLAYER_COUNT;
 
   for (int i = 0; i < GRID_ROWS; i++) {
     for (int j = 0; j < GRID_COLS; j++) {
