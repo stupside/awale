@@ -1,18 +1,17 @@
 #include "challenge.h"
 
 #include "lib/display/colors.h"
-#include "lib/socket/cmds/challenge.h"
-
 #include "lib/socket/cmd.h"
+#include "lib/socket/cmds/challenge.h"
 
 unsigned int on_challenge(unsigned int client_id, const void *data) {
   const struct ChallengeEvent *event = data;
 
-  PRINT_COLOR(
-      COLOR_BLUE,
-      "You have been challenged by %d, tap /challenge-accept %d to accept or "
-      "/challenge-reject %d to decline.\n",
-      event->client_id, event->client_id, event->client_id);
+  PRINT_COLOR(COLOR_CYAN, // Changed to cyan for system notifications
+              "📢 Player %d has challenged you!\n"
+              "➡️ Use /challenge-accept %d to accept the challenge or\n"
+              "❌ Use /challenge-reject %d to decline.\n",
+              event->client_id, event->client_id, event->client_id);
 
   return 1;
 }
@@ -22,10 +21,10 @@ unsigned int on_handle_challenge_event(unsigned int client_id,
   const struct ChallengeHandleEvent *event = data;
 
   if (event->accept) {
-    PRINT_COLOR(COLOR_GREEN, "Your challenge request has been accepted, tap "
-                             "/game-grid to load the game.\n");
+    PRINT_COLOR(COLOR_GREEN, "✅ Your challenge was accepted! Use /game-grid to "
+                             "view the game board.\n");
   } else {
-    PRINT_COLOR(COLOR_RED, "Your challenge request has been declined.\n");
+    PRINT_COLOR(COLOR_YELLOW, "⚠️ Your challenge was declined by the player.\n");
   }
 
   return 1;

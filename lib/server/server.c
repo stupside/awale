@@ -134,9 +134,7 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
 
   const enum CoupValidity validity = play(&lobby->awale, player, target);
 
-  enum GameStatus game_status = status(&lobby->awale);
-
-  if (game_status != GAME_NOT_OVER && game_status != PASS_TURN_NO_SEEDS) {
+  if (status(&lobby->awale) != GAME_NOT_OVER) {
     lobby->state = LOBBY_STATE_FINISHED;
   }
 
