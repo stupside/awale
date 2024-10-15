@@ -50,4 +50,10 @@ struct UserListRes {
   struct UserRes users[PAGE_MAX_CLIENTS];
 };
 
+struct UserInfoSetReq {
+  char name[USER_NAME_LEN];
+  char password[USER_PASSWORD_LEN];
+  char description[USER_DESC_LEN];
+};
+
 #endif

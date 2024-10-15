@@ -1,5 +1,6 @@
 #include "mediator.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -119,6 +120,46 @@ unsigned int client_game_leave(SOCKET sock, char *argv[],
   return 1;
 }
 
+unsigned int client_game_set_infos(SOCKET sock, char *argv[],
+                                   unsigned int argslen) {
+  if (argslen < 3) {
+    return 0;
+  }
+
+  struct UserInfoSetReq req = {0};
+
+  int j = 1;
+  while (j < argslen - 1) {
+    if (strcmp(argv[j], "-p") == 0) {
+      strncpy(req.password, argv[j + 1], sizeof(req.password) - 1);
+      printf("Password\n");
+      req.password[sizeof(req.password) - 1] = '\0';
+      j += 2;
+    } else if (strcmp(argv[j], "-n") == 0) {
+      strncpy(req.name, argv[j + 1], sizeof(req.name) - 1);
+      req.name[sizeof(req.name) - 1] = '\0';
+      j += 2;
+    } else if (strcmp(argv[j], "-d") == 0) {
+      j++;
+      while (j < argslen && argv[j][0] != '-') {
+        strncat(req.description, argv[j],
+                sizeof(req.description) - strlen(req.description) - 1);
+        if (j < argslen - 1 && argv[j + 1][0] != '-') {
+          strncat(req.description, " ",
+                  sizeof(req.description) - strlen(req.description) - 1);
+        }
+        j++;
+      }
+    } else {
+      j++;
+    }
+  }
+
+  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(struct UserInfoSetReq));
+
+  return 1;
+}
+
 void init_client_mediator(struct ClientMediator *mediator) {
 
   register_client_cmd(mediator, "/chat", &client_chat);
@@ -136,4 +177,6 @@ void init_client_mediator(struct ClientMediator *mediator) {
   register_client_cmd(mediator, "/observe", &client_game_observe);
 
   register_client_cmd(mediator, "/leave", &client_game_leave);
+
+  register_client_cmd(mediator, "/set-infos", &client_game_set_infos);
 }
