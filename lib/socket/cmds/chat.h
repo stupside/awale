@@ -8,7 +8,9 @@ struct ChatWriteReq {
   int client_id;
   char message[CHAT_MSG_LEN];
 };
-
+struct ChatWriteRes {
+  unsigned int count;
+};
 struct ChatWriteEvent {
   ClientId client_id;
   char message[CHAT_MSG_LEN];
