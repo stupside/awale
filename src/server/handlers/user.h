@@ -108,6 +108,19 @@ unsigned int on_user_logout(unsigned int client_id, const void *data) {
 
 unsigned int on_user_list_all(unsigned int client_id, const void *data) {
 
+  // on filtre
+  const struct SocketClient *socketClients[awale_server()->pool.count];
+  int countParseableUsers = 0;
+  for (unsigned int i = 0; i < awale_server()->pool.count; i++) {
+    const SocketClient *client = &awale_server()->pool.clients[i];
+    if (client->id == client_id) {
+      continue;
+    }
+    if (client->online) {
+      socketClients[countParseableUsers++] = client;
+    }
+  }
+
   const struct UserListReq *req = data;
 
   struct UserListRes res = {
@@ -116,28 +129,24 @@ unsigned int on_user_list_all(unsigned int client_id, const void *data) {
 
   const unsigned int min = req->page * PAGE_MAX_CLIENTS;
 
-  const unsigned int max =
-      (min + PAGE_MAX_CLIENTS) % awale_server()->pool.count;
+  unsigned int max = PAGE_MAX_CLIENTS * (req->page + 1) - 1;
+
+  if (countParseableUsers / PAGE_MAX_CLIENTS == req->page) {
+    max = min + countParseableUsers % PAGE_MAX_CLIENTS - 1;
+  }
 
   for (unsigned int i = min; i <= max; i++) {
 
-    const SocketClient *client = &awale_server()->pool.clients[i];
+    const SocketClient *client = socketClients[i];
 
-    if (client->id == client_id) {
-      continue;
-    }
+    struct UserRes user = {
+        .client_id = client->id,
+        .description = {0},
+    };
 
-    if (client->online) {
+    strncpy(user.name, client->name, USER_NAME_LEN);
 
-      struct UserRes user = {
-          .client_id = client->id,
-          .description = {0},
-      };
-
-      strncpy(user.name, client->name, USER_NAME_LEN);
-
-      res.users[res.count++] = user;
-    }
+    res.users[res.count++] = user;
   }
 
   const SocketClient *client =
