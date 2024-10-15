@@ -30,6 +30,9 @@ unsigned int client_chat(SOCKET sock, char *argv[], unsigned int argslen) {
 }
 
 unsigned int client_play(SOCKET sock, char *argv[], unsigned int argslen) {
+  if (argslen < 2) {
+    return 0;
+  }
   struct GamePlayReq req;
   req.input = atoi(argv[1]);
 
@@ -40,6 +43,11 @@ unsigned int client_play(SOCKET sock, char *argv[], unsigned int argslen) {
 
 unsigned int client_challenge(SOCKET sock, char *argv[], unsigned int argslen) {
   struct ChallengeReq req;
+
+  if (argslen < 2) {
+    return 0;
+  }
+
   req.client_id = atoi(argv[1]);
 
   send_cmd_to(sock, CMD_CHALLENGE, &req, sizeof(struct ChallengeReq));
@@ -49,6 +57,10 @@ unsigned int client_challenge(SOCKET sock, char *argv[], unsigned int argslen) {
 
 unsigned int client_challenge_handle(SOCKET sock, char *argv[],
                                      unsigned int argslen) {
+  if (argslen < 3) {
+    return 0;
+  }
+
   struct ChallengeHandleReq req;
   req.accept = atoi(argv[2]);
   req.client_id = atoi(argv[1]);
@@ -68,6 +80,10 @@ unsigned int client_game_grid(SOCKET sock, char *argv[], unsigned int argslen) {
 }
 
 unsigned int client_users(SOCKET sock, char *argv[], unsigned int argslen) {
+
+  if (argslen < 2) {
+    return 0;
+  }
   struct UserListReq req = {
       .page = argslen > 1 ? atoi(argv[1]) : 0,
   };
@@ -79,6 +95,10 @@ unsigned int client_users(SOCKET sock, char *argv[], unsigned int argslen) {
 
 unsigned int client_game_observe(SOCKET sock, char *argv[],
                                  unsigned int argslen) {
+  if (argslen < 3) {
+    return 0;
+  }
+
   struct GameObserveReq req = {
       .observe = atoi(argv[2]),
       .client_id = atoi(argv[1]),
