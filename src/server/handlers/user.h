@@ -166,6 +166,11 @@ unsigned int on_user_set_info(unsigned int client_id, const void *data) {
     strncpy(client->description, req->description, USER_DESC_LEN);
   }
 
+  const struct UserSetInfoRes res = {};
+
+  send_cmd_to(client->socket, CMD_USER_SET_INFO, &res,
+              sizeof(struct UserSetInfoRes));
+
   return 1;
 };
 

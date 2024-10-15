@@ -51,6 +51,13 @@ unsigned int on_user_get_info(unsigned int client_id, const void *data) {
   return 1;
 };
 
+unsigned int on_user_set_info(unsigned int client_id, const void *data) {
+
+  printf("User info set\n");
+
+  return 1;
+};
+
 void add_user_cmds(struct ServerMediator *mediator) {
   register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list);
 
@@ -58,6 +65,7 @@ void add_user_cmds(struct ServerMediator *mediator) {
   register_cmd(mediator, CMD_USER_LOGOUT_EVENT, &on_user_logout);
 
   register_cmd(mediator, CMD_USER_GET_INFO, &on_user_get_info);
+  register_cmd(mediator, CMD_USER_SET_INFO, &on_user_set_info);
 }
 
 #endif

@@ -47,6 +47,7 @@ struct UserSetInfoReq {
   char password[USER_PASSWORD_LEN];
   char description[USER_DESC_LEN];
 };
+struct UserSetInfoRes {};
 
 struct UserGetInfoReq {};
 struct UserGetInfoRes {
