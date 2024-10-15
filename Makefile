@@ -15,6 +15,13 @@ client1:
 client2:
 	$(BAZEL) run //src/client:client -- 127.0.0.1 client2 password2 $(ARGS)
 
+client3:
+	$(BAZEL) run //src/client:client -- 127.0.0.1 client3 password3 $(ARGS)
+
+client4:
+	$(BAZEL) run //src/client:client -- 127.0.0.1 client4 password4 $(ARGS)
+
+
 server:
 	$(BAZEL) run //src/server:server -- $(ARGS)
 

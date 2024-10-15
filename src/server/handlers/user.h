@@ -108,36 +108,38 @@ unsigned int on_user_logout(unsigned int client_id, const void *data) {
 
 unsigned int on_user_list_all(unsigned int client_id, const void *data) {
 
-  // on filtre
-  const struct SocketClient *socketClients[awale_server()->pool.count];
-  int countParseableUsers = 0;
-  for (unsigned int i = 0; i < awale_server()->pool.count; i++) {
+  const struct SocketClient *clients_online[awale_server()->pool.count];
+
+  int clients_online_c = 0;
+
+  for (unsigned int i = 0; i < awale_server()->pool.count; ++i) {
+
     const SocketClient *client = &awale_server()->pool.clients[i];
+
     if (client->id == client_id) {
       continue;
     }
+
     if (client->online) {
-      socketClients[countParseableUsers++] = client;
+      clients_online[clients_online_c++] = client;
     }
   }
 
   const struct UserListReq *req = data;
 
+  const unsigned int min = req->page * PAGE_MAX_CLIENTS;
+
+  unsigned int max = clients_online_c / PAGE_MAX_CLIENTS == req->page
+                         ? min + clients_online_c % PAGE_MAX_CLIENTS - 1
+                         : PAGE_MAX_CLIENTS * (req->page + 1) - 1;
+
   struct UserListRes res = {
       .count = 0,
   };
 
-  const unsigned int min = req->page * PAGE_MAX_CLIENTS;
+  for (unsigned int i = min; i <= max; ++i) {
 
-  unsigned int max = PAGE_MAX_CLIENTS * (req->page + 1) - 1;
-
-  if (countParseableUsers / PAGE_MAX_CLIENTS == req->page) {
-    max = min + countParseableUsers % PAGE_MAX_CLIENTS - 1;
-  }
-
-  for (unsigned int i = min; i <= max; i++) {
-
-    const SocketClient *client = socketClients[i];
+    const SocketClient *client = clients_online[i];
 
     struct UserRes user = {
         .client_id = client->id,
