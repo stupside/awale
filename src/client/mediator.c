@@ -160,6 +160,15 @@ unsigned int client_game_set_infos(SOCKET sock, char *argv[],
   return 1;
 }
 
+unsigned int client_game_get_infos(SOCKET sock, char *argv[],
+                                   unsigned int argslen) {
+  struct UserGetInfoReq req;
+
+  send_cmd_to(sock, CMD_USER_GET_INFO, &req, sizeof(struct UserGetInfoReq));
+
+  return 1;
+}
+
 void init_client_mediator(struct ClientMediator *mediator) {
 
   register_client_cmd(mediator, "/chat", &client_chat);
@@ -179,4 +188,6 @@ void init_client_mediator(struct ClientMediator *mediator) {
   register_client_cmd(mediator, "/leave", &client_game_leave);
 
   register_client_cmd(mediator, "/set-infos", &client_game_set_infos);
+
+  register_client_cmd(mediator, "/get-infos", &client_game_get_infos);
 }

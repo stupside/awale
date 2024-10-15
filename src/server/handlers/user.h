@@ -190,12 +190,35 @@ unsigned int on_user_set_info(unsigned int client_id, const void *data) {
   return 1;
 };
 
+unsigned int on_user_get_info(unsigned int client_id, const void *data) {
+
+  const SocketClient *client =
+      find_client_by_id(&awale_server()->pool, client_id);
+
+  if (!client) {
+    return 0; // todo send error
+  }
+
+  struct UserGetInfoRes res;
+
+  res.user.client_id = client->id;
+  strncpy(res.user.name, client->name, USER_NAME_LEN);
+  strncpy(res.user.description, client->description, USER_DESC_LEN);
+  strncpy(res.user.description, client->description, USER_DESC_LEN);
+
+  send_cmd_to(client->socket, CMD_USER_GET_INFO, &res,
+              sizeof(struct UserInfoRes));
+
+  return 1;
+};
+
 void add_user_cmds(struct ServerMediator *mediator) {
 
   register_cmd(mediator, CMD_USER_LOGIN, &on_user_login);
   register_cmd(mediator, CMD_USER_LOGOUT, &on_user_logout);
   register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list_all);
   register_cmd(mediator, CMD_USER_SET_INFO, &on_user_set_info);
+  register_cmd(mediator, CMD_USER_GET_INFO, &on_user_get_info);
 }
 
 #endif

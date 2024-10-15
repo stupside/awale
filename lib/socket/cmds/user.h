@@ -38,7 +38,6 @@ struct UserListReq {
 
 struct UserRes {
   ClientId client_id;
-
   char name[USER_NAME_LEN];
   char description[USER_DESC_LEN];
 };
@@ -56,4 +55,9 @@ struct UserInfoSetReq {
   char description[USER_DESC_LEN];
 };
 
+struct UserGetInfoReq {};
+
+struct UserGetInfoRes {
+  struct UserRes user;
+};
 #endif

@@ -39,11 +39,24 @@ unsigned int on_user_list(unsigned int client_id, const void *data) {
   return 1;
 };
 
+unsigned int on_user_get_info(unsigned int client_id, const void *data) {
+
+  const struct UserGetInfoRes *res = data;
+
+  printf("User info:\n");
+  printf("Id: %d\n", res->user.client_id);
+  printf("Name: %s\n", res->user.name);
+  printf("Description: %s\n", res->user.description);
+  return 1;
+};
+
 void add_user_cmds(struct ServerMediator *mediator) {
   register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list);
 
   register_cmd(mediator, CMD_USER_LOGIN_EVENT, &on_user_login);
   register_cmd(mediator, CMD_USER_LOGOUT_EVENT, &on_user_logout);
+
+  register_cmd(mediator, CMD_USER_GET_INFO, &on_user_get_info);
 }
 
 #endif
