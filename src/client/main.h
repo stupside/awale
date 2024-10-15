@@ -23,20 +23,23 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
 
-  struct ServerMediator mediator;
+  struct ServerMediator server_mediator = {
+      .handlers = {0},
+  };
 
-  add_user_cmds(&mediator);
-  add_chat_cmds(&mediator);
-  add_challenge_cmds(&mediator);
-  add_game_cmds(&mediator);
-  add_error_handlers(&mediator);
+  add_user_cmds(&server_mediator);
+  add_chat_cmds(&server_mediator);
+  add_game_cmds(&server_mediator);
+  add_error_handlers(&server_mediator);
+  add_challenge_cmds(&server_mediator);
 
-  struct ClientMediator clientMediator;
-  init_client_mediator(&clientMediator);
+  struct ClientMediator client_mediator = {
+      .handler_c = 0,
+  };
 
-  // handle_cmd(mediator, const SocketClient *from, const char *cmd)
+  init_client_mediator(&client_mediator);
 
-  app(argv[1], argv[2], argv[3], &mediator, &clientMediator);
+  app(argv[1], argv[2], argv[3], &server_mediator, &client_mediator);
 
   return EXIT_SUCCESS;
 }

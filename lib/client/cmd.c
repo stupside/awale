@@ -2,17 +2,14 @@
 
 #include <string.h>
 
-#define MAX_ARGS 10
+#define MAX_ARGS 15
 
 unsigned int register_client_cmd(
-    struct ClientMediator *mediator, char prefix[15],
+    struct ClientMediator *mediator, const char prefix[MAX_PREFIX_LEN],
     unsigned int (*callback)(SOCKET sock, char *argv[], unsigned int argslen)) {
 
-  struct ClientHandler handler;
-
+  struct ClientHandler handler = {.handle = callback};
   strcpy(handler.prefix, prefix);
-
-  handler.handle = callback;
 
   mediator->handlers[mediator->handler_c++] = handler;
 

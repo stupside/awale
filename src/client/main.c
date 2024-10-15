@@ -4,8 +4,6 @@
 #include <pthread.h>
 #include <signal.h>
 #include <string.h>
-#include <sys/select.h>
-#include <unistd.h>
 
 #include "lib/socket/cmd.h"
 #include "lib/socket/cmds/user.h"
@@ -60,8 +58,8 @@ void *write_handler(void *clientMediator) {
     // Read input from stdin
     if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
       if (buffer[0] == '\n')
-        continue;                        // Ignore if empty
-      buffer[strcspn(buffer, "\n")] = 0; // Remove newlines
+        continue;
+      buffer[strcspn(buffer, "\n")] = 0;
 
       unsigned int res = handle_client_cmd(
           sock, (struct ClientMediator *)clientMediator, buffer);
@@ -96,6 +94,7 @@ void *read_handler(void *mediator) {
 void app(const char *address, const char *name, const char *password,
          const struct ServerMediator *mediator,
          const struct ClientMediator *clientMediator) {
+
   sock = init(address);
 
   // Setup the signal handler for SIGINT
@@ -109,12 +108,12 @@ void app(const char *address, const char *name, const char *password,
   send_cmd_to(sock, CMD_USER_LOGIN, &req, sizeof(struct UserLoginReq));
 
   // Create threads for reading and writing
-  pthread_create(&write_thread, NULL, write_handler, (void *)clientMediator);
   pthread_create(&read_thread, NULL, read_handler, (void *)mediator);
+  pthread_create(&write_thread, NULL, write_handler, (void *)clientMediator);
 
   // Wait for the threads to finish (optional)
-  pthread_join(write_thread, NULL);
   pthread_join(read_thread, NULL);
+  pthread_join(write_thread, NULL);
 
   // Send logout command when exiting
   int ok = send_cmd_to(sock, CMD_USER_LOGOUT, NULL, 0);

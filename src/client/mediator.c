@@ -1,6 +1,5 @@
 #include "mediator.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -10,30 +9,33 @@
 #include "lib/socket/cmds/user.h"
 
 unsigned int client_chat(SOCKET sock, char *argv[], unsigned int argslen) {
-  struct ChatWriteReq req;
-  char formatted_message[255];
 
-  formatted_message[0] = '\0';
+  struct ChatWriteReq req;
+
+  char message[255];
 
   for (unsigned int i = 1; i < argslen; i++) {
-    strcat(formatted_message, argv[i]);
+
+    strcat(message, argv[i]);
+
     if (i < argslen - 1) {
-      strcat(formatted_message, " ");
+      strcat(message, " ");
     }
   }
 
-  strncpy(req.message, formatted_message, sizeof(req.message) - 1);
-  req.message[sizeof(req.message) - 1] = '\0';
+  strncpy(req.message, message, sizeof(req.message) - 1);
 
   send_cmd_to(sock, CMD_CHAT_WRITE, &req, sizeof(struct ChatWriteReq));
 
   return 1;
 }
 
-unsigned int client_play(SOCKET sock, char *argv[], unsigned int argslen) {
+unsigned int client_game_play(SOCKET sock, char *argv[], unsigned int argslen) {
+
   if (argslen < 2) {
     return 0;
   }
+
   struct GamePlayReq req;
   req.input = atoi(argv[1]);
 
@@ -63,7 +65,13 @@ unsigned int client_challenge_handle(SOCKET sock, char *argv[],
   }
 
   struct ChallengeHandleReq req;
-  req.accept = atoi(argv[2]);
+
+  const char *accept = argv[2];
+
+  unsigned int accepted =
+      (strcmp(accept, "yes") == 0 || strcmp(accept, "accept") == 0) ? 1 : 0;
+
+  req.accept = accepted;
   req.client_id = atoi(argv[1]);
 
   send_cmd_to(sock, CMD_CHALLENGE_HANDLE, &req,
@@ -82,9 +90,6 @@ unsigned int client_game_grid(SOCKET sock, char *argv[], unsigned int argslen) {
 
 unsigned int client_users(SOCKET sock, char *argv[], unsigned int argslen) {
 
-  if (argslen < 2) {
-    return 0;
-  }
   struct UserListReq req = {
       .page = argslen > 1 ? atoi(argv[1]) : 0,
   };
@@ -120,39 +125,56 @@ unsigned int client_game_leave(SOCKET sock, char *argv[],
   return 1;
 }
 
-unsigned int client_game_set_infos(SOCKET sock, char *argv[],
-                                   unsigned int argslen) {
-  if (argslen < 3) {
+unsigned int client_set_password(SOCKET sock, char *argv[],
+                                 unsigned int argslen) {
+
+  if (argslen < 2) {
     return 0;
   }
 
   struct UserInfoSetReq req = {0};
 
-  int j = 1;
-  while (j < argslen - 1) {
-    if (strcmp(argv[j], "-p") == 0) {
-      strncpy(req.password, argv[j + 1], sizeof(req.password) - 1);
-      printf("Password\n");
-      req.password[sizeof(req.password) - 1] = '\0';
-      j += 2;
-    } else if (strcmp(argv[j], "-n") == 0) {
-      strncpy(req.name, argv[j + 1], sizeof(req.name) - 1);
-      req.name[sizeof(req.name) - 1] = '\0';
-      j += 2;
-    } else if (strcmp(argv[j], "-d") == 0) {
-      j++;
-      while (j < argslen && argv[j][0] != '-') {
-        strncat(req.description, argv[j],
-                sizeof(req.description) - strlen(req.description) - 1);
-        if (j < argslen - 1 && argv[j + 1][0] != '-') {
-          strncat(req.description, " ",
-                  sizeof(req.description) - strlen(req.description) - 1);
-        }
-        j++;
-      }
-    } else {
-      j++;
+  strncpy(req.password, argv[1], sizeof(req.password) - 1);
+
+  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(struct UserInfoSetReq));
+
+  return 1;
+}
+
+unsigned int client_set_username(SOCKET sock, char *argv[],
+                                 unsigned int argslen) {
+
+  if (argslen < 2) {
+    return 0;
+  }
+
+  struct UserInfoSetReq req = {0};
+
+  strncpy(req.name, argv[1], sizeof(req.name) - 1);
+
+  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(struct UserInfoSetReq));
+
+  return 1;
+}
+
+unsigned int client_set_description(SOCKET sock, char *argv[],
+                                    unsigned int argslen) {
+
+  if (argslen < 2) {
+    return 0;
+  }
+
+  struct UserInfoSetReq req = {0};
+
+  unsigned int curs = 1;
+  while (curs < argslen) {
+    strncat(req.description, argv[curs],
+            sizeof(req.description) - strlen(req.description) - 1);
+    if (curs < argslen - 1) {
+      strncat(req.description, " ",
+              sizeof(req.description) - strlen(req.description) - 1);
     }
+    curs++;
   }
 
   send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(struct UserInfoSetReq));
@@ -160,8 +182,7 @@ unsigned int client_game_set_infos(SOCKET sock, char *argv[],
   return 1;
 }
 
-unsigned int client_game_get_infos(SOCKET sock, char *argv[],
-                                   unsigned int argslen) {
+unsigned int client_user(SOCKET sock, char *argv[], unsigned int argslen) {
   struct UserGetInfoReq req;
 
   send_cmd_to(sock, CMD_USER_GET_INFO, &req, sizeof(struct UserGetInfoReq));
@@ -173,21 +194,18 @@ void init_client_mediator(struct ClientMediator *mediator) {
 
   register_client_cmd(mediator, "/chat", &client_chat);
 
-  register_client_cmd(mediator, "/play", &client_play);
-
-  register_client_cmd(mediator, "/challenge", &client_challenge);
-
-  register_client_cmd(mediator, "/handle", &client_challenge_handle);
-
-  register_client_cmd(mediator, "/grid", &client_game_grid);
-
+  register_client_cmd(mediator, "/user", &client_user);
   register_client_cmd(mediator, "/users", &client_users);
 
-  register_client_cmd(mediator, "/observe", &client_game_observe);
+  register_client_cmd(mediator, "/game-play", &client_game_play);
+  register_client_cmd(mediator, "/game-grid", &client_game_grid);
+  register_client_cmd(mediator, "/game-leave", &client_game_leave);
+  register_client_cmd(mediator, "/game-observe", &client_game_observe);
 
-  register_client_cmd(mediator, "/leave", &client_game_leave);
+  register_client_cmd(mediator, "/challenge", &client_challenge);
+  register_client_cmd(mediator, "/challenge-handle", &client_challenge_handle);
 
-  register_client_cmd(mediator, "/set-infos", &client_game_set_infos);
-
-  register_client_cmd(mediator, "/get-infos", &client_game_get_infos);
+  register_client_cmd(mediator, "/set-username", &client_set_username);
+  register_client_cmd(mediator, "/set-password", &client_set_password);
+  register_client_cmd(mediator, "/set-description", &client_set_description);
 }
