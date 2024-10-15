@@ -1,40 +1,38 @@
 #ifndef GAME_HANDLERS_H
 #define GAME_HANDLERS_H
 
-#include <stdio.h>
-
 #include "lib/cmds/mediator.h"
+#include "lib/display/colors.h"
 #include "lib/socket/cmd.h"
-
 #include "lib/socket/cmds/game.h"
 #include "src/client/handlers/user.h"
+#include <stdio.h>
 
 unsigned int on_game_play(unsigned int client_id, const void *data) {
 
   const struct GamePlayRes *res = data;
-  printf("Move info : ");
+  PRINT_COLOR(COLOR_CYAN, "Move info: ");
   switch (res->validity) {
   case VALID:
-    printf("Your move was valid\n");
+    PRINT_COLOR(COLOR_GREEN, "Your move was valid.\n");
     break;
   case INVALID_NOT_PLAYER_ROUND:
-    printf("It's not your turn\n");
+    PRINT_COLOR(COLOR_YELLOW, "It's not your turn.\n");
     break;
   case INVALID_NO_SEEDS_IN_CASE:
-    printf("There are no seeds in this case\n");
+    PRINT_COLOR(COLOR_RED, "There are no seeds in this case.\n");
     break;
   case INVALID_OPONENT_HAS_NO_SEEDS:
-    printf("Your opponent has no seeds / Your move takes all of his seeds ! "
-           "please play anither move\n");
+    PRINT_COLOR(COLOR_RED, "Your opponent has no seeds / Your move takes all "
+                           "of their seeds! Please play another move.\n");
     break;
   case INVALID:
-    printf("Invalid move\n");
+    PRINT_COLOR(COLOR_RED, "Invalid move.\n");
     break;
   case INVALID_TARGET_OUT_OF_BOUNDS:
-    printf("Invalid target, move out of bonds\n");
+    PRINT_COLOR(COLOR_RED, "Invalid target, move out of bounds.\n");
     break;
   }
-  printf("\n");
 
   return 1;
 };
@@ -50,10 +48,13 @@ unsigned int on_game_leave_event(unsigned int client_id, const void *data) {
 
   const struct GameLeaveEvent *event = data;
 
-  event->observing
-      ? printf("Your oppenent has left the game\n")
-      : printf("You are no longer observing the game of client %d\n",
-               event->client_id);
+  if (event->observing) {
+    PRINT_COLOR(COLOR_RED, "Your opponent has left the game\n");
+  } else {
+    PRINT_COLOR(COLOR_RED,
+                "You are no longer observing the game of client %d\n",
+                event->client_id);
+  }
 
   return 1;
 };
@@ -62,11 +63,11 @@ unsigned int on_game_state_event(unsigned int client_id, const void *data) {
 
   const struct GameStateEvent *event = data;
 
-  printf("\n\n  Player 0 : score %d\n", event->score[0]);
+  PRINT_COLOR(COLOR_BLUE, "\n\nPlayer 0: score %d\n", event->score[0]);
 
   printf("  ");
   for (int i = 0; i < GRID_ROWS; i++) {
-    printf("  [%2d] ", event->grid[i][0]);
+    PRINT_COLOR(COLOR_GREEN, "  [%2d] ", event->grid[i][0]);
   }
   printf("\n");
 
@@ -78,35 +79,33 @@ unsigned int on_game_state_event(unsigned int client_id, const void *data) {
 
   printf("  ");
   for (int i = 0; i < GRID_ROWS; i++) {
-    printf("  [%2d] ", event->grid[i][1]);
+    PRINT_COLOR(COLOR_GREEN, "  [%2d] ", event->grid[i][1]);
   }
-  printf("\n  Player 1 : score %d \n\n", event->score[1]);
+
+  PRINT_COLOR(COLOR_BLUE, "\nPlayer 1: score %d \n\n", event->score[1]);
 
   if (CLIENT_ID == event->player[event->turn]) {
-    printf("It's your turn !\n");
+    PRINT_COLOR(COLOR_CYAN, "It's your turn!\n");
   } else {
-    printf("It's your opponent's turn !\n");
+    PRINT_COLOR(COLOR_CYAN, "It's your opponent's turn!\n");
   }
 
   return 1;
 };
 
 unsigned int on_game_state(unsigned int client_id, const void *data) {
-
   const struct GameStateRes *res = data;
 
-  printf("Game state: %d\n", res->status);
-
-  printf("\n\n  Player 0 is %d : score %d\n", res->player[PLAYER1],
-         res->score[0]);
+  PRINT_COLOR(COLOR_CYAN, "Game state: %d\n", res->status);
+  PRINT_COLOR(COLOR_BLUE, "\n\nPlayer 0 is %d: score %d\n",
+              res->player[PLAYER1], res->score[0]);
 
   printf("  ");
   for (int i = 0; i < GRID_ROWS; i++) {
-    printf("  [%2d] ", res->grid[i][0]);
+    PRINT_COLOR(COLOR_GREEN, "  [%2d] ", res->grid[i][0]);
   }
   printf("\n");
 
-  printf("  ");
   for (int i = 0; i < GRID_ROWS; i++) {
     printf("-------");
   }
@@ -114,11 +113,12 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
 
   printf("  ");
   for (int i = 0; i < GRID_ROWS; i++) {
-    printf("  [%2d] ", res->grid[i][1]);
+    PRINT_COLOR(COLOR_GREEN, "  [%2d] ", res->grid[i][1]);
   }
-  printf("\n  Player 1 is %d : score %d \n\n", res->player[PLAYER1],
-         res->score[1]);
-  printf("It's player %d's turn\n", res->turn);
+  PRINT_COLOR(COLOR_BLUE, "\nPlayer 1 is %d: score %d\n", res->player[PLAYER1],
+              res->score[1]);
+
+  PRINT_COLOR(COLOR_YELLOW, "It's player %d's turn\n", res->turn);
 
   return 1;
 };
@@ -126,10 +126,15 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
 unsigned int on_game_observe(unsigned int client_id, const void *data) {
 
   const struct GameObserveRes *res = data;
-  res->observe
-      ? printf("You are now observing the game of client %d\n", res->client_id)
-      : printf("You are no longer observing the game of client %d\n",
-               res->client_id);
+
+  if (res->observe) {
+    PRINT_COLOR(COLOR_YELLOW, "You are now observing the game of client %d\n",
+                res->client_id);
+  } else {
+    PRINT_COLOR(COLOR_YELLOW,
+                "You are no longer observing the game of client %d\n",
+                res->client_id);
+  }
 
   return 1;
 };
@@ -138,9 +143,13 @@ unsigned int on_game_observe_event(unsigned int client_id, const void *data) {
 
   const struct GameObserveEvent *event = data;
 
-  event->observe
-      ? printf("Client %d is now observing the game\n", event->client_id)
-      : printf("Client %d is no longer observing the game\n", event->client_id);
+  if (event->observe) {
+    PRINT_COLOR(COLOR_YELLOW, "Client %d is now observing the game\n",
+                event->client_id);
+  } else {
+    PRINT_COLOR(COLOR_YELLOW, "Client %d is no longer observing the game\n",
+                event->client_id);
+  }
 
   return 1;
 };

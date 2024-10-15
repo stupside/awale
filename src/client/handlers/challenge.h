@@ -1,20 +1,20 @@
 #ifndef CHALLENGE_HANDLERS_H
 #define CHALLENGE_HANDLERS_H
 
-#include <stdio.h>
-
 #include "lib/cmds/mediator.h"
+#include "lib/display/colors.h"
 #include "lib/socket/cmd.h"
-
 #include "lib/socket/cmds/challenge.h"
+#include <stdio.h>
 
 unsigned int on_challenge(unsigned int client_id, const void *data) {
 
   const struct ChallengeEvent *event = data;
 
-  printf("You have been challenged by %d, tap /handle %d 1 in order to accept "
-         "or /handle %d 0 in order to decline request /\n",
-         event->client_id, event->client_id, event->client_id);
+  PRINT_COLOR(COLOR_BLUE,
+              "You have been challenged by %d, tap /handle %d 1 to accept or "
+              "/handle %d 0 to decline.\n",
+              event->client_id, event->client_id, event->client_id);
 
   return 1;
 };
@@ -25,11 +25,11 @@ unsigned int on_handle_challenge_event(unsigned int client_id,
   const struct ChallengeHandleEvent *event = data;
 
   if (event->accept) {
-    printf("Your challenge request has been accepted, tap /grid in order to "
-           "load the game\n");
+    PRINT_COLOR(COLOR_GREEN, "Your challenge request has been accepted, tap "
+                             "/grid to load the game.\n");
   } else {
-    printf("Your challenge request has been declined, try challenging other "
-           "users !\n");
+    PRINT_COLOR(COLOR_RED, "Your challenge request has been declined, try "
+                           "challenging other users!\n");
   }
 
   return 1;

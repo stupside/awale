@@ -8,6 +8,7 @@ cc_binary(
         "//lib/awale:awale_lib",
         "//lib/socket:socket_lib",
         "//lib/client:client_lib",
+        "//lib/display:display_lib"
     ],
     linkopts = ["-pthread"],
 )

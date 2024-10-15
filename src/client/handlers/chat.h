@@ -1,18 +1,18 @@
 #ifndef CHAT_HANDLERS_H
 #define CHAT_HANDLERS_H
 
-#include <stdio.h>
-
 #include "lib/cmds/mediator.h"
+#include "lib/display/colors.h"
 #include "lib/socket/cmd.h"
-
 #include "lib/socket/cmds/chat.h"
+#include <stdio.h>
 
 unsigned int on_chat_write(unsigned int client_id, const void *data) {
 
   const struct ChatWriteEvent *event = data;
 
-  printf("User %d wrote: %s\n", event->client_id, event->message);
+  PRINT_COLOR(COLOR_YELLOW, "User %d wrote: %s\n", event->client_id,
+              event->message);
 
   return 1;
 };
