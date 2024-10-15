@@ -214,6 +214,11 @@ enum CoupValidity play(struct Awale *awale, enum PlayerID player, int target) {
     sow_seeds_update_grid_score(player, awale, target);
 
     awale->current = next_player(awale);
+
+    enum GameStatus game_status = status(awale);
+    if (game_status == PASS_TURN_NO_SEEDS) {
+      awale->current = next_player(awale);
+    }
   }
 
   return validity;
