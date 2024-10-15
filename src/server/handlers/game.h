@@ -66,37 +66,18 @@ unsigned int on_game_observe(unsigned int client_id, const void *data) {
 
   unsigned int ok = observe_lobby(lobby, observer, req->observe);
 
-  if (!ok) {
-    struct ErrorEvent event = {
-        .message = "An error occured while trying to observe the game",
-    };
-
-    send_cmd_to_client(observer, CMD_ERROR_EVENT, &event,
-                       sizeof(struct ErrorEvent));
-
-    return 0;
+  if (ok) {
+    return 1;
   }
 
-  const struct GameObserveRes res = {
-      .observe = req->observe,
-      .client_id = req->client_id,
+  struct ErrorEvent event = {
+      .message = "An error occured while trying to observe the game",
   };
 
-  send_cmd_to_client(observer, CMD_GAME_OBSERVE, &res,
-                     sizeof(struct GameObserveRes));
+  send_cmd_to_client(observer, CMD_ERROR_EVENT, &event,
+                     sizeof(struct ErrorEvent));
 
-  const struct GameObserveEvent event = {
-      .client_id = client_id,
-      .observe = req->observe,
-  };
-
-  send_cmd_to_client(lobby->client[PLAYER1], CMD_GAME_OBSERVE_EVENT, &event,
-                     sizeof(struct GameObserveEvent));
-
-  send_cmd_to_client(lobby->client[PLAYER2], CMD_GAME_OBSERVE_EVENT, &event,
-                     sizeof(struct GameObserveEvent));
-
-  return 1;
+  return 0;
 };
 
 unsigned int on_game_leave(unsigned int client_id, const void *data) {
@@ -119,15 +100,35 @@ unsigned int on_game_leave(unsigned int client_id, const void *data) {
 
   end_lobby(lobby);
 
-  const struct GameLeaveEvent event = {
+  const struct GameLeaveRes res = {};
+
+  const enum PlayerID player_id =
+      lobby->client[PLAYER1]->id == client_id ? PLAYER1 : PLAYER2;
+
+  send_cmd_to_client(lobby->client[player_id], CMD_GAME_LEAVE, &res,
+                     sizeof(struct GameLeaveRes));
+
+  struct GameLeaveEvent event = {
+      .observing = 0,
       .client_id = client_id,
   };
 
-  send_cmd_to_client(lobby->client[PLAYER1], CMD_GAME_LEAVE_EVENT, &event,
-                     sizeof(struct GameLeaveEvent));
+  const enum PlayerID other_player_id =
+      player_id == PLAYER1 ? PLAYER2 : PLAYER1;
 
-  send_cmd_to_client(lobby->client[PLAYER2], CMD_GAME_LEAVE_EVENT, &event,
-                     sizeof(struct GameLeaveEvent));
+  send_cmd_to_client(lobby->client[other_player_id], CMD_GAME_LEAVE_EVENT,
+                     &event, sizeof(struct GameLeaveEvent));
+
+  event.observing = 1;
+
+  for (unsigned int idx = 0; idx < MAX_CLIENTS; idx++) {
+    const struct SocketClient *observator = lobby->observators[idx];
+
+    if (observator) {
+      send_cmd_to_client(observator, CMD_GAME_LEAVE_EVENT, &event,
+                         sizeof(struct GameLeaveEvent));
+    }
+  }
 
   return 1;
 };

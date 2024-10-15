@@ -12,8 +12,10 @@ struct GamePlayRes {
 };
 
 struct GameLeaveReq {};
+struct GameLeaveRes {};
 struct GameLeaveEvent {
   ClientId client_id;
+  unsigned int observing;
 };
 
 struct GameListReq {};

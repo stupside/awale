@@ -39,9 +39,21 @@ unsigned int on_game_play(unsigned int client_id, const void *data) {
   return 1;
 };
 
+unsigned int on_game_leave(unsigned int client_id, const void *data) {
+
+  printf("Game left\n");
+
+  return 1;
+};
+
 unsigned int on_game_leave_event(unsigned int client_id, const void *data) {
 
-  printf("The oponent have left the game ! You can no longer play\n");
+  const struct GameLeaveEvent *event = data;
+
+  event->observing
+      ? printf("Your oppenent has left the game\n")
+      : printf("You are no longer observing the game of client %d\n",
+               event->client_id);
 
   return 1;
 };
@@ -135,6 +147,7 @@ unsigned int on_game_observe_event(unsigned int client_id, const void *data) {
 
 void add_game_cmds(struct ServerMediator *mediator) {
   register_cmd(mediator, CMD_GAME_PLAY, &on_game_play);
+  register_cmd(mediator, CMD_GAME_LEAVE, &on_game_leave);
   register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
   register_cmd(mediator, CMD_GAME_OBSERVE, &on_game_observe);
 
