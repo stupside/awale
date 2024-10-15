@@ -37,7 +37,7 @@ unsigned int on_game_play(unsigned int client_id, const void *data) {
 
 unsigned int on_game_leave(unsigned int client_id, const void *data) {
 
-  printf("Game left\n");
+  PRINT_COLOR(COLOR_RED, "You have left the game\n");
 
   return 1;
 };
@@ -61,12 +61,13 @@ unsigned int on_game_state_event(unsigned int client_id, const void *data) {
 
   const struct GameStateEvent *event = data;
 
-  PRINT_COLOR(COLOR_BLUE, "\n\nPlayer 0: score %d\n", event->score[0]);
+  PRINT_COLOR(COLOR_BLUE, "Player 0: score %d\n", event->score[PLAYER1]);
 
   printf("  ");
   for (int i = 0; i < GRID_ROWS; i++) {
     PRINT_COLOR(COLOR_GREEN, "  [%2d] ", event->grid[i][0]);
   }
+
   printf("\n");
 
   printf("  ");
@@ -80,7 +81,9 @@ unsigned int on_game_state_event(unsigned int client_id, const void *data) {
     PRINT_COLOR(COLOR_GREEN, "  [%2d] ", event->grid[i][1]);
   }
 
-  PRINT_COLOR(COLOR_BLUE, "\nPlayer 1: score %d \n\n", event->score[1]);
+  printf("\n");
+
+  PRINT_COLOR(COLOR_BLUE, "Player 1: score %d \n\n", event->score[PLAYER2]);
 
   if (CLIENT_ID == event->player[event->turn]) {
     PRINT_COLOR(COLOR_CYAN, "It's your turn!\n");
@@ -95,8 +98,9 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
   const struct GameStateRes *res = data;
 
   PRINT_COLOR(COLOR_CYAN, "Game state: %d\n", res->status);
-  PRINT_COLOR(COLOR_BLUE, "\n\nPlayer 0 is %d: score %d\n",
-              res->player[PLAYER1], res->score[0]);
+
+  PRINT_COLOR(COLOR_BLUE, "Player 0 is %d: score %d\n", res->player[PLAYER1],
+              res->score[PLAYER1]);
 
   printf("  ");
   for (int i = 0; i < GRID_ROWS; i++) {
@@ -107,14 +111,18 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
   for (int i = 0; i < GRID_ROWS; i++) {
     printf("-------");
   }
+
   printf("\n");
 
   printf("  ");
   for (int i = 0; i < GRID_ROWS; i++) {
     PRINT_COLOR(COLOR_GREEN, "  [%2d] ", res->grid[i][1]);
   }
-  PRINT_COLOR(COLOR_BLUE, "\nPlayer 1 is %d: score %d\n", res->player[PLAYER1],
-              res->score[1]);
+
+  printf("\n");
+
+  PRINT_COLOR(COLOR_BLUE, "Player 1 is %d: score %d\n", res->player[PLAYER2],
+              res->score[PLAYER2]);
 
   PRINT_COLOR(COLOR_YELLOW, "It's player %d's turn\n", res->turn);
 

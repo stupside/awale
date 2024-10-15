@@ -12,7 +12,7 @@ unsigned int on_user_login(unsigned int client_id, const void *data) {
 
   CLIENT_ID = event->client_id;
 
-  PRINT_COLOR(COLOR_GREEN, "\n\n Your user ID is %d \n\n", CLIENT_ID);
+  PRINT_COLOR(COLOR_GREEN, "Your user ID is %d\n", CLIENT_ID);
 
   return 1;
 };
@@ -21,7 +21,7 @@ unsigned int on_user_login_event(unsigned int client_id, const void *data) {
 
   const struct UserLoginEvent *event = data;
 
-  PRINT_COLOR(COLOR_BLUE, "\n\n User %d logged in \n\n", event->client_id);
+  PRINT_COLOR(COLOR_BLUE, "User %d logged in\n", event->client_id);
 
   return 1;
 };
