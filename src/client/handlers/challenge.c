@@ -8,10 +8,11 @@
 unsigned int on_challenge(unsigned int client_id, const void *data) {
   const struct ChallengeEvent *event = data;
 
-  PRINT_COLOR(COLOR_BLUE,
-              "You have been challenged by %d, tap /handle %d 1 to accept or "
-              "/handle %d 0 to decline.\n",
-              event->client_id, event->client_id, event->client_id);
+  PRINT_COLOR(
+      COLOR_BLUE,
+      "You have been challenged by %d, tap /challenge-accept %d to accept or "
+      "/challenge-reject %d to decline.\n",
+      event->client_id, event->client_id, event->client_id);
 
   return 1;
 }
@@ -22,7 +23,7 @@ unsigned int on_handle_challenge_event(unsigned int client_id,
 
   if (event->accept) {
     PRINT_COLOR(COLOR_GREEN, "Your challenge request has been accepted, tap "
-                             "/grid to load the game.\n");
+                             "/game-grid to load the game.\n");
   } else {
     PRINT_COLOR(COLOR_RED, "Your challenge request has been declined.\n");
   }

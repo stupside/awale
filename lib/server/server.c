@@ -134,6 +134,10 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
 
   const enum CoupValidity validity = play(&lobby->awale, player, target);
 
+  if (status(&lobby->awale) != GAME_NOT_OVER) {
+    lobby->state = LOBBY_STATE_FINISHED;
+  }
+
   struct GamePlayRes res = {
       .validity = validity,
   };
