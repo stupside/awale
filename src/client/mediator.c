@@ -14,6 +14,8 @@ unsigned int client_chat(SOCKET sock, char *argv[], unsigned int argslen) {
 
   char message[255];
 
+  message[0] = '\0';
+
   for (unsigned int i = 1; i < argslen; i++) {
 
     strcat(message, argv[i]);

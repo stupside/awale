@@ -57,15 +57,20 @@ void *write_handler(void *clientMediator) {
   while (1) {
     // Read input from stdin
     if (fgets(buffer, sizeof(buffer), stdin) != NULL) {
+
       if (buffer[0] == '\n')
         continue;
       buffer[strcspn(buffer, "\n")] = 0;
 
-      unsigned int res = handle_client_cmd(
+      unsigned int ok = handle_client_cmd(
           sock, (struct ClientMediator *)clientMediator, buffer);
-      if (!res) {
+
+      if (ok) {
+      } else {
         perror("Command not handled");
       }
+
+      memset(buffer, 0, sizeof(buffer));
     }
   }
   return NULL;
