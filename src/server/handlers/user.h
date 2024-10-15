@@ -13,7 +13,7 @@
 
 #include "lib/socket/cmds/user.h"
 
-unsigned int on_user_login(unsigned int socket, const void *data) {
+unsigned int on_user_login_event(unsigned int socket, const void *data) {
 
   struct Server *server = awale_server();
 
@@ -194,7 +194,7 @@ unsigned int on_user_get_info(unsigned int client_id, const void *data) {
 
 void add_user_cmds(struct ServerMediator *mediator) {
 
-  register_cmd(mediator, CMD_USER_LOGIN, &on_user_login);
+  register_cmd(mediator, CMD_USER_LOGIN, &on_user_login_event);
   register_cmd(mediator, CMD_USER_LOGOUT, &on_user_logout);
   register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list_all);
   register_cmd(mediator, CMD_USER_SET_INFO, &on_user_set_info);

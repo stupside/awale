@@ -22,12 +22,18 @@ struct GameStateReq {};
 struct GameStateRes {
   enum GameStatus status;
   int grid[GRID_ROWS][GRID_COLS];
+  int score[2];
+  int player[2];
+  enum PlayerID turn;
 };
 struct GameStateEvent {
   unsigned int observing;
   struct UserRes users[2];
   enum GameStatus status;
   int grid[GRID_ROWS][GRID_COLS];
+  int score[2];
+  int player[2];
+  enum PlayerID turn;
 };
 
 struct GameObserveReq {

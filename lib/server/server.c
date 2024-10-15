@@ -142,7 +142,18 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
 
   struct GameStateEvent event = {
       .observing = 0,
+      .score =
+          {
+              lobby->awale.score[PLAYER1],
+              lobby->awale.score[PLAYER2],
+          },
+      .player =
+          {
+              lobby->client[PLAYER1]->id,
+              lobby->client[PLAYER2]->id,
+          },
       .status = status(&lobby->awale),
+      .turn = lobby->awale.current,
   };
 
   for (int i = 0; i < GRID_ROWS; i++) {

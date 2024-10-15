@@ -7,11 +7,12 @@
 #include "lib/socket/cmd.h"
 
 #include "lib/socket/cmds/game.h"
+#include "src/client/handlers/user.h"
 
 unsigned int on_game_play(unsigned int client_id, const void *data) {
 
   const struct GamePlayRes *res = data;
-
+  printf("Move info : ");
   switch (res->validity) {
   case VALID:
     printf("Your move was valid\n");
@@ -33,13 +34,14 @@ unsigned int on_game_play(unsigned int client_id, const void *data) {
     printf("Invalid target, move out of bonds\n");
     break;
   }
+  printf("\n");
 
   return 1;
 };
 
 unsigned int on_game_leave_event(unsigned int client_id, const void *data) {
 
-  printf("The openent have left the game ! You can no longer play\n");
+  printf("The oponent have left the game ! You can no longer play\n");
 
   return 1;
 };
@@ -48,13 +50,30 @@ unsigned int on_game_state_event(unsigned int client_id, const void *data) {
 
   const struct GameStateEvent *event = data;
 
-  printf("Game state: %d\n", event->status);
+  printf("\n\n  Player 0 : score %d\n", event->score[0]);
 
+  printf("  ");
   for (int i = 0; i < GRID_ROWS; i++) {
-    for (int j = 0; j < GRID_COLS; j++) {
-      printf("[%2d]", event->grid[i][j]);
-    }
-    printf("\n");
+    printf("  [%2d] ", event->grid[i][0]);
+  }
+  printf("\n");
+
+  printf("  ");
+  for (int i = 0; i < GRID_ROWS; i++) {
+    printf("-------");
+  }
+  printf("\n");
+
+  printf("  ");
+  for (int i = 0; i < GRID_ROWS; i++) {
+    printf("  [%2d] ", event->grid[i][1]);
+  }
+  printf("\n  Player 1 : score %d \n\n", event->score[1]);
+
+  if (CLIENT_ID == event->player[event->turn]) {
+    printf("It's your turn !\n");
+  } else {
+    printf("It's your opponent's turn !\n");
   }
 
   return 1;
@@ -66,12 +85,28 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
 
   printf("Game state: %d\n", res->status);
 
+  printf("\n\n  Player 0 is %d : score %d\n", res->player[PLAYER1],
+         res->score[0]);
+
+  printf("  ");
   for (int i = 0; i < GRID_ROWS; i++) {
-    for (int j = 0; j < GRID_COLS; j++) {
-      printf("[%2d]", res->grid[i][j]);
-    }
-    printf("\n");
+    printf("  [%2d] ", res->grid[i][0]);
   }
+  printf("\n");
+
+  printf("  ");
+  for (int i = 0; i < GRID_ROWS; i++) {
+    printf("-------");
+  }
+  printf("\n");
+
+  printf("  ");
+  for (int i = 0; i < GRID_ROWS; i++) {
+    printf("  [%2d] ", res->grid[i][1]);
+  }
+  printf("\n  Player 1 is %d : score %d \n\n", res->player[PLAYER1],
+         res->score[1]);
+  printf("It's player %d's turn\n", res->turn);
 
   return 1;
 };

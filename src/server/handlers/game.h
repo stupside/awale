@@ -22,6 +22,9 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
 
   struct GameStateRes res = {
       .status = status(&lobby->awale),
+      .turn = lobby->awale.current,
+      .score = {lobby->awale.score[PLAYER1], lobby->awale.score[PLAYER2]},
+      .player = {lobby->client[PLAYER1]->id, lobby->client[PLAYER2]->id},
   };
 
   for (int i = 0; i < GRID_ROWS; i++) {
