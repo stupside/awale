@@ -138,6 +138,8 @@ void add_game_cmds(struct ServerMediator *mediator) {
   register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
   register_cmd(mediator, CMD_GAME_OBSERVE, &on_game_observe);
 
+  register_cmd(mediator, CMD_GAME_OBSERVE_EVENT, &on_game_observe_event);
+
   register_cmd(mediator, CMD_GAME_LEAVE_EVENT, &on_game_leave_event);
   register_cmd(mediator, CMD_GAME_STATE_EVENT, &on_game_state_event);
 }

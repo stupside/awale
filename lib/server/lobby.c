@@ -1,7 +1,11 @@
 #include "lobby.h"
-#include "server.h"
 
 #include <stdlib.h>
+
+#include "lib/socket/cmds/game.h"
+#include "lib/socket/socket.h"
+
+#include "server.h"
 
 struct Lobby new_lobby(struct SocketClient *challenger,
                        struct SocketClient *challenged) {
@@ -56,7 +60,26 @@ int observe_lobby(struct Lobby *lobby, const struct SocketClient *client,
 
   lobby->observators[null_idx] = client;
 
-  return 0;
+  const struct GameObserveRes res = {
+      .observe = observe,
+      .client_id = lobby->client[PLAYER1]->id,
+  };
+
+  send_cmd_to_client(client, CMD_GAME_OBSERVE, &res,
+                     sizeof(struct GameObserveRes));
+
+  const struct GameObserveEvent event = {
+      .observe = observe,
+      .client_id = client->id,
+  };
+
+  send_cmd_to_client(lobby->client[PLAYER1], CMD_GAME_OBSERVE_EVENT, &event,
+                     sizeof(struct GameObserveEvent));
+
+  send_cmd_to_client(lobby->client[PLAYER2], CMD_GAME_OBSERVE_EVENT, &event,
+                     sizeof(struct GameObserveEvent));
+
+  return 1;
 }
 
 void end_lobby(struct Lobby *lobby) { lobby->state = LOBBY_STATE_FINISHED; }
