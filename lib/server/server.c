@@ -106,6 +106,11 @@ int challenge(struct Server *server, SocketClient *challenger,
 
   server->lobbies[server->lobbies_c++] = new_lobby(challenger, challenged);
 
+  const struct ChallengeRes res = {};
+
+  send_cmd_to_client(challenger, CMD_CHALLENGE, &res,
+                     sizeof(struct ChallengeRes));
+
   const struct ChallengeEvent event = {
       .client_id = challenger->id,
   };
@@ -129,62 +134,57 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
 
   const enum CoupValidity validity = play(&lobby->awale, player, target);
 
-  if (validity == VALID) {
+  struct GamePlayRes res = {
+      .validity = validity,
+  };
 
-    struct GameStateEvent event = {
-        .observed = 0,
-        .status = status(&lobby->awale),
-    };
+  send_cmd_to_client(client, CMD_GAME_PLAY, &res, sizeof(struct GamePlayRes));
 
-    for (int i = 0; i < PLAYER_COUNT; i++) {
-      const struct SocketClient *player = lobby->client[i];
+  struct GameStateEvent event = {
+      .observing = 0,
+      .status = status(&lobby->awale),
+  };
 
-      struct UserRes user = {
-          .client_id = player->id,
-      };
-
-      strncpy(user.name, player->name, USER_NAME_LEN);
-
-      event.users[i] = user;
+  for (int i = 0; i < GRID_ROWS; i++) {
+    for (int j = 0; j < GRID_COLS; j++) {
+      event.grid[i][j] = lobby->awale.grid[i][j];
     }
-
-    for (int i = 0; i < GRID_ROWS; i++) {
-      for (int j = 0; j < GRID_COLS; j++) {
-        event.grid[i][j] = lobby->awale.grid[i][j];
-      }
-    }
-
-    send_cmd_to_client(lobby->client[PLAYER1], CMD_GAME_STATE_EVENT, &event,
-                       sizeof(struct GameStateEvent));
-
-    send_cmd_to_client(lobby->client[PLAYER2], CMD_GAME_STATE_EVENT, &event,
-                       sizeof(struct GameStateEvent));
-
-    event.observed = 1;
-
-    for (unsigned int i = 0; i < MAX_LOBBIES; i++) {
-
-      const struct SocketClient *observator = lobby->observators[i];
-
-      if (observator) {
-        if (observator->online) {
-          send_cmd_to_client(observator, CMD_GAME_STATE_EVENT, &event,
-                             sizeof(struct GameStateEvent));
-        }
-      }
-    }
-
-    return 1;
-  } else {
-
-    struct GamePlayRes res = {
-        .validity = validity,
-    };
-
-    send_cmd_to_client(client, CMD_GAME_PLAY, &res, sizeof(struct GamePlayRes));
   }
 
-  return 0;
+  for (int i = 0; i < PLAYER_COUNT; i++) {
+    const struct SocketClient *player = lobby->client[i];
+
+    struct UserRes user = {
+        .client_id = player->id,
+    };
+
+    strncpy(user.name, player->name, USER_NAME_LEN);
+
+    event.users[i] = user;
+  }
+
+  const enum PlayerID other_player_id =
+      lobby->client[PLAYER1]->id == client->id ? PLAYER2 : PLAYER1;
+
+  send_cmd_to_client(lobby->client[other_player_id], CMD_GAME_STATE_EVENT,
+                     &event, sizeof(struct GameStateEvent));
+
+  event.observing = 1;
+
+  for (unsigned int i = 0; i < MAX_CLIENTS; i++) {
+
+    const struct SocketClient *observator = lobby->observators[i];
+
+    if (observator) {
+
+      if (observator->online) {
+        send_cmd_to_client(observator, CMD_GAME_STATE_EVENT, &event,
+                           sizeof(struct GameStateEvent));
+      }
+    }
+  }
+
+  return validity == VALID ? 1 : 0;
 }
 
 int handle_challenge(struct Server *server, const SocketClient *challenger,
@@ -204,12 +204,19 @@ int handle_challenge(struct Server *server, const SocketClient *challenger,
       start_lobby(lobby);
     }
 
+    struct ChallengeHandleRes res = {};
+
+    send_cmd_to_client(lobby->client[PLAYER2], CMD_CHALLENGE, &res,
+                       sizeof(struct ChallengeHandleRes));
+
     struct ChallengeHandleEvent event = {
         .accept = accept,
     };
 
     send_cmd_to_client(lobby->client[PLAYER1], CMD_CHALLENGE_HANDLE_EVENT,
                        &event, sizeof(struct ChallengeHandleEvent));
+
+    return 1;
   }
 
   return 0;

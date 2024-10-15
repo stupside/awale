@@ -24,7 +24,7 @@ struct GameStateRes {
   int grid[GRID_ROWS][GRID_COLS];
 };
 struct GameStateEvent {
-  unsigned int observed;
+  unsigned int observing;
   struct UserRes users[2];
   enum GameStatus status;
   int grid[GRID_ROWS][GRID_COLS];

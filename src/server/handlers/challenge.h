@@ -30,7 +30,18 @@ unsigned int on_challenge(unsigned int client_id, const void *data) {
     return 0;
   }
 
-  return challenge(awale_server(), challenger, challenged);
+  unsigned int ok = challenge(awale_server(), challenger, challenged);
+
+  if (ok) {
+    return 1;
+  }
+
+  const struct ErrorEvent event = {.message = "Failed to challenge"};
+
+  send_cmd_to_client(challenger, CMD_ERROR_EVENT, &event,
+                     sizeof(struct ErrorEvent));
+
+  return 0;
 };
 
 unsigned int on_challenge_handle(unsigned int client_id, const void *data) {
@@ -53,18 +64,19 @@ unsigned int on_challenge_handle(unsigned int client_id, const void *data) {
   const SocketClient *challenged =
       find_client_by_id(&awale_server()->pool, client_id);
 
-  if (!challenged) {
-    return 0;
-  }
-
   int ok =
       handle_challenge(awale_server(), challenger, challenged, req->accept);
 
-  if (!ok) {
-    return 0;
+  if (ok) {
+    return 1;
   }
 
-  return 1;
+  const struct ErrorEvent event = {.message = "Failed to handle challenge"};
+
+  send_cmd_to_client(challenger, CMD_ERROR_EVENT, &event,
+                     sizeof(struct ErrorEvent));
+
+  return 0;
 };
 
 void add_challenge_cmds(struct ServerMediator *mediator) {

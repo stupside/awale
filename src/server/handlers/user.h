@@ -26,9 +26,6 @@ unsigned int on_user_login(unsigned int socket, const void *data) {
   if (existing) {
 
     if (existing->online) {
-      const struct ErrorEvent event = {.message = "Client already online"};
-
-      send_cmd_to(socket, CMD_ERROR_EVENT, &event, sizeof(struct ErrorEvent));
 
       perror("Client already online");
       return 0;
@@ -36,50 +33,36 @@ unsigned int on_user_login(unsigned int socket, const void *data) {
 
     if (strcmp(existing->password, req->password) != 0) {
 
-      const struct ErrorEvent event = {.message = "Invalid password"};
-
-      send_cmd_to(socket, CMD_ERROR_EVENT, &event, sizeof(struct ErrorEvent));
-
       perror("Invalid password");
       return 0;
     }
 
-    const int ok =
+    const int unarchived =
         unarchive_client(&server->pool, socket, req->name, &client_id);
 
-    if (!ok) {
-
-      const struct ErrorEvent event = {.message = "Failed to unarchive client"};
-
-      send_cmd_to(socket, CMD_ERROR_EVENT, &event, sizeof(struct ErrorEvent));
-
+    if (!unarchived) {
       perror("Failed to unarchive client");
       return 0;
     }
   } else {
 
-    const int ok =
+    const int added =
         add_client(&server->pool, req->name, req->password, socket, &client_id);
 
-    if (!ok) {
-
-      const struct ErrorEvent event = {.message = "Failed to add client"};
-
-      send_cmd_to(socket, CMD_ERROR_EVENT, &event, sizeof(struct ErrorEvent));
-
+    if (!added) {
       perror("Failed to add client");
       return 0;
     }
   }
 
-  const SocketClient *client =
-      find_client_by_id(&awale_server()->pool, client_id);
+  const struct UserLoginRes res = {.client_id = client_id};
 
-  if (!client) {
-    return 0;
-  }
+  send_cmd_to(socket, CMD_USER_LOGIN, &res, sizeof(struct UserLoginRes));
 
   const struct UserLoginEvent event = {.id = client_id};
+
+  const SocketClient *client =
+      find_client_by_id(&awale_server()->pool, client_id);
 
   send_cmd_to_pool(&awale_server()->pool, client, CMD_USER_LOGIN_EVENT, &event,
                    sizeof(struct UserLoginEvent));
@@ -166,27 +149,23 @@ unsigned int on_user_set_info(unsigned int client_id, const void *data) {
 
   SocketClient *client = find_client_by_id(&awale_server()->pool, client_id);
 
-  if (!client) {
-    return 0;
+  if (req->name[0] != '\0') {
+
+    if (find_client_by_name(&awale_server()->pool, req->name)) {
+      return 0;
+    } else {
+      strncpy(client->name, req->name, USER_NAME_LEN);
+    }
   }
 
   if (req->password[0] != '\0') {
     strncpy(client->password, req->password, USER_PASSWORD_LEN);
   }
 
-  if (req->name[0] != '\0') {
-    SocketClient *otherClient =
-        find_client_by_name(&awale_server()->pool, req->name);
-    if (!otherClient) {
-      strncpy(client->name, req->name, USER_NAME_LEN);
-    }
-    // else send error todo
-  }
   if (req->description[0] != '\0') {
     strncpy(client->description, req->description, USER_DESC_LEN);
   }
-  printf("Updated user info: ID=%u, Name=%s, Password=%s, Description=%s\n",
-         client->id, client->name, client->password, client->description);
+
   return 1;
 };
 
@@ -195,15 +174,11 @@ unsigned int on_user_get_info(unsigned int client_id, const void *data) {
   const SocketClient *client =
       find_client_by_id(&awale_server()->pool, client_id);
 
-  if (!client) {
-    return 0; // todo send error
-  }
+  struct UserGetInfoRes res = {
+      .user.client_id = client->id,
+  };
 
-  struct UserGetInfoRes res;
-
-  res.user.client_id = client->id;
   strncpy(res.user.name, client->name, USER_NAME_LEN);
-  strncpy(res.user.description, client->description, USER_DESC_LEN);
   strncpy(res.user.description, client->description, USER_DESC_LEN);
 
   send_cmd_to(client->socket, CMD_USER_GET_INFO, &res,
