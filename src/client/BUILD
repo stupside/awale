@@ -9,4 +9,5 @@ cc_binary(
         "//lib/socket:socket_lib",
         "//lib/client:client_lib",
     ],
+    linkopts = ["-pthread"],
 )

@@ -6,6 +6,7 @@
 #include "lib/server/server.h"
 #include "lib/socket/socket.h"
 
+#include "lib/socket/cmds/error.h"
 #include "lib/socket/cmds/game.h"
 
 unsigned int on_game_state(unsigned int client_id, const void *data) {
@@ -42,39 +43,56 @@ unsigned int on_game_play(unsigned int client_id, const void *data) {
 
   const struct GamePlayReq *req = data;
 
-  struct Lobby *lobby = find_running_lobby(awale_server(), client);
+  return awale_play(awale_server(), client, req->input);
+};
+
+unsigned int on_game_observe(unsigned int client_id, const void *data) {
+
+  const SocketClient *observer =
+      find_client_by_id(&awale_server()->pool, client_id);
+
+  const struct GameObserveReq *req = data;
+
+  const SocketClient *observed =
+      find_client_by_id(&awale_server()->pool, req->client_id);
+
+  struct Lobby *lobby = find_running_lobby(awale_server(), observed);
 
   if (!lobby) {
     return 0;
   }
 
-  enum CoupValidity ok = play(&lobby->awale, client_id, req->input);
+  unsigned int ok = observe_lobby(lobby, observer, req->observe);
 
-  if (ok != VALID) {
+  if (!ok) {
+    struct ErrorEvent event = {
+        .message = "An error occured while trying to observe the game",
+    };
 
-    const struct GamePlayRes event = {
-        .validity = ok}; // Do no send two messages successively
+    send_cmd_to(observer->socket, CMD_ERROR_EVENT, &event,
+                sizeof(struct ErrorEvent));
 
-    send_cmd_to(client->socket, CMD_GAME_PLAY, &event,
-                sizeof(struct GamePlayRes));
     return 0;
   }
 
-  struct GameStateEvent res = {
-      .status = status(&lobby->awale),
+  const struct GameObserveRes res = {
+      .observe = req->observe,
+      .client_id = req->client_id,
   };
 
-  for (int i = 0; i < GRID_ROWS; i++) {
-    for (int j = 0; j < GRID_COLS; j++) {
-      res.grid[i][j] = lobby->awale.grid[i][j];
-    }
-  }
+  send_cmd_to(observer->socket, CMD_GAME_OBSERVE, &res,
+              sizeof(struct GameObserveRes));
 
-  send_cmd_to(lobby->client[PLAYER1]->socket, CMD_GAME_STATE_EVENT, &res,
-              sizeof(struct GameStateEvent));
+  const struct GameObserveEvent event = {
+      .client_id = client_id,
+      .observe = req->observe,
+  };
 
-  send_cmd_to(lobby->client[PLAYER2]->socket, CMD_GAME_STATE_EVENT, &res,
-              sizeof(struct GameStateEvent));
+  send_cmd_to(lobby->client[PLAYER1]->socket, CMD_GAME_OBSERVE_EVENT, &event,
+              sizeof(struct GameObserveEvent));
+
+  send_cmd_to(lobby->client[PLAYER2]->socket, CMD_GAME_OBSERVE_EVENT, &event,
+              sizeof(struct GameObserveEvent));
 
   return 1;
 };
@@ -83,6 +101,7 @@ void add_game_cmds(struct ServerMediator *mediator) {
 
   register_cmd(mediator, CMD_GAME_PLAY, &on_game_play);
   register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
+  register_cmd(mediator, CMD_GAME_OBSERVE, &on_game_observe);
 }
 
 #endif

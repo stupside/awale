@@ -2,10 +2,6 @@
 
 #include <stdlib.h>
 
-#include "lib/socket/cmd.h"
-#include "lib/socket/cmds/challenge.h"
-#include "lib/socket/socket.h"
-
 struct Lobby new_lobby(struct SocketClient *challenger,
                        struct SocketClient *challenged) {
 
@@ -31,7 +27,7 @@ int start_lobby(struct Lobby *lobby) {
   return 1;
 }
 
-int observe_lobby(struct Lobby *lobby, struct SocketClient *client,
+int observe_lobby(struct Lobby *lobby, const struct SocketClient *client,
                   unsigned int observe) {
 
   if (lobby->state != LOBBY_STATE_RUNNING) {

@@ -1,10 +1,6 @@
 #ifndef CHALLENGE_HANDLERS_H
 #define CHALLENGE_HANDLERS_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "lib/cmds/mediator.h"
 
 #include "lib/server/server.h"

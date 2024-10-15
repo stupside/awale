@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 struct Server *awale_server() {
 
@@ -138,8 +139,21 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
   if (validity == VALID) {
 
     struct GameStateEvent event = {
+        .observed = 0,
         .status = status(&lobby->awale),
     };
+
+    for (int i = 0; i < PLAYER_COUNT; i++) {
+      const struct SocketClient *player = lobby->client[i];
+
+      struct UserRes user = {
+          .client_id = player->id,
+      };
+
+      strncpy(user.name, player->name, USER_NAME_LEN);
+
+      event.users[i] = user;
+    }
 
     for (int i = 0; i < GRID_ROWS; i++) {
       for (int j = 0; j < GRID_COLS; j++) {
@@ -152,6 +166,8 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
 
     send_cmd_to(lobby->client[PLAYER2]->socket, CMD_GAME_STATE_EVENT, &event,
                 sizeof(struct GameStateEvent));
+
+    event.observed = 1;
 
     for (int i = 0; i < MAX_CLIENTS; i++) {
 

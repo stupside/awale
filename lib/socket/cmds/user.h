@@ -43,7 +43,7 @@ struct UserRes {
   char description[USER_DESC_LEN];
 };
 
-#define PAGE_MAX_CLIENTS 5
+#define PAGE_MAX_CLIENTS 2
 
 struct UserListRes {
   unsigned int count;

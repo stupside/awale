@@ -79,11 +79,12 @@ unsigned int client_users(SOCKET sock, char *argv[], unsigned int argslen) {
 
 unsigned int client_game_observe(SOCKET sock, char *argv[],
                                  unsigned int argslen) {
-  struct UserObserveReq req = {
+  struct GameObserveReq req = {
+      .observe = atoi(argv[2]),
       .client_id = atoi(argv[1]),
   };
 
-  send_cmd_to(sock, CMD_GAME_OBSERVE, &req, sizeof(struct UserObserveReq));
+  send_cmd_to(sock, CMD_GAME_OBSERVE, &req, sizeof(struct GameObserveReq));
 
   return 1;
 }

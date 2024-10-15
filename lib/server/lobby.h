@@ -21,10 +21,10 @@ struct Lobby {
 
   enum LobbyState state;
 
-  struct SocketClient *client[PLAYER_COUNT];
+  const struct SocketClient *client[PLAYER_COUNT];
 
   unsigned int observators_c;
-  struct SocketClient *observators[MAX_CLIENTS];
+  const struct SocketClient *observators[MAX_CLIENTS];
 };
 
 struct Lobby new_lobby(struct SocketClient *challenger,
@@ -32,7 +32,7 @@ struct Lobby new_lobby(struct SocketClient *challenger,
 
 int start_lobby(struct Lobby *lobby);
 
-int observe_lobby(struct Lobby *lobby, struct SocketClient *client,
+int observe_lobby(struct Lobby *lobby, const struct SocketClient *client,
                   unsigned int observe);
 
 void end_lobby(struct Lobby *lobby);

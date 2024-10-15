@@ -10,7 +10,7 @@ typedef struct in_addr IN_ADDR;
 typedef struct sockaddr SOCKADDR;
 typedef struct sockaddr_in SOCKADDR_IN;
 
-#define BUF_SIZE 1024
+#define BUF_SIZE 1024 * 2 // TODO à revoir
 
 #define SOCKET_ERROR -1
 #define INVALID_SOCKET -1

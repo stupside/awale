@@ -1,6 +1,8 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <stdlib.h>
+
 #include "handlers/challenge.h"
 #include "handlers/chat.h"
 #include "handlers/game.h"

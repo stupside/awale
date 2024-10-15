@@ -76,9 +76,32 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
   return 1;
 };
 
+unsigned int on_game_observe(unsigned int client_id, const void *data) {
+
+  const struct GameObserveRes *res = data;
+  res->observe
+      ? printf("You are now observing the game of client %d\n", res->client_id)
+      : printf("You are no longer observing the game of client %d\n",
+               res->client_id);
+
+  return 1;
+};
+
+unsigned int on_game_observe_event(unsigned int client_id, const void *data) {
+
+  const struct GameObserveEvent *event = data;
+
+  event->observe
+      ? printf("Client %d is now observing the game\n", event->client_id)
+      : printf("Client %d is no longer observing the game\n", event->client_id);
+
+  return 1;
+};
+
 void add_game_cmds(struct ServerMediator *mediator) {
   register_cmd(mediator, CMD_GAME_PLAY, &on_game_play);
   register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
+  register_cmd(mediator, CMD_GAME_OBSERVE, &on_game_observe);
 
   register_cmd(mediator, CMD_GAME_LEAVE_EVENT, &on_game_leave_event);
   register_cmd(mediator, CMD_GAME_STATE_EVENT, &on_game_state_event);
