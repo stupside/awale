@@ -22,6 +22,8 @@ struct Lobby {
   enum LobbyState state;
 
   struct SocketClient *client[PLAYER_COUNT];
+
+  unsigned int observators_c;
   struct SocketClient *observators[MAX_CLIENTS];
 };
 

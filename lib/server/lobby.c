@@ -10,9 +10,11 @@ struct Lobby new_lobby(struct SocketClient *challenger,
                        struct SocketClient *challenged) {
 
   return (struct Lobby){
-      .client = {challenger, challenged},
-      .state = LOBBY_STATE_WAITING,
       .awale = new_awale(),
+      .state = LOBBY_STATE_WAITING,
+      .client = {challenger, challenged},
+      .observators_c = 0,
+      .observators = {NULL},
   };
 }
 
@@ -32,29 +34,25 @@ int start_lobby(struct Lobby *lobby) {
 int observe_lobby(struct Lobby *lobby, struct SocketClient *client,
                   unsigned int observe) {
 
-  static unsigned int id;
+  if (lobby->state != LOBBY_STATE_RUNNING) {
+    return 0;
+  }
 
-  for (int i = 0; i < MAX_CLIENTS; i++) {
-    const struct SocketClient *observator = lobby->observators[i];
+  for (unsigned int idx = 0; idx < lobby->observators_c; idx++) {
 
-    if (observe) {
-      if (observator) {
-        if (observator->id == client->id) {
-          return 0; // Already observing
-        }
+    const struct SocketClient *observator = lobby->observators[idx];
+
+    if (observator->id == client->id) {
+      if (observe) {
+        return 0;
       } else {
-        lobby->observators[id++] = client;
-        return 1;
+        lobby->observators[lobby->observators_c--] = NULL;
       }
-    } else {
-      if (observator) {
-        if (observator->id == client->id) {
-          lobby->observators[i] = NULL;
-          return 1;
-        }
-      }
+      return 1;
     }
   }
+
+  lobby->observators[lobby->observators_c++] = client;
 
   return 0;
 }
