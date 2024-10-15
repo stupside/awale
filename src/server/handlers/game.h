@@ -50,12 +50,13 @@ unsigned int on_game_play(unsigned int client_id, const void *data) {
 
   enum CoupValidity ok = play(&lobby->awale, client_id, req->input);
 
-  const struct GamePlayRes event = {.validity = ok};
-
-  send_cmd_to(client->socket, CMD_GAME_PLAY, &event,
-              sizeof(struct GamePlayRes));
-
   if (ok != VALID) {
+
+    const struct GamePlayRes event = {
+        .validity = ok}; // Do no send two messages successively
+
+    send_cmd_to(client->socket, CMD_GAME_PLAY, &event,
+                sizeof(struct GamePlayRes));
     return 0;
   }
 
