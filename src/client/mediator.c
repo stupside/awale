@@ -58,21 +58,33 @@ unsigned int client_challenge(SOCKET sock, char *argv[], unsigned int argslen) {
   return 1;
 }
 
-unsigned int client_challenge_handle(SOCKET sock, char *argv[],
+unsigned int client_challenge_accept(SOCKET sock, char *argv[],
                                      unsigned int argslen) {
-  if (argslen < 3) {
+  if (argslen < 2) {
     return 0;
   }
 
-  struct ChallengeHandleReq req;
+  struct ChallengeHandleReq req = {
+      .accept = 1,
+      .client_id = atoi(argv[1]),
+  };
 
-  const char *accept = argv[2];
+  send_cmd_to(sock, CMD_CHALLENGE_HANDLE, &req,
+              sizeof(struct ChallengeHandleReq));
 
-  unsigned int accepted =
-      (strcmp(accept, "yes") == 0 || strcmp(accept, "accept") == 0) ? 1 : 0;
+  return 1;
+}
 
-  req.accept = accepted;
-  req.client_id = atoi(argv[1]);
+unsigned int client_challenge_reject(SOCKET sock, char *argv[],
+                                     unsigned int argslen) {
+  if (argslen < 2) {
+    return 0;
+  }
+
+  struct ChallengeHandleReq req = {
+      .accept = 0,
+      .client_id = atoi(argv[1]),
+  };
 
   send_cmd_to(sock, CMD_CHALLENGE_HANDLE, &req,
               sizeof(struct ChallengeHandleReq));
@@ -101,12 +113,28 @@ unsigned int client_users(SOCKET sock, char *argv[], unsigned int argslen) {
 
 unsigned int client_game_observe(SOCKET sock, char *argv[],
                                  unsigned int argslen) {
-  if (argslen < 3) {
+  if (argslen < 2) {
     return 0;
   }
 
   struct GameObserveReq req = {
-      .observe = atoi(argv[2]),
+      .observe = 1,
+      .client_id = atoi(argv[1]),
+  };
+
+  send_cmd_to(sock, CMD_GAME_OBSERVE, &req, sizeof(struct GameObserveReq));
+
+  return 1;
+}
+
+unsigned int client_game_unobserver(SOCKET sock, char *argv[],
+                                    unsigned int argslen) {
+  if (argslen < 2) {
+    return 0;
+  }
+
+  struct GameObserveReq req = {
+      .observe = 0,
       .client_id = atoi(argv[1]),
   };
 
@@ -201,9 +229,11 @@ void init_client_mediator(struct ClientMediator *mediator) {
   register_client_cmd(mediator, "/game-grid", &client_game_grid);
   register_client_cmd(mediator, "/game-leave", &client_game_leave);
   register_client_cmd(mediator, "/game-observe", &client_game_observe);
+  register_client_cmd(mediator, "/game-unobserve", &client_game_unobserver);
 
   register_client_cmd(mediator, "/challenge", &client_challenge);
-  register_client_cmd(mediator, "/challenge-handle", &client_challenge_handle);
+  register_client_cmd(mediator, "/challenge-accept", &client_challenge_accept);
+  register_client_cmd(mediator, "/challenge-reject", &client_challenge_reject);
 
   register_client_cmd(mediator, "/set-username", &client_set_username);
   register_client_cmd(mediator, "/set-password", &client_set_password);
