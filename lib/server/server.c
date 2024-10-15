@@ -130,12 +130,6 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
 
   const enum CoupValidity validity = play(&lobby->awale, player, target);
 
-  struct GamePlayRes res = {
-      .validity = validity,
-  };
-
-  send_cmd_to(client->socket, CMD_GAME_PLAY, &res, sizeof(struct GamePlayRes));
-
   if (validity == VALID) {
 
     struct GameStateEvent event = {
@@ -169,17 +163,25 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
 
     event.observed = 1;
 
-    for (int i = 0; i < MAX_CLIENTS; i++) {
+    for (unsigned int i = 0; i < lobby->observators_c; i++) {
 
       const struct SocketClient *observator = lobby->observators[i];
 
       if (observator) {
-        send_cmd_to(observator->socket, CMD_GAME_STATE, &event,
+        send_cmd_to(observator->socket, CMD_GAME_STATE_EVENT, &event,
                     sizeof(struct GameStateEvent));
       }
     }
 
     return 1;
+  } else {
+
+    struct GamePlayRes res = {
+        .validity = validity,
+    };
+
+    send_cmd_to(client->socket, CMD_GAME_PLAY, &res,
+                sizeof(struct GamePlayRes));
   }
 
   return 0;
