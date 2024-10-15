@@ -160,11 +160,41 @@ unsigned int on_user_list_all(unsigned int client_id, const void *data) {
   return 1;
 };
 
+unsigned int on_user_set_info(unsigned int client_id, const void *data) {
+
+  const struct UserInfoSetReq *req = data;
+
+  SocketClient *client = find_client_by_id(&awale_server()->pool, client_id);
+
+  if (!client) {
+    return 0;
+  }
+
+  if (req->password[0] != '\0') {
+    strncpy(client->password, req->password, USER_PASSWORD_LEN);
+  }
+
+  if (req->name[0] != '\0') {
+    SocketClient *otherClient =
+        find_client_by_name(&awale_server()->pool, req->name);
+    if (!otherClient) {
+      strncpy(client->name, req->name, USER_NAME_LEN);
+    }
+    // else send error todo
+  }
+  if (req->description[0] != '\0') {
+    strncpy(client->description, req->description, USER_DESC_LEN);
+  }
+
+  return 1;
+};
+
 void add_user_cmds(struct ServerMediator *mediator) {
 
   register_cmd(mediator, CMD_USER_LOGIN, &on_user_login);
   register_cmd(mediator, CMD_USER_LOGOUT, &on_user_logout);
   register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list_all);
+  register_cmd(mediator, CMD_USER_SET_INFO, &on_user_set_info);
 }
 
 #endif

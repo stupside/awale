@@ -13,6 +13,7 @@ typedef struct SocketClient {
   unsigned int id;
   char name[USER_NAME_LEN];
   char password[USER_PASSWORD_LEN];
+  char description[USER_DESC_LEN];
 
 } SocketClient;
 
