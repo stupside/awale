@@ -8,10 +8,20 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#define CRLF "\r\n"
+
 void close_socket(SOCKET sock) { close(sock); }
 
 int write_to_socket(SOCKET sock, const char *buffer) {
-  return send(sock, buffer, strlen(buffer), 0) > 0;
+
+  char copy[strlen(buffer) + sizeof(CRLF) + 1];
+
+  strcpy(copy, buffer);
+  strcat(copy, CRLF);
+
+  const unsigned int ok = send(sock, copy, strlen(copy), 0) > 0;
+
+  return ok;
 }
 
 int write_to_sockets(const SocketPool *pool, const SocketClient *sender,

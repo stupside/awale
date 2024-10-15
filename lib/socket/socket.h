@@ -6,8 +6,6 @@
 
 #define PORT 1977
 
-#define CRLF "\r\n"
-
 typedef struct in_addr IN_ADDR;
 typedef struct sockaddr SOCKADDR;
 typedef struct sockaddr_in SOCKADDR_IN;
