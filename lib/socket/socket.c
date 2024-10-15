@@ -2,7 +2,7 @@
 
 #include "lib/cmds/cmd.h"
 
-#include <stdio.h>
+#include "lib/socket/cmds/error.h"
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -85,4 +85,12 @@ int send_cmd_to_client(const struct SocketClient *client, enum CMD cmd_id,
   }
 
   return 0;
+}
+
+void send_error_to_client(const struct SocketClient *client, enum Errors code) {
+
+  const struct ErrorEvent event = {.code = ERROR_CLIENT_NOT_FOUND};
+
+  send_cmd_to_client(client, CMD_ERROR_EVENT, &event,
+                     sizeof(struct ErrorEvent));
 }

@@ -17,6 +17,7 @@ unsigned int on_game_state(unsigned int client_id, const void *data) {
   const struct Lobby *lobby = find_running_lobby(awale_server(), client);
 
   if (!lobby) {
+    send_error_to_client(client, ERROR_GET_GAME_NOT_RUNNING);
     return 0;
   }
 
@@ -61,6 +62,7 @@ unsigned int on_game_observe(unsigned int client_id, const void *data) {
   struct Lobby *lobby = find_running_lobby(awale_server(), observed);
 
   if (!lobby) {
+    send_error_to_client(observer, ERROR_OBSRRVE_GAME_NOT_RUNNING);
     return 0;
   }
 
@@ -70,12 +72,7 @@ unsigned int on_game_observe(unsigned int client_id, const void *data) {
     return 1;
   }
 
-  struct ErrorEvent event = {
-      .message = "An error occured while trying to observe the game",
-  };
-
-  send_cmd_to_client(observer, CMD_ERROR_EVENT, &event,
-                     sizeof(struct ErrorEvent));
+  send_error_to_client(observer, ERROR_OBSERVE_GAME_ERROR);
 
   return 0;
 };
@@ -88,12 +85,8 @@ unsigned int on_game_leave(unsigned int client_id, const void *data) {
   struct Lobby *lobby = find_running_lobby(awale_server(), client);
 
   if (!lobby) {
-    const struct ErrorEvent event = {
-        .message = "You are not in a game",
-    };
 
-    send_cmd_to_client(client, CMD_ERROR_EVENT, &event,
-                       sizeof(struct ErrorEvent));
+    send_error_to_client(client, ERROR_LEAVE_GAME_NOT_RUNNING);
 
     return 0;
   }

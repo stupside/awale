@@ -2,6 +2,7 @@
 
 #include <netdb.h>
 #include <pthread.h>
+#include <signal.h>
 #include <string.h>
 
 #include "lib/socket/cmds/user.h"

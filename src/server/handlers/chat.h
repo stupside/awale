@@ -9,6 +9,7 @@
 #include "lib/socket/socket.h"
 
 #include "lib/socket/cmds/chat.h"
+#include "lib/socket/cmds/error.h"
 
 unsigned int on_chat_write(unsigned int client_id, const void *data) {
 
@@ -16,10 +17,6 @@ unsigned int on_chat_write(unsigned int client_id, const void *data) {
 
   const SocketClient *client =
       find_client_by_id(&awale_server()->pool, client_id);
-
-  if (!client) {
-    return 0;
-  }
 
   struct ChatWriteEvent event = {.client_id = client->id};
   strcpy(event.message, req->message);
@@ -35,6 +32,7 @@ unsigned int on_chat_write(unsigned int client_id, const void *data) {
       find_client_by_id(&awale_server()->pool, req->client_id);
 
   if (!receiver) {
+    send_error_to_client(client, ERROR_CLIENT_NOT_FOUND);
     return 0;
   }
 

@@ -75,10 +75,6 @@ unsigned int on_user_logout(unsigned int client_id, const void *data) {
   const SocketClient *client =
       find_client_by_id(&awale_server()->pool, client_id);
 
-  if (!client) {
-    return 0;
-  }
-
   {
     const struct UserLogoutEvent event = {.client_id = client->id};
 
@@ -182,11 +178,8 @@ unsigned int on_user_get_info(unsigned int client_id, const void *data) {
       find_client_by_id(&awale_server()->pool, req->client_id);
 
   if (!client) {
-    const struct ErrorEvent event = {.message = "Client not found"};
 
-    send_cmd_to(client->socket, CMD_ERROR_EVENT, &event,
-                sizeof(struct ErrorEvent));
-    return 0;
+    send_error_to_client(client, ERROR_CLIENT_NOT_FOUND);
   }
 
   struct UserGetInfoRes res = {

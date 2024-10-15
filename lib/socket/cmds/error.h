@@ -1,10 +1,10 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#include "lib/valuable/limit.h"
+#include "lib/valuable/type.h"
 
 struct ErrorEvent {
-  char message[ERROR_MSG_LEN];
+  enum Errors code;
 };
 
 #endif

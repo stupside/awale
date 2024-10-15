@@ -28,4 +28,6 @@ int send_cmd_to_client(const struct SocketClient *client, enum CMD cmd_id,
 
 int read_from_socket(SOCKET sock, char *buffer);
 
+void send_error_to_client(const struct SocketClient *client, enum Errors code);
+
 #endif

@@ -22,10 +22,7 @@ unsigned int on_challenge(unsigned int client_id, const void *data) {
 
   if (!challenged) {
 
-    const struct ErrorEvent event = {.message = "Client not found"};
-
-    send_cmd_to_client(challenger, CMD_ERROR_EVENT, &event,
-                       sizeof(struct ErrorEvent));
+    send_error_to_client(challenger, ERROR_CLIENT_NOT_FOUND);
 
     return 0;
   }
@@ -36,10 +33,7 @@ unsigned int on_challenge(unsigned int client_id, const void *data) {
     return 1;
   }
 
-  const struct ErrorEvent event = {.message = "Failed to challenge"};
-
-  send_cmd_to_client(challenger, CMD_ERROR_EVENT, &event,
-                     sizeof(struct ErrorEvent));
+  send_error_to_client(challenger, ERROR_FAILED_TO_CHALLENGE);
 
   return 0;
 };
@@ -53,10 +47,7 @@ unsigned int on_challenge_handle(unsigned int client_id, const void *data) {
 
   if (!challenger) {
 
-    const struct ErrorEvent event = {.message = "Challenger not found"};
-
-    send_cmd_to_client(challenger, CMD_ERROR_EVENT, &event,
-                       sizeof(struct ErrorEvent));
+    send_error_to_client(challenger, ERROR_FAILED_TO_RETRIEVE_CHALLENGER);
 
     return 0;
   }
@@ -71,10 +62,7 @@ unsigned int on_challenge_handle(unsigned int client_id, const void *data) {
     return 1;
   }
 
-  const struct ErrorEvent event = {.message = "Failed to handle challenge"};
-
-  send_cmd_to_client(challenger, CMD_ERROR_EVENT, &event,
-                     sizeof(struct ErrorEvent));
+  send_error_to_client(challenger, ERROR_FAILED_TO_HANDLE_CHALLENGE);
 
   return 0;
 };
