@@ -96,9 +96,43 @@ unsigned int on_game_observe(unsigned int client_id, const void *data) {
   return 1;
 };
 
+unsigned int on_game_leave(unsigned int client_id, const void *data) {
+
+  const SocketClient *client =
+      find_client_by_id(&awale_server()->pool, client_id);
+
+  struct Lobby *lobby = find_running_lobby(awale_server(), client);
+
+  if (!lobby) {
+    const struct ErrorEvent event = {
+        .message = "You are not in a game",
+    };
+
+    send_cmd_to_client(client, CMD_ERROR_EVENT, &event,
+                       sizeof(struct ErrorEvent));
+
+    return 0;
+  }
+
+  end_lobby(lobby);
+
+  const struct GameLeaveEvent event = {
+      .client_id = client_id,
+  };
+
+  send_cmd_to_client(lobby->client[PLAYER1], CMD_GAME_LEAVE_EVENT, &event,
+                     sizeof(struct GameLeaveEvent));
+
+  send_cmd_to_client(lobby->client[PLAYER2], CMD_GAME_LEAVE_EVENT, &event,
+                     sizeof(struct GameLeaveEvent));
+
+  return 1;
+};
+
 void add_game_cmds(struct ServerMediator *mediator) {
 
   register_cmd(mediator, CMD_GAME_PLAY, &on_game_play);
+  register_cmd(mediator, CMD_GAME_LEAVE, &on_game_leave);
   register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
   register_cmd(mediator, CMD_GAME_OBSERVE, &on_game_observe);
 }
