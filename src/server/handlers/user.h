@@ -185,7 +185,8 @@ unsigned int on_user_set_info(unsigned int client_id, const void *data) {
   if (req->description[0] != '\0') {
     strncpy(client->description, req->description, USER_DESC_LEN);
   }
-
+  printf("Updated user info: ID=%u, Name=%s, Password=%s, Description=%s\n",
+         client->id, client->name, client->password, client->description);
   return 1;
 };
 
