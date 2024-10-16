@@ -4,14 +4,19 @@
 #include "lib/valuable/limit.h"
 #include "lib/valuable/type.h"
 
+struct UserRegisterReq {
+  char name[USER_NAME_LEN];
+  char password[USER_PASSWORD_LEN];
+};
+struct UserRegisterRes {
+  ClientId client_id;
+};
+
 struct UserLoginReq {
   char name[USER_NAME_LEN];
   char password[USER_PASSWORD_LEN];
-  char description[USER_DESC_LEN];
 };
-struct UserLoginRes {
-  ClientId client_id;
-};
+struct UserLoginRes {};
 struct UserLoginEvent {
   ClientId client_id;
 };

@@ -4,14 +4,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct ServerMediator new_mediator() {
-  return (struct ServerMediator){.handlers = {0}};
-}
-
 void register_cmd(struct ServerMediator *mediator, CommandId cmd_id,
                   unsigned int (*callback)(ClientId client_id,
-                                           const void *data)) {
-  mediator->handlers[cmd_id] = (struct Handler){.handle = callback};
+                                           const void *data),
+                  enum Persist persist) {
+
+  mediator->handlers[cmd_id] =
+      (struct Handler){.handle = callback, .persist = persist};
 }
 
 int handle_cmd(const struct ServerMediator *dispatcher, unsigned int client_id,
@@ -38,6 +37,16 @@ int handle_cmd(const struct ServerMediator *dispatcher, unsigned int client_id,
 
   if (handler->handle) {
     ok = handler->handle(client_id, cmd_payload);
+
+    if (ok) {
+      if (handler->persist == PERSIST) {
+        if (write_cmd(&dispatcher->persistor, client_id, cmd)) {
+          printf("Command persisted\n");
+        } else {
+          perror("Failed to persist command");
+        }
+      }
+    }
   }
 
   free(cmd_payload);

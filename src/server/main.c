@@ -9,7 +9,7 @@
 
 #include "lib/socket/socket.h"
 
-int init(void) {
+int init(unsigned int port) {
 
   SOCKET sock = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -25,7 +25,7 @@ int init(void) {
     exit(errno);
   }
 
-  sin.sin_port = htons(PORT);
+  sin.sin_port = htons(port);
   sin.sin_family = AF_INET;
   sin.sin_addr.s_addr = htonl(INADDR_ANY);
 
@@ -40,8 +40,8 @@ int init(void) {
   return sock;
 }
 
-void app(struct ServerMediator *mediator) {
-  SOCKET sock = init();
+void app(unsigned int port, struct ServerMediator *mediator) {
+  SOCKET sock = init(port);
 
   char buffer[BUF_SIZE];
 
@@ -91,11 +91,19 @@ void app(struct ServerMediator *mediator) {
         continue;
       }
 
-      if (handle_cmd(mediator, csock, buffer)) {
-        FD_SET(csock, &rdfs);
-        maxfd = csock > maxfd ? csock : maxfd;
-      } else {
-        close_socket(csock);
+      {
+        handle_cmd(mediator, csock, buffer);
+
+        if (read_from_socket(csock, buffer) == -1) {
+          continue;
+        }
+
+        if (handle_cmd(mediator, csock, buffer)) {
+          FD_SET(csock, &rdfs);
+          maxfd = csock > maxfd ? csock : maxfd;
+        } else {
+          close_socket(csock);
+        }
       }
 
     } else {

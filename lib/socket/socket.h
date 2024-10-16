@@ -4,8 +4,6 @@
 #include "cmd.h"
 #include "pool.h"
 
-#define PORT 1977
-
 typedef struct in_addr IN_ADDR;
 typedef struct sockaddr SOCKADDR;
 typedef struct sockaddr_in SOCKADDR_IN;

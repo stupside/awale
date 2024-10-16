@@ -135,10 +135,10 @@ unsigned int on_game_leave(unsigned int client_id, const void *data) {
 
 void add_game_cmds(struct ServerMediator *mediator) {
 
-  register_cmd(mediator, CMD_GAME_PLAY, &on_game_play);
-  register_cmd(mediator, CMD_GAME_LEAVE, &on_game_leave);
-  register_cmd(mediator, CMD_GAME_STATE, &on_game_state);
-  register_cmd(mediator, CMD_GAME_OBSERVE, &on_game_observe);
+  register_cmd(mediator, CMD_GAME_PLAY, &on_game_play, PERSIST);
+  register_cmd(mediator, CMD_GAME_LEAVE, &on_game_leave, PERSIST);
+  register_cmd(mediator, CMD_GAME_STATE, &on_game_state, NO_PERSIST);
+  register_cmd(mediator, CMD_GAME_OBSERVE, &on_game_observe, PERSIST);
 }
 
 #endif

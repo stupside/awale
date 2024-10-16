@@ -68,8 +68,8 @@ unsigned int on_challenge_handle(unsigned int client_id, const void *data) {
 };
 
 void add_challenge_cmds(struct ServerMediator *mediator) {
-  register_cmd(mediator, CMD_CHALLENGE, &on_challenge);
-  register_cmd(mediator, CMD_CHALLENGE_HANDLE, &on_challenge_handle);
+  register_cmd(mediator, CMD_CHALLENGE, &on_challenge, PERSIST);
+  register_cmd(mediator, CMD_CHALLENGE_HANDLE, &on_challenge_handle, PERSIST);
 }
 
 #endif

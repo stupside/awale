@@ -30,7 +30,7 @@ int add_client(SocketPool *pool, const char *name, const char *password,
 
   const unsigned int id = pool->count++;
 
-  pool->clients[id] = (SocketClient){.id = id, .socket = socket, .online = 1};
+  pool->clients[id] = (SocketClient){.id = id, .socket = socket, .online = 0};
 
   struct SocketClient *client = &pool->clients[id];
 

@@ -12,13 +12,13 @@
 #include "handlers/game.h"
 #include "handlers/user.h"
 
-void app(const char *address, const char *name, const char *password,
-         const struct ServerMediator *mediator,
+void app(const char *address, unsigned int port, const char *name,
+         const char *password, const struct ServerMediator *mediator,
          const struct ClientMediator *clientMediator);
 
 int main(int argc, char **argv) {
-  if (argc < 2) {
-    printf("Usage : %s [address] [pseudo] [password]\n", argv[0]);
+  if (argc < 5) {
+    printf("Usage : %s [address] [port] [pseudo] [password]\n", argv[0]);
     return EXIT_FAILURE;
   }
 
@@ -38,7 +38,13 @@ int main(int argc, char **argv) {
 
   init_client_mediator(&client_mediator);
 
-  app(argv[1], argv[2], argv[3], &server_mediator, &client_mediator);
+  const char *address = argv[1];
+  unsigned int port = atoi(argv[2]);
+
+  const char *name = argv[3];
+  const char *password = argv[4];
+
+  app(address, port, name, password, &server_mediator, &client_mediator);
 
   return EXIT_SUCCESS;
 }

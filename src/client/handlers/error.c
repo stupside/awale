@@ -11,6 +11,9 @@ unsigned int on_error_event(unsigned int client_id, const void *data) {
   case ERROR_CLIENT_NOT_FOUND:
     PRINT_COLOR(COLOR_RED, "❌ Error: No available client was found.\n");
     break;
+  case ERROR_CLIENT_FOUND:
+    PRINT_COLOR(COLOR_RED, "❌ Error: Client already exists.\n");
+    break;
   case ERROR_FAILED_TO_CHALLENGE:
     PRINT_COLOR(COLOR_RED, "❌ Error: Could not send the challenge.\n");
     break;
@@ -45,5 +48,5 @@ unsigned int on_error_event(unsigned int client_id, const void *data) {
 }
 
 void add_error_handlers(struct ServerMediator *mediator) {
-  register_cmd(mediator, CMD_ERROR_EVENT, &on_error_event);
+  register_cmd(mediator, CMD_ERROR_EVENT, &on_error_event, NO_PERSIST);
 }

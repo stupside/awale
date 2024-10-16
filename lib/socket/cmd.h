@@ -3,6 +3,8 @@
 
 enum CMD {
 
+  CMD_USER_REGISTER,
+
   CMD_USER_LOGIN,
   CMD_USER_LOGIN_EVENT,
 

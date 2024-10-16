@@ -13,6 +13,43 @@
 
 #include "lib/socket/cmds/user.h"
 
+unsigned int on_user_register(unsigned int socket, const void *data) {
+
+  struct Server *server = awale_server();
+
+  const struct UserRegisterReq *req = data;
+
+  const SocketClient *existing = find_client_by_name(&server->pool, req->name);
+
+  if (existing) {
+
+    const struct ErrorEvent event = {.code = ERROR_CLIENT_FOUND};
+
+    send_cmd_to(socket, CMD_ERROR_EVENT, &event, sizeof(struct ErrorEvent));
+
+    perror("Client already exists");
+    return 0;
+  }
+
+  unsigned int client_id;
+
+  const int added =
+      add_client(&server->pool, req->name, req->password, socket, &client_id);
+
+  if (!added) {
+    perror("Failed to add client");
+    return 0;
+  }
+
+  const struct UserRegisterRes res = {
+      .client_id = client_id,
+  };
+
+  send_cmd_to(socket, CMD_USER_REGISTER, &res, sizeof(struct UserRegisterRes));
+
+  return 1;
+}
+
 unsigned int on_user_login(unsigned int socket, const void *data) {
 
   struct Server *server = awale_server();
@@ -46,16 +83,14 @@ unsigned int on_user_login(unsigned int socket, const void *data) {
     }
   } else {
 
-    const int added =
-        add_client(&server->pool, req->name, req->password, socket, &client_id);
+    const struct ErrorEvent event = {.code = ERROR_CLIENT_NOT_FOUND};
 
-    if (!added) {
-      perror("Failed to add client");
-      return 0;
-    }
+    send_cmd_to(socket, CMD_ERROR_EVENT, &event, sizeof(struct ErrorEvent));
+
+    return 0;
   }
 
-  const struct UserLoginRes res = {.client_id = client_id};
+  const struct UserLoginRes res = {};
 
   send_cmd_to(socket, CMD_USER_LOGIN, &res, sizeof(struct UserLoginRes));
 
@@ -207,11 +242,12 @@ unsigned int on_user_get_info(unsigned int client_id, const void *data) {
 
 void add_user_cmds(struct ServerMediator *mediator) {
 
-  register_cmd(mediator, CMD_USER_LOGIN, &on_user_login);
-  register_cmd(mediator, CMD_USER_LOGOUT, &on_user_logout);
-  register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list_all);
-  register_cmd(mediator, CMD_USER_SET_INFO, &on_user_set_info);
-  register_cmd(mediator, CMD_USER_GET_INFO, &on_user_get_info);
+  register_cmd(mediator, CMD_USER_REGISTER, &on_user_register, PERSIST);
+  register_cmd(mediator, CMD_USER_LOGIN, &on_user_login, NO_PERSIST);
+  register_cmd(mediator, CMD_USER_LOGOUT, &on_user_logout, NO_PERSIST);
+  register_cmd(mediator, CMD_USER_LIST_ALL, &on_user_list_all, NO_PERSIST);
+  register_cmd(mediator, CMD_USER_SET_INFO, &on_user_set_info, PERSIST);
+  register_cmd(mediator, CMD_USER_GET_INFO, &on_user_get_info, NO_PERSIST);
 }
 
 #endif

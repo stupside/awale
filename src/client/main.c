@@ -21,7 +21,7 @@ void handle_sigint(int sig) {
 }
 
 // Function to initialize the socket connection
-int init(const char *address) {
+int init(const char *address, unsigned int port) {
   sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock == INVALID_SOCKET) {
     perror("Socket creation failed");
@@ -36,7 +36,7 @@ int init(const char *address) {
   }
 
   sin.sin_addr = *(IN_ADDR *)hostinfo->h_addr;
-  sin.sin_port = htons(PORT);
+  sin.sin_port = htons(port);
   sin.sin_family = AF_INET;
 
   if (connect(sock, (SOCKADDR *)&sin, sizeof(SOCKADDR)) == SOCKET_ERROR) {
@@ -60,8 +60,7 @@ void *write_handler(void *clientMediator) {
         continue;
       buffer[strcspn(buffer, "\n")] = 0;
 
-      unsigned int ok = handle_client_cmd(
-          sock, (struct ClientMediator *)clientMediator, buffer);
+      unsigned int ok = handle_client_cmd(sock, clientMediator, buffer);
 
       if (ok) {
       } else {
@@ -94,21 +93,30 @@ void *read_handler(void *mediator) {
 }
 
 // Main application function
-void app(const char *address, const char *name, const char *password,
-         const struct ServerMediator *mediator,
+void app(const char *address, unsigned int port, const char *name,
+         const char *password, const struct ServerMediator *mediator,
          const struct ClientMediator *clientMediator) {
 
-  sock = init(address);
+  sock = init(address, port);
+
+  {
+    struct UserRegisterReq req;
+    strncpy(req.name, name, sizeof(req.name));
+    strncpy(req.password, password, sizeof(req.password));
+
+    send_cmd_to(sock, CMD_USER_REGISTER, &req, sizeof(struct UserRegisterReq));
+  }
+
+  {
+    struct UserLoginReq req;
+    strncpy(req.name, name, sizeof(req.name));
+    strncpy(req.password, password, sizeof(req.password));
+
+    send_cmd_to(sock, CMD_USER_LOGIN, &req, sizeof(struct UserLoginReq));
+  }
 
   // Setup the signal handler for SIGINT
   signal(SIGINT, handle_sigint);
-
-  // Send login command
-  struct UserLoginReq req;
-  strncpy(req.name, name, sizeof(req.name));
-  strncpy(req.password, password, sizeof(req.password));
-
-  send_cmd_to(sock, CMD_USER_LOGIN, &req, sizeof(struct UserLoginReq));
 
   // Create threads for reading and writing
   pthread_create(&read_thread, NULL, read_handler, (void *)mediator);
