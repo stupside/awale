@@ -86,6 +86,8 @@ unsigned int on_user_logout(unsigned int client_id, const void *data) {
 };
 
 unsigned int on_user_list_all(unsigned int client_id, const void *data) {
+  const SocketClient *requesting_client =
+      find_client_by_id(&awale_server()->pool, client_id);
 
   const struct SocketClient *clients_online[awale_server()->pool.count];
 
@@ -108,9 +110,15 @@ unsigned int on_user_list_all(unsigned int client_id, const void *data) {
 
   const unsigned int min = req->page * PAGE_MAX_CLIENTS;
 
-  unsigned int max = clients_online_c / PAGE_MAX_CLIENTS == req->page
-                         ? min + clients_online_c % PAGE_MAX_CLIENTS - 1
-                         : PAGE_MAX_CLIENTS * (req->page + 1) - 1;
+  unsigned int max = ((clients_online_c / PAGE_MAX_CLIENTS) == req->page)
+                         ? (min + clients_online_c % PAGE_MAX_CLIENTS - 1)
+                         : (PAGE_MAX_CLIENTS * (req->page + 1) - 1);
+  if (clients_online_c <
+      PAGE_MAX_CLIENTS * (req->page + 1)) { // si la taille de la page est plus
+    // grande que le nombre de clients
+    send_error_to_client(requesting_client, ERROR_PAGE_OUT_OF_BOUNDS);
+    return 0;
+  }
 
   struct UserListRes res = {
       .count = 0,
@@ -130,10 +138,7 @@ unsigned int on_user_list_all(unsigned int client_id, const void *data) {
     res.users[res.count++] = user;
   }
 
-  const SocketClient *client =
-      find_client_by_id(&awale_server()->pool, client_id);
-
-  send_cmd_to(client->socket, CMD_USER_LIST_ALL, &res,
+  send_cmd_to(requesting_client->socket, CMD_USER_LIST_ALL, &res,
               sizeof(struct UserListRes));
 
   return 1;

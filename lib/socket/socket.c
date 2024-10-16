@@ -89,7 +89,7 @@ int send_cmd_to_client(const struct SocketClient *client, enum CMD cmd_id,
 
 void send_error_to_client(const struct SocketClient *client, enum Errors code) {
 
-  const struct ErrorEvent event = {.code = ERROR_CLIENT_NOT_FOUND};
+  const struct ErrorEvent event = {.code = code};
 
   send_cmd_to_client(client, CMD_ERROR_EVENT, &event,
                      sizeof(struct ErrorEvent));

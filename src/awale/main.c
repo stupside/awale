@@ -96,7 +96,7 @@ int main() {
       int win = winner(&awale, &player);
 
       if (win == 0) {
-        printf("lus de mouvements possibles le jeu est fini, match nul\n");
+        printf("Plus de mouvements possibles le jeu est fini, match nul\n");
       } else {
         printf("Plus de mouvements possibles le jeu est fini, le joueur %d a "
                "gagné avec un score de %d\n",
