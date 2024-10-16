@@ -37,6 +37,11 @@ unsigned int on_user_register(unsigned int socket, const void *data) {
       add_client(&server->pool, req->name, req->password, socket, &client_id);
 
   if (!added) {
+
+    const struct ErrorEvent event = {.code = ERROR_CLIENT_NOT_FOUND};
+
+    send_cmd_to(socket, CMD_ERROR_EVENT, &event, sizeof(struct ErrorEvent));
+
     perror("Failed to add client");
     return 0;
   }

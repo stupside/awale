@@ -4,6 +4,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "lib/socket/cmds/user.h"
 
@@ -83,7 +84,7 @@ void *read_handler(void *mediator) {
       break;
     }
 
-    if (handle_cmd(mediator, -1, buffer)) {
+    if (handle_cmd(mediator, -1, buffer, NO_PERSIST)) {
       continue;
     } else {
       perror("Command %02X not handled");
@@ -106,6 +107,8 @@ void app(const char *address, unsigned int port, const char *name,
 
     send_cmd_to(sock, CMD_USER_REGISTER, &req, sizeof(struct UserRegisterReq));
   }
+
+  sleep(2);
 
   {
     struct UserLoginReq req;

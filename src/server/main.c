@@ -92,13 +92,13 @@ void app(unsigned int port, struct ServerMediator *mediator) {
       }
 
       {
-        handle_cmd(mediator, csock, buffer);
+        handle_cmd(mediator, csock, buffer, PERSIST);
 
         if (read_from_socket(csock, buffer) == -1) {
           continue;
         }
 
-        if (handle_cmd(mediator, csock, buffer)) {
+        if (handle_cmd(mediator, csock, buffer, PERSIST)) {
           FD_SET(csock, &rdfs);
           maxfd = csock > maxfd ? csock : maxfd;
         } else {
@@ -116,7 +116,7 @@ void app(unsigned int port, struct ServerMediator *mediator) {
 
           if (read_from_socket(client->socket, buffer)) {
 
-            if (handle_cmd(mediator, client->id, buffer)) {
+            if (handle_cmd(mediator, client->id, buffer, PERSIST)) {
               // Command handled
             } else {
               perror("Failed to compute command");

@@ -1,4 +1,5 @@
 #include "persistor.h"
+#include <string.h>
 
 #define PATH_MODE "a+"
 
@@ -38,14 +39,16 @@ int read_cmd(const Persistor *persistor, ClientId *client_id, char *cmd) {
     return 0;
   }
 
-  printf("Read command: %d %s\n", *client_id, cmd);
-
   return 1;
 }
 
 int write_cmd(const Persistor *persistor, ClientId client_id, const char *cmd) {
 
-  fseek(persistor->ptr, 0, SEEK_END);
+  char copy[strlen(cmd) + 1];
+
+  strcpy(copy, cmd);
+
+  strtok(copy, "\n");
 
   if (fprintf(persistor->ptr, "%d\n%s\n", client_id, cmd) < 0) {
 

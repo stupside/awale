@@ -9,8 +9,8 @@
 #include "persistor.h"
 
 enum Persist {
-  PERSIST,
   NO_PERSIST,
+  PERSIST,
 };
 
 struct Handler {
@@ -31,6 +31,6 @@ void register_cmd(struct ServerMediator *mediator, CommandId cmd_id,
                   enum Persist persist);
 
 int handle_cmd(const struct ServerMediator *dispatcher, unsigned int client_id,
-               const char *cmd);
+               const char *cmd, enum Persist persist);
 
 #endif
