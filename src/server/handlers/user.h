@@ -175,19 +175,24 @@ unsigned int on_user_get_info(unsigned int client_id, const void *data) {
   const struct UserGetInfoReq *req = data;
 
   const SocketClient *client =
+      find_client_by_id(&awale_server()->pool, client_id);
+
+  const SocketClient *client_to_get =
       find_client_by_id(&awale_server()->pool, req->client_id);
 
-  if (!client) {
+  if (!client_to_get) {
 
     send_error_to_client(client, ERROR_CLIENT_NOT_FOUND);
+
+    return 0;
   }
 
   struct UserGetInfoRes res = {
-      .user.client_id = client->id,
+      .user.client_id = client_to_get->id,
   };
 
-  strncpy(res.user.name, client->name, USER_NAME_LEN);
-  strncpy(res.user.description, client->description, USER_DESC_LEN);
+  strncpy(res.user.name, client_to_get->name, USER_NAME_LEN);
+  strncpy(res.user.description, client_to_get->description, USER_DESC_LEN);
 
   send_cmd_to(client->socket, CMD_USER_GET_INFO, &res,
               sizeof(struct UserGetInfoRes));

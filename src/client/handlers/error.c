@@ -30,6 +30,9 @@ unsigned int on_error_event(unsigned int client_id, const void *data) {
   case ERROR_OBSRRVE_GAME_NOT_RUNNING:
     PRINT_COLOR(COLOR_RED, "❌ Error: No running game available to observe.\n");
     break;
+  case ERROR_FAILED_TO_PLAY:
+    PRINT_COLOR(COLOR_RED, "❌ Error: Failed to play the game.\n");
+    break;
   default:
     PRINT_COLOR(COLOR_RED, "❌ Error: An unknown error occurred.\n");
     break;

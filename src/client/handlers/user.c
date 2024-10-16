@@ -4,12 +4,11 @@
 #include "lib/socket/cmd.h"
 #include "lib/socket/cmds/user.h"
 
-static ClientId CLIENT_ID = 0;
-
 unsigned int on_user_login(unsigned int client_id, const void *data) {
   const struct UserLoginRes *event = data;
 
   CLIENT_ID = event->client_id;
+
   PRINT_COLOR(COLOR_GREEN, "✅ You are logged in! Your user ID is: %d\n",
               CLIENT_ID);
 

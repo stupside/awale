@@ -15,195 +15,231 @@
 
 unsigned int client_chat(SOCKET sock, char *argv[], unsigned int argslen) {
   struct ChatWriteReq req;
-  char message[255];
+  char message[255] = {0};
 
   if (is_number(argv[1])) {
-    PRINT_COLOR(COLOR_YELLOW, "Sending message to client %d\n", atoi(argv[1]));
     req.client_id = atoi(argv[1]);
+    PRINT_COLOR(COLOR_YELLOW, "📨 Sending message to client %d...\n",
+                req.client_id);
   } else {
-    PRINT_COLOR(COLOR_YELLOW, "Sending message to all clients\n");
     req.client_id = -1;
+    PRINT_COLOR(COLOR_YELLOW, "📨 Broadcasting message to all clients...\n");
   }
 
-  message[0] = '\0';
   for (unsigned int i = 2; i < argslen; i++) {
     if (strlen(message) + strlen(argv[i]) + 1 >= sizeof(message)) {
+      PRINT_COLOR(COLOR_RED, "⚠️ Message too long! Truncating...\n");
       break;
     }
     strncat(message, argv[i], sizeof(message) - strlen(message) - 1);
-    if (i < argslen - 1) {
+    if (i < argslen - 1)
       strncat(message, " ", sizeof(message) - strlen(message) - 1);
-    }
   }
 
   strncpy(req.message, message, sizeof(req.message) - 1);
-  req.message[sizeof(req.message) - 1] = '\0'; // Ensure null-termination
+  req.message[sizeof(req.message) - 1] = '\0';
 
-  if (send_cmd_to(sock, CMD_CHAT_WRITE, &req, sizeof(struct ChatWriteReq)) <
-      0) {
-    perror("Failed to send chat message");
+  if (send_cmd_to(sock, CMD_CHAT_WRITE, &req, sizeof(req)) < 0) {
+    perror("❌ Failed to send chat message");
     return 0;
   }
+  PRINT_COLOR(COLOR_GREEN, "✅ Message sent successfully!\n");
   return 1;
 }
 
 unsigned int client_game_play(SOCKET sock, char *argv[], unsigned int argslen) {
-  if (argslen < 2)
-    return 0;
-
-  struct GamePlayReq req;
-  req.input = atoi(argv[1]);
-
-  send_cmd_to(sock, CMD_GAME_PLAY, &req, sizeof(struct GamePlayReq));
-  return 1;
-}
-
-unsigned int client_challenge(SOCKET sock, char *argv[], unsigned int argslen) {
-  struct ChallengeReq req;
-
   if (argslen < 2) {
-    PRINT_COLOR(COLOR_RED, "Usage: /challenge [client_id]\n");
+    PRINT_COLOR(COLOR_RED, "⚠️ Usage: /game-play [position]\n");
+    PRINT_COLOR(COLOR_YELLOW, "📝 Hint: Provide a valid pit number (0-5).\n");
     return 0;
   }
 
   if (!is_number(argv[1])) {
-    PRINT_COLOR(COLOR_RED, "Invalid client ID\n");
+    PRINT_COLOR(COLOR_RED, "❌ Invalid input! Position must be a number.\n");
     return 0;
   }
 
-  req.client_id = atoi(argv[1]);
-  send_cmd_to(sock, CMD_CHALLENGE, &req, sizeof(struct ChallengeReq));
+  struct GamePlayReq req = {.input = atoi(argv[1])};
+  send_cmd_to(sock, CMD_GAME_PLAY, &req, sizeof(req));
+  PRINT_COLOR(COLOR_GREEN, "✅ Move submitted successfully.\n");
+  return 1;
+}
+
+unsigned int client_challenge(SOCKET sock, char *argv[], unsigned int argslen) {
+  if (argslen < 2) {
+    PRINT_COLOR(COLOR_RED, "⚠️ Usage: /challenge [client_id]\n");
+    return 0;
+  }
+
+  if (!is_number(argv[1])) {
+    PRINT_COLOR(COLOR_RED, "❌ Invalid client ID. Must be a number.\n");
+    return 0;
+  }
+
+  struct ChallengeReq req = {.client_id = atoi(argv[1])};
+  send_cmd_to(sock, CMD_CHALLENGE, &req, sizeof(req));
+  PRINT_COLOR(COLOR_GREEN, "✅ Challenge sent to client %d.\n", req.client_id);
   return 1;
 }
 
 unsigned int client_challenge_accept(SOCKET sock, char *argv[],
                                      unsigned int argslen) {
   if (argslen < 2) {
-    PRINT_COLOR(COLOR_RED, "Usage: /challenge-accept [client_id]\n");
+    PRINT_COLOR(COLOR_RED, "⚠️ Usage: /challenge-accept [client_id]\n");
     return 0;
   }
 
   if (!is_number(argv[1])) {
-    PRINT_COLOR(COLOR_RED, "Invalid client ID\n");
+    PRINT_COLOR(COLOR_RED, "❌ Invalid client ID.\n");
     return 0;
   }
 
   struct ChallengeHandleReq req = {.accept = 1, .client_id = atoi(argv[1])};
-  send_cmd_to(sock, CMD_CHALLENGE_HANDLE, &req,
-              sizeof(struct ChallengeHandleReq));
+  send_cmd_to(sock, CMD_CHALLENGE_HANDLE, &req, sizeof(req));
+  PRINT_COLOR(COLOR_GREEN, "✅ Challenge accepted.\n");
   return 1;
 }
 
 unsigned int client_challenge_reject(SOCKET sock, char *argv[],
                                      unsigned int argslen) {
   if (argslen < 2) {
-    PRINT_COLOR(COLOR_RED, "Usage: /challenge-reject [client_id]\n");
+    PRINT_COLOR(COLOR_RED, "⚠️ Usage: /challenge-reject [client_id]\n");
     return 0;
   }
 
   if (!is_number(argv[1])) {
-    PRINT_COLOR(COLOR_RED, "Invalid client ID\n");
+    PRINT_COLOR(COLOR_RED, "❌ Invalid client ID.\n");
     return 0;
   }
 
   struct ChallengeHandleReq req = {.accept = 0, .client_id = atoi(argv[1])};
-  send_cmd_to(sock, CMD_CHALLENGE_HANDLE, &req,
-              sizeof(struct ChallengeHandleReq));
+  send_cmd_to(sock, CMD_CHALLENGE_HANDLE, &req, sizeof(req));
+  PRINT_COLOR(COLOR_GREEN, "✅ Challenge rejected.\n");
   return 1;
 }
 
 unsigned int client_game_grid(SOCKET sock, char *argv[], unsigned int argslen) {
   struct GameStateReq req;
-  send_cmd_to(sock, CMD_GAME_STATE, &req, sizeof(struct GameStateReq));
+  send_cmd_to(sock, CMD_GAME_STATE, &req, sizeof(req));
+  PRINT_COLOR(COLOR_GREEN, "✅ Game state requested.\n");
   return 1;
 }
 
 unsigned int client_users(SOCKET sock, char *argv[], unsigned int argslen) {
-  if (!is_number(argv[1])) {
-    PRINT_COLOR(COLOR_RED, "Invalid page number\n");
-    return 0;
+  unsigned int page = 0;
+
+  if (argslen > 1 && is_number(argv[1])) {
+    page = atoi(argv[1]);
+    if (page < 0) {
+      PRINT_COLOR(COLOR_RED, "❌ Invalid page number. Must be 0 or higher.\n");
+      return 0;
+    }
   }
 
-  struct UserListReq req = {.page = argslen > 1 ? atoi(argv[1]) : 0};
-  send_cmd_to(sock, CMD_USER_LIST_ALL, &req, sizeof(struct UserListReq));
+  struct UserListReq req = {.page = page};
+  send_cmd_to(sock, CMD_USER_LIST_ALL, &req, sizeof(req));
+  PRINT_COLOR(COLOR_GREEN, "🔍 Requesting user list (Page %d)...\n", page);
   return 1;
 }
 
 unsigned int client_game_observe(SOCKET sock, char *argv[],
                                  unsigned int argslen) {
   if (argslen < 2) {
-    PRINT_COLOR(COLOR_RED, "Usage: /game-observe [client_id]\n");
+    PRINT_COLOR(COLOR_RED, "⚠️ Usage: /game-observe [client_id]\n");
     return 0;
   }
 
   if (!is_number(argv[1])) {
-    PRINT_COLOR(COLOR_RED, "Invalid client ID\n");
+    PRINT_COLOR(COLOR_RED, "❌ Invalid client ID.\n");
     return 0;
   }
 
   struct GameObserveReq req = {.observe = 1, .client_id = atoi(argv[1])};
-  send_cmd_to(sock, CMD_GAME_OBSERVE, &req, sizeof(struct GameObserveReq));
+  send_cmd_to(sock, CMD_GAME_OBSERVE, &req, sizeof(req));
+  PRINT_COLOR(COLOR_GREEN, "👁️ Now observing client %d.\n", req.client_id);
   return 1;
 }
 
 unsigned int client_game_unobserve(SOCKET sock, char *argv[],
                                    unsigned int argslen) {
   if (argslen < 2) {
-    PRINT_COLOR(COLOR_RED, "Usage: /game-unobserve [client_id]\n");
+    PRINT_COLOR(COLOR_RED, "⚠️ Usage: /game-unobserve [client_id]\n");
     return 0;
   }
 
   if (!is_number(argv[1])) {
-    PRINT_COLOR(COLOR_RED, "Invalid client ID\n");
+    PRINT_COLOR(COLOR_RED, "❌ Invalid client ID.\n");
     return 0;
   }
 
   struct GameObserveReq req = {.observe = 0, .client_id = atoi(argv[1])};
-  send_cmd_to(sock, CMD_GAME_OBSERVE, &req, sizeof(struct GameObserveReq));
-  return 1;
-}
-
-unsigned int client_game_leave(SOCKET sock, char *argv[],
-                               unsigned int argslen) {
-  struct GameLeaveReq req;
-  send_cmd_to(sock, CMD_GAME_LEAVE, &req, sizeof(struct GameLeaveReq));
+  send_cmd_to(sock, CMD_GAME_OBSERVE, &req, sizeof(req));
+  PRINT_COLOR(COLOR_GREEN, "👁️ Stopped observing client %d.\n", req.client_id);
   return 1;
 }
 
 unsigned int client_set_password(SOCKET sock, char *argv[],
                                  unsigned int argslen) {
   if (argslen < 2) {
-    PRINT_COLOR(COLOR_RED, "Usage: /set-password [password]\n");
+    PRINT_COLOR(COLOR_RED, "⚠️ Usage: /set-password [password]\n");
     return 0;
   }
 
   struct UserSetInfoReq req = {0};
   strncpy(req.password, argv[1], sizeof(req.password) - 1);
-  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(struct UserSetInfoReq));
+  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(req));
+  PRINT_COLOR(COLOR_GREEN, "✅ Password updated.\n");
   return 1;
 }
 
+unsigned int client_user(SOCKET sock, char *argv[], unsigned int argslen) {
+  struct UserGetInfoReq req;
+
+  if (argslen < 2) {
+    PRINT_COLOR(COLOR_YELLOW, "🧑 Requesting your user info...\n");
+    req.client_id = CLIENT_ID;
+  } else {
+    req.client_id = atoi(argv[1]);
+    PRINT_COLOR(COLOR_YELLOW, "🧑 Requesting user info for client %d...\n",
+                req.client_id);
+  }
+
+  send_cmd_to(sock, CMD_USER_GET_INFO, &req, sizeof(req));
+  return 1;
+}
+
+unsigned int client_game_leave(SOCKET sock, char *argv[],
+                               unsigned int argslen) {
+  struct GameLeaveReq req;
+  send_cmd_to(sock, CMD_GAME_LEAVE, &req, sizeof(req));
+  PRINT_COLOR(COLOR_GREEN, "🚪 You have left the game.\n");
+  return 1;
+}
+
+// ✏️ Set a new username
 unsigned int client_set_username(SOCKET sock, char *argv[],
                                  unsigned int argslen) {
   if (argslen < 2) {
-    PRINT_COLOR(COLOR_RED, "Usage: /set-username [username]\n");
+    PRINT_COLOR(COLOR_RED, "⚠️ Usage: /set-username [username]\n");
     return 0;
   }
 
   struct UserSetInfoReq req = {0};
   strncpy(req.name, argv[1], sizeof(req.name) - 1);
-  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(struct UserSetInfoReq));
+  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(req));
+  PRINT_COLOR(COLOR_GREEN, "✅ Username updated to '%s'.\n", argv[1]);
   return 1;
 }
 
 unsigned int client_set_description(SOCKET sock, char *argv[],
                                     unsigned int argslen) {
   if (argslen < 2) {
-    PRINT_COLOR(COLOR_RED, "Usage: /set-description [description]\n");
+    PRINT_COLOR(COLOR_RED, "⚠️ Usage: /set-description [description]\n");
     return 0;
   }
 
   struct UserSetInfoReq req = {0};
+
   for (unsigned int i = 1; i < argslen; i++) {
     strncat(req.description, argv[i],
             sizeof(req.description) - strlen(req.description) - 1);
@@ -213,51 +249,44 @@ unsigned int client_set_description(SOCKET sock, char *argv[],
     }
   }
 
-  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(struct UserSetInfoReq));
-  return 1;
-}
-
-unsigned int client_user(SOCKET sock, char *argv[], unsigned int argslen) {
-  struct UserGetInfoReq req;
-
-  if (argslen < 2) {
-    PRINT_COLOR(COLOR_YELLOW, "Getting own user info\n");
-    req.client_id = CLIENT_ID;
-  } else {
-    PRINT_COLOR(COLOR_YELLOW, "Getting user info for %d\n", atoi(argv[1]));
-    req.client_id = atoi(argv[1]);
-  }
-
-  send_cmd_to(sock, CMD_USER_GET_INFO, &req, sizeof(struct UserGetInfoReq));
+  send_cmd_to(sock, CMD_USER_SET_INFO, &req, sizeof(req));
+  PRINT_COLOR(COLOR_GREEN, "✅ Description updated.\n");
   return 1;
 }
 
 unsigned int client_help(SOCKET sock, char *argv[], unsigned int argslen) {
-  PRINT_COLOR(COLOR_GREEN, "Available commands:\n");
+  PRINT_COLOR(COLOR_GREEN, "📜 **Available Commands:**\n");
 
-  PRINT_COLOR(COLOR_YELLOW, "/help : Show this help\n");
+  PRINT_COLOR(COLOR_YELLOW, "💬 **Chat Commands:**\n");
+  PRINT_COLOR(
+      COLOR_WHITE,
+      "  • /chat [client_id] [message] : Send a message to a client (or all).\n"
+      "  • /user [client_id] : Get info about yourself or another user.\n"
+      "  • /users [page] : List users (optional page number).\n");
 
-  PRINT_COLOR(COLOR_YELLOW, "/chat [client_id] [message] : Send a message\n");
+  PRINT_COLOR(COLOR_YELLOW, "🎮 **Game Commands:**\n");
+  PRINT_COLOR(COLOR_WHITE,
+              "  • /game-play [input] : Make a move in the game.\n"
+              "  • /game-grid : Show the current game state.\n"
+              "  • /game-leave : Exit the current game.\n"
+              "  • /game-observe [client_id] : Watch another player's game.\n"
+              "  • /game-unobserve [client_id] : Stop watching a game.\n");
 
-  PRINT_COLOR(COLOR_YELLOW, "/user [client_id] : Get user info\n");
-  PRINT_COLOR(COLOR_YELLOW, "/users [page] : List users\n");
+  PRINT_COLOR(COLOR_YELLOW, "⚔️ **Challenge Commands:**\n");
+  PRINT_COLOR(COLOR_WHITE,
+              "  • /challenge [client_id] : Challenge a player.\n"
+              "  • /challenge-accept [client_id] : Accept a challenge.\n"
+              "  • /challenge-reject [client_id] : Reject a challenge.\n");
 
-  PRINT_COLOR(COLOR_YELLOW, "/game-play [input] : Play a turn\n");
-  PRINT_COLOR(COLOR_YELLOW, "/game-grid : Show game state\n");
-  PRINT_COLOR(COLOR_YELLOW, "/game-leave : Leave the game\n");
-  PRINT_COLOR(COLOR_YELLOW, "/game-observe [client_id] : Observe a player\n");
-  PRINT_COLOR(COLOR_YELLOW, "/game-unobserve [client_id] : Stop observing\n");
+  PRINT_COLOR(COLOR_YELLOW, "🛠️ **User Management Commands:**\n");
+  PRINT_COLOR(
+      COLOR_WHITE,
+      "  • /set-username [username] : Change your username.\n"
+      "  • /set-password [password] : Change your password.\n"
+      "  • /set-description [description] : Update your description.\n");
 
-  PRINT_COLOR(COLOR_YELLOW, "/challenge [client_id] : Challenge a player\n");
-  PRINT_COLOR(COLOR_YELLOW,
-              "/challenge-accept [client_id] : Accept challenge\n");
-  PRINT_COLOR(COLOR_YELLOW,
-              "/challenge-reject [client_id] : Reject challenge\n");
-
-  PRINT_COLOR(COLOR_YELLOW, "/set-username [username] : Set username\n");
-  PRINT_COLOR(COLOR_YELLOW, "/set-password [password] : Set password\n");
-  PRINT_COLOR(COLOR_YELLOW,
-              "/set-description [description] : Set description\n");
+  PRINT_COLOR(COLOR_YELLOW, "❓ **General Commands:**\n");
+  PRINT_COLOR(COLOR_WHITE, "  • /help : Show this help message.\n");
 
   return 1;
 }

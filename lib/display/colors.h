@@ -8,6 +8,7 @@
 #define COLOR_YELLOW "1;33" // Bold Yellow
 #define COLOR_CYAN "1;36"   // Bold Cyan
 #define COLOR_PURPLE "1;35" // Bold Purple
+#define COLOR_WHITE "1;37"  // Bold White
 
 #define PRINT_COLOR(color, fmt, ...)                                           \
   SET_COLOR(color);                                                            \

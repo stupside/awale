@@ -46,7 +46,14 @@ unsigned int on_game_play(unsigned int client_id, const void *data) {
 
   const struct GamePlayReq *req = data;
 
-  return awale_play(awale_server(), client, req->input);
+  unsigned int ok = awale_play(awale_server(), client, req->input);
+
+  if (!ok) {
+    send_error_to_client(client, ERROR_FAILED_TO_PLAY);
+    return 0;
+  }
+
+  return 1;
 };
 
 unsigned int on_game_observe(unsigned int client_id, const void *data) {
