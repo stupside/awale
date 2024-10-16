@@ -153,11 +153,6 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
               lobby->awale.score[PLAYER1],
               lobby->awale.score[PLAYER2],
           },
-      .player =
-          {
-              lobby->client[PLAYER1]->id,
-              lobby->client[PLAYER2]->id,
-          },
       .status = game_status,
       .turn = lobby->awale.current,
   };
@@ -173,11 +168,27 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
 
     struct UserRes user = {
         .client_id = player->id,
+        .wins = 0,
+        .losses = 0,
     };
 
     strncpy(user.name, player->name, USER_NAME_LEN);
 
-    event.users[i] = user;
+    for (unsigned int j = 0; j < awale_server()->lobbies_c; ++j) {
+      const struct Lobby *lobby = &awale_server()->lobbies[j];
+
+      if (lobby && lobby->state == LOBBY_STATE_FINISHED) {
+        if (lobby->client[PLAYER1]->id == client->id) {
+          if (status(&lobby->awale) == GAME_OVER_PLAYER1_WINS) {
+            user.wins++;
+          } else if (status(&lobby->awale) == GAME_OVER_PLAYER2_WINS) {
+            user.losses++;
+          }
+        }
+      }
+    }
+
+    event.players[i] = user;
   }
 
   const enum PlayerID other_player_id =

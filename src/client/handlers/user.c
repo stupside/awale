@@ -44,7 +44,8 @@ unsigned int on_user_list(unsigned int client_id, const void *data) {
   PRINT_COLOR(COLOR_YELLOW, "📋 Online Users (%d):\n", res->count);
 
   for (unsigned int i = 0; i < res->count; i++) {
-    printf("  👤 User %d: %s\n", res->users[i].client_id, res->users[i].name);
+    printf("  👤 User %d: %s (wins: %d, losses: %d)\n", res->users[i].client_id,
+           res->users[i].name, res->users[i].wins, res->users[i].losses);
   }
 
   return 1;
@@ -57,6 +58,9 @@ unsigned int on_user_get_info(unsigned int client_id, const void *data) {
   PRINT_COLOR(COLOR_PURPLE, "  🔹 ID: %d\n", res->user.client_id);
   PRINT_COLOR(COLOR_PURPLE, "  🔹 Name: %s\n", res->user.name);
   PRINT_COLOR(COLOR_PURPLE, "  🔹 Description: %s\n", res->user.description);
+  PRINT_COLOR(COLOR_PURPLE, "  🔹 Stats: %d\n", res->user.client_id);
+  PRINT_COLOR(COLOR_PURPLE, "    🔹 Wins: %d\n", res->user.wins);
+  PRINT_COLOR(COLOR_PURPLE, "    🔹 Losses: %d\n", res->user.losses);
 
   return 1;
 }

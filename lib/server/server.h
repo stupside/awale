@@ -32,4 +32,6 @@ int challenge(struct Server *server, SocketClient *c1, SocketClient *c2);
 int handle_challenge(struct Server *server, const SocketClient *challenger,
                      const SocketClient *challenged, int accept);
 
+unsigned int is_lobby_player(const struct Lobby *lobby, const SocketClient *p);
+
 #endif

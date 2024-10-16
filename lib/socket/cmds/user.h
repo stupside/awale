@@ -36,6 +36,10 @@ struct UserListReq {
 
 struct UserRes {
   ClientId client_id;
+
+  unsigned int wins;
+  unsigned int losses;
+
   char name[USER_NAME_LEN];
   char description[USER_DESC_LEN];
 };

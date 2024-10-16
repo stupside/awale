@@ -130,18 +130,12 @@ unsigned int on_user_list_all(unsigned int client_id, const void *data) {
       find_client_by_id(&awale_server()->pool, client_id);
 
   const struct SocketClient *clients_online[awale_server()->pool.count];
-
   int clients_online_c = 0;
 
   for (unsigned int i = 0; i < awale_server()->pool.count; ++i) {
-
     const SocketClient *client = &awale_server()->pool.clients[i];
 
-    if (client->id == client_id) {
-      continue;
-    }
-
-    if (client->online) {
+    if (client->id != client_id && client->online) {
       clients_online[clients_online_c++] = client;
     }
   }
@@ -149,40 +143,46 @@ unsigned int on_user_list_all(unsigned int client_id, const void *data) {
   const struct UserListReq *req = data;
 
   const unsigned int min = req->page * PAGE_MAX_CLIENTS;
+  const unsigned int max = min + PAGE_MAX_CLIENTS;
 
-  unsigned int max = ((clients_online_c / PAGE_MAX_CLIENTS) == req->page)
-                         ? (min + clients_online_c % PAGE_MAX_CLIENTS - 1)
-                         : (PAGE_MAX_CLIENTS * (req->page + 1) - 1);
-  if (clients_online_c <
-      PAGE_MAX_CLIENTS * (req->page + 1)) { // si la taille de la page est plus
-    // grande que le nombre de clients
+  if (min >= clients_online_c) {
     send_error_to_client(requesting_client, ERROR_PAGE_OUT_OF_BOUNDS);
     return 0;
   }
 
-  struct UserListRes res = {
-      .count = 0,
-  };
+  struct UserListRes res = {.count = 0};
 
-  for (unsigned int i = min; i <= max; ++i) {
-
+  for (unsigned int i = min; i < max && i < clients_online_c; ++i) {
     const SocketClient *client = clients_online[i];
 
     struct UserRes user = {
-        .client_id = client->id,
-        .description = {0},
-    };
+        .client_id = client->id, .description = {0}, .wins = 0, .losses = 0};
 
     strncpy(user.name, client->name, USER_NAME_LEN);
+
+    for (unsigned int j = 0; j < awale_server()->lobbies_c; ++j) {
+      const struct Lobby *lobby = &awale_server()->lobbies[j];
+
+      if (lobby && lobby->state == LOBBY_STATE_FINISHED) {
+        if (lobby->client[PLAYER1]->id == client->id) {
+          if (status(&lobby->awale) == GAME_OVER_PLAYER1_WINS) {
+            user.wins++;
+          } else if (status(&lobby->awale) == GAME_OVER_PLAYER2_WINS) {
+            user.losses++;
+          }
+        }
+      }
+    }
 
     res.users[res.count++] = user;
   }
 
+  // Send the response to the client
   send_cmd_to(requesting_client->socket, CMD_USER_LIST_ALL, &res,
               sizeof(struct UserListRes));
 
   return 1;
-};
+}
 
 unsigned int on_user_set_info(unsigned int client_id, const void *data) {
 
