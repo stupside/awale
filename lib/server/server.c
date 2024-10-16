@@ -186,6 +186,11 @@ int awale_play(struct Server *server, const SocketClient *client, int target) {
   send_cmd_to_client(lobby->client[other_player_id], CMD_GAME_STATE_EVENT,
                      &event, sizeof(struct GameStateEvent));
 
+  printf("Message sent to client %d\n", lobby->client[other_player_id]->id);
+
+  send_cmd_to_client(client, CMD_GAME_STATE_EVENT, &event,
+                     sizeof(struct GameStateEvent));
+
   event.observing = 1;
 
   for (unsigned int i = 0; i < MAX_CLIENTS; i++) {
