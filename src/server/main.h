@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 
   app(port, &mediator);
 
-  // close_persistor(&mediator.persistor);
+  close_persistor(&mediator.persistor);
 
   return EXIT_SUCCESS;
 }
