@@ -38,15 +38,15 @@ int handle_cmd(const struct ServerMediator *dispatcher, unsigned int client_id,
   if (handler->handle) {
     ok = handler->handle(client_id, cmd_payload);
 
-    // if (ok && persist == PERSIST) {
-    //   if (handler->persist == PERSIST) {
-    //     if (write_cmd(&dispatcher->persistor, client_id, cmd)) {
-    //       printf("Command persisted\n");
-    //     } else {
-    //       perror("Failed to persist command");
-    //     }
-    //   }
-    // }
+    if (ok && persist == PERSIST) {
+      if (handler->persist == PERSIST) {
+        if (write_cmd(&dispatcher->persistor, client_id, cmd)) {
+          printf("Command persisted\n");
+        } else {
+          perror("Failed to persist command");
+        }
+      }
+    }
   }
 
   free(cmd_payload);
