@@ -98,7 +98,7 @@ void app(unsigned int port, struct ServerMediator *mediator) {
           continue;
         }
 
-        if (handle_cmd(mediator, csock, buffer, PERSIST)) {
+        if (handle_cmd(mediator, csock, buffer, NO_PERSIST)) {
           FD_SET(csock, &rdfs);
           maxfd = csock > maxfd ? csock : maxfd;
         } else {
