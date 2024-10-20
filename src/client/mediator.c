@@ -197,7 +197,7 @@ unsigned int client_user(SOCKET sock, char *argv[], unsigned int argslen) {
 
   if (argslen < 2) {
     PRINT_COLOR(COLOR_YELLOW, "🧑 Requesting your user info...\n");
-    req.client_id = CLIENT_ID;
+    req.client_id = current_client_id();
   } else {
     req.client_id = atoi(argv[1]);
     PRINT_COLOR(COLOR_YELLOW, "🧑 Requesting user info for client %d...\n",

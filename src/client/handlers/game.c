@@ -99,7 +99,7 @@ unsigned int on_game_state_event(unsigned int client_id, const void *data) {
     return 1;
   }
 
-  if (CLIENT_ID == event->players[event->turn].client_id) {
+  if (current_client_id() == event->players[event->turn].client_id) {
     PRINT_COLOR(COLOR_CYAN, "🕐 It's your turn!\n");
   } else {
     PRINT_COLOR(COLOR_CYAN, "🕐 It's your opponent's turn!\n");

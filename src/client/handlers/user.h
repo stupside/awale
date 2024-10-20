@@ -3,7 +3,7 @@
 
 #include "lib/cmds/mediator.h"
 
-static ClientId CLIENT_ID;
+ClientId current_client_id();
 
 void add_user_cmds(struct ServerMediator *mediator);
 

@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
   }
 
   struct ServerMediator server_mediator = {
-      .handlers = {0},
+      .handlers = {},
   };
 
   add_user_cmds(&server_mediator);

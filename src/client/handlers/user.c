@@ -4,6 +4,10 @@
 #include "lib/socket/cmd.h"
 #include "lib/socket/cmds/user.h"
 
+unsigned int CLIENT_ID = -1;
+
+ClientId current_client_id() { return CLIENT_ID; }
+
 unsigned int on_user_register(unsigned int client_id, const void *data) {
   const struct UserRegisterRes *event = data;
 
