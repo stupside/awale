@@ -1,4 +1,5 @@
-#include <stdio.h>
+#ifndef DISPLAY_COLOR_H
+#define DISPLAY_COLOR_H
 
 #define SET_COLOR(code) printf("\033[%sm", code)
 #define RESET_COLOR() printf("\033[0m")
@@ -14,3 +15,5 @@
   SET_COLOR(color);                                                            \
   printf(fmt, ##__VA_ARGS__);                                                  \
   RESET_COLOR()
+
+#endif
